@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using Restore;
 
 namespace Restore.Tests
 {
@@ -10,13 +9,14 @@ namespace Restore.Tests
         private TestResource _testResource;
         InMemoryDataEndpoint<TestResource> _testSource;
         IDataEndpoint<TestResource> _testTarget;
-
+        private SynchronizationChannel<TestResource> _testChannel;
+            
         [SetUp]
         public void SetUpTest()
         {
-            _testSource = new InMemoryDataEndpoint<TestResource>(t => new IntIdentifier(t.Id));
+            _testSource = new InMemoryDataEndpoint<TestResource>(t => t.Id);
             _testSource.ResourceDeleted.Subscribe(t => t.Deleted = true);
-            _testTarget = new InMemoryDataEndpoint<TestResource>(t => new IntIdentifier(t.Id));
+            _testTarget = new InMemoryDataEndpoint<TestResource>(t => t.Id);
             _testTarget.AddSyncAction(t => t.Deleted, (ds, t) => ds.Delete(t), "Delete");
             _testTarget.AddSyncAction(t => string.IsNullOrEmpty(t.CorrelationId), 
                 (ds, r) => ds.Create(r), "Create");
@@ -24,13 +24,21 @@ namespace Restore.Tests
             _testTarget.AddSyncAction(
                 t => !string.IsNullOrEmpty(t.CorrelationId), (ds, r) =>
                 {
-                    var resourceToUpdate = ds.Get(new IntIdentifier(r.Id));
+                    var resourceToUpdate = ds.Get(r.Id);
                     if (resourceToUpdate != null)
                     {
                         resourceToUpdate.Update(r);
                         ds.Update(resourceToUpdate);
                     }
                 }, "Update");
+
+            _testChannel = new SynchronizationChannel<TestResource>(_testSource, _testTarget);
+        }
+
+        [TearDown]
+        public void TearDownTest()
+        {
+            _testChannel.Dispose();
         }
 
         [Test]
@@ -42,7 +50,7 @@ namespace Restore.Tests
                 _testResource = new TestResource(1);
                 _testSource.Create(_testResource);
 
-                Assert.AreEqual(_testResource, _testTarget.Get(new IntIdentifier(1)));
+                Assert.AreEqual(_testResource, _testTarget.Get(1));
             }
         }
 
@@ -62,7 +70,7 @@ namespace Restore.Tests
                 _testSource.Create(changedResource);
 
                 // Assert
-                var actualtTestResource = _testTarget.Get(new IntIdentifier(1));
+                var actualtTestResource = _testTarget.Get(1);
                 Assert.AreEqual(_testResource, actualtTestResource);
                 Assert.AreEqual("Changed", actualtTestResource.Description);
             }
@@ -82,14 +90,14 @@ namespace Restore.Tests
                 _testSource.Delete(_testResource);
 
                 // Assert
-                Assert.IsNull(_testTarget.Get(new IntIdentifier(1)));
+                Assert.IsNull(_testTarget.Get(1));
             }
         }
 
         [Test]
         public void ShouldNotBreakPublishing()
         {
-            _testTarget = new InMemoryDataEndpoint<TestResource>(t => new IntIdentifier(t.Id));
+            _testTarget = new InMemoryDataEndpoint<TestResource>(t => t.Id);
             _testTarget.AddSyncAction(t => t.Deleted, (ds, t) =>
             {
                 throw new Exception("Ooops");
@@ -106,7 +114,7 @@ namespace Restore.Tests
                 var testResource2 = new TestResource(2);
                 _testSource.Create(testResource2);
 
-                Assert.AreEqual(testResource2, _testTarget.Get(new IntIdentifier(2)));
+                Assert.AreEqual(testResource2, _testTarget.Get(2));
             }
         }
     }

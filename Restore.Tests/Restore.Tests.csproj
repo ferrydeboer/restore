@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InMemoryDataEndpoint.cs" />
-    <Compile Include="IntIdentifier.cs" />
     <Compile Include="OneWayTests.cs" />
     <Compile Include="TestResource.cs" />
   </ItemGroup>

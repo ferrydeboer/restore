@@ -10,15 +10,15 @@ namespace Restore.Tests
     /// <typeparam name="T"></typeparam>
     public class InMemoryDataEndpoint<T> : IDataEndpoint<T>
     {
-        readonly IDictionary<IIdentifier, T> _items = new Dictionary<IIdentifier, T>();
-        readonly Func<T, IIdentifier> _idResolver;
+        readonly IDictionary<Identifier, T> _items = new Dictionary<Identifier, T>();
+        readonly Func<T, Identifier> _idResolver;
         readonly IList<IObserver<T>> _observers = new List<IObserver<T>>();
         readonly List<IObserver<T>> _deleteObservers = new List<IObserver<T>>();
         // Should be made a constructor argument or built using factory method.
         readonly IList<ISynchronizationAction<T>> _synchActions = new List<ISynchronizationAction<T>>();
         
 
-        public InMemoryDataEndpoint(Func<T, IIdentifier> idResolver)
+        public InMemoryDataEndpoint(Func<T, Identifier> idResolver)
         {
             _idResolver = idResolver;
         }
@@ -57,12 +57,12 @@ namespace Restore.Tests
             OnResourceChanged(resource);
         }
 
-        public T Get(IIdentifier id)
+        public T Get(Identifier id)
         {
             return _items.ContainsKey(id) ? _items[id] : default(T);
         }
 
-        public Func<T, IIdentifier> IdentityResolver
+        public Func<T, Identifier> IdentityResolver
         {
             get { return _idResolver; }
         }

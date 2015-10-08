@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Restore.Tests
+namespace Restore
 {
-    public class IntIdentifier : IIdentifier
+    public class IntIdentifier : Identifier
     {
         public IntIdentifier(int id)
         {

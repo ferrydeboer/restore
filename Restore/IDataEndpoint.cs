@@ -11,9 +11,9 @@ namespace Restore
 
         void Delete(T resource);
 
-        T Get(IIdentifier id);
+        T Get(Identifier id);
 
-        Func<T, IIdentifier> IdentityResolver { get; }
+        Func<T, Identifier> IdentityResolver { get; }
 
         IObservable<T> ResourceChanged { get; }
 
