@@ -4,13 +4,13 @@ namespace Restore
 {
     public class SynchronizationAction<T> : ISynchronizationAction<T>
     {
-        private readonly Func<T, bool> _applies;
+        private readonly Func<IDataEndpoint<T>, T, bool> _applies;
         private readonly Action<IDataEndpoint<T>, T> _executeAction;
         private readonly IDataEndpoint<T> _dataEndpoint;
         private readonly string _name;
         private T _applicant;
 
-        public SynchronizationAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> executeAction, IDataEndpoint<T> dataEndpoint, string name = "Unnamed")
+        public SynchronizationAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> executeAction, IDataEndpoint<T> dataEndpoint, string name = "Unnamed")
         {
             _applies = applies;
             _executeAction = executeAction;
@@ -30,7 +30,7 @@ namespace Restore
 
         public bool AppliesTo(T resource)
         {
-            var applies = _applies(resource);
+            var applies = _applies(_dataEndpoint, resource);
             if (applies)
             {
                 _applicant = resource;

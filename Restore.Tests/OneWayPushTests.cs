@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Restore.Tests
 {
     [TestFixture]
-    public class OneWayTests
+    public class OneWayPushTests
     {
         private TestResource _testResource;
         InMemoryDataEndpoint<TestResource> _testSource;

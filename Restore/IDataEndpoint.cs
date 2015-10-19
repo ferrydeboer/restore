@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Restore
 {
-    public interface IDataEndpoint<T>
+    public interface IDataEndpoint<T> : IDataChanges<T>
     {
         void Update(T testResource);
 
@@ -15,10 +15,9 @@ namespace Restore
 
         Func<T, Identifier> IdentityResolver { get; }
 
-        IObservable<T> ResourceChanged { get; }
-
         IEnumerable<ISynchronizationAction<T>> SynchActions{ get; }
 
         void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execution, string name = null);
+        IObservable<T> GetList();
     }
 }

@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeDetector.cs" />
+    <Compile Include="IDataChanges.cs" />
     <Compile Include="IDataEndpoint.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="IntIdentifier.cs" />

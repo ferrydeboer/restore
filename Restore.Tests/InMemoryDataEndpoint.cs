@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Restore.Tests
@@ -122,6 +124,16 @@ namespace Restore.Tests
         }
 
         public void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
+        {
+            _synchActions.Add(new SynchronizationAction<T>((e, r) => applies(r), execute, this, name));
+        }
+
+        public IObservable<T> GetList()
+        {
+            return _items.Values.ToObservable(Scheduler.CurrentThread);
+        }
+
+        public void AddSyncAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
         {
             _synchActions.Add(new SynchronizationAction<T>(applies, execute, this, name));
         }
