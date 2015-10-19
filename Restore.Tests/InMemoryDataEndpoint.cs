@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
@@ -10,22 +9,21 @@ namespace Restore.Tests
     /// Simple in memory endpoint that serves testing purposes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class InMemoryDataEndpoint<T> : IDataEndpoint<T>
+    public class InMemoryDataEndpoint<T> : DataEndpoint<T>, IDataEndpoint<T>
     {
         readonly IDictionary<Identifier, T> _items = new Dictionary<Identifier, T>();
         readonly Func<T, Identifier> _idResolver;
         readonly IList<IObserver<T>> _observers = new List<IObserver<T>>();
         readonly List<IObserver<T>> _deleteObservers = new List<IObserver<T>>();
         // Should be made a constructor argument or built using factory method.
-        readonly IList<ISynchronizationAction<T>> _synchActions = new List<ISynchronizationAction<T>>();
-        
+
 
         public InMemoryDataEndpoint(Func<T, Identifier> idResolver)
         {
             _idResolver = idResolver;
         }
 
-        public void Update(T resource)
+        public override void Update(T resource)
         {
             var id = _idResolver(resource);
             if (_items.ContainsKey(id))
@@ -34,7 +32,7 @@ namespace Restore.Tests
             }
         }
 
-        public void Create(T resource)
+        public override void Create(T resource)
         {
             var id = _idResolver(resource);
             if (_items.ContainsKey(id))
@@ -48,7 +46,7 @@ namespace Restore.Tests
             OnResourceChanged(resource);
         }
 
-        public void Delete(T resource)
+        public override void Delete(T resource)
         {
             var id = _idResolver(resource);
             if (_items.ContainsKey(id))
@@ -59,9 +57,19 @@ namespace Restore.Tests
             OnResourceChanged(resource);
         }
 
-        public T Get(Identifier id)
+        public override T Get(Identifier id)
         {
             return _items.ContainsKey(id) ? _items[id] : default(T);
+        }
+
+        public override IObservable<T> GetListAsync()
+        {
+            return _items.Values.ToObservable(Scheduler.CurrentThread);
+        }
+
+        public override IEnumerable<T> GetList()
+        {
+            return _items.Values;
         }
 
         public Func<T, Identifier> IdentityResolver
@@ -77,7 +85,7 @@ namespace Restore.Tests
             }
         }
 
-        public IObservable<T> ResourceChanged
+        public override IObservable<T> ResourceChanged
         {
             get
             {
@@ -113,29 +121,6 @@ namespace Restore.Tests
                     };
                 });
             }
-        }
-
-        public IEnumerable<ISynchronizationAction<T>> SynchActions 
-        {
-            get
-            {
-                return _synchActions;
-            }
-        }
-
-        public void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
-        {
-            _synchActions.Add(new SynchronizationAction<T>((e, r) => applies(r), execute, this, name));
-        }
-
-        public IObservable<T> GetList()
-        {
-            return _items.Values.ToObservable(Scheduler.CurrentThread);
-        }
-
-        public void AddSyncAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
-        {
-            _synchActions.Add(new SynchronizationAction<T>(applies, execute, this, name));
         }
     }
 }

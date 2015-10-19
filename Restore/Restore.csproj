@@ -51,7 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChangeDetector.cs" />
+    <Compile Include="BatchListCleanupEndpointDecorator.cs" />
+    <Compile Include="DataEndpoint.cs" />
     <Compile Include="IDataChanges.cs" />
     <Compile Include="IDataEndpoint.cs" />
     <Compile Include="Identifier.cs" />

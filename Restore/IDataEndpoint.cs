@@ -5,7 +5,7 @@ namespace Restore
 {
     public interface IDataEndpoint<T> : IDataChanges<T>
     {
-        void Update(T testResource);
+        void Update(T resource);
 
         void Create(T resource);
 
@@ -13,11 +13,21 @@ namespace Restore
 
         T Get(Identifier id);
 
+        IObservable<T> GetListAsync();
+
+        IEnumerable<T> GetList();
+
+        /// <summary>
+        /// Resolves the 
+        /// </summary>
         Func<T, Identifier> IdentityResolver { get; }
 
         IEnumerable<ISynchronizationAction<T>> SynchActions{ get; }
 
         void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execution, string name = null);
-        IObservable<T> GetList();
+
+        void AddSyncAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name = null);
+
+        void AddSyncAction(ISynchronizationAction<T> action);
     }
 }

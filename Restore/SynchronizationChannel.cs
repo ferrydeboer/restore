@@ -12,9 +12,10 @@ namespace Restore
     {
         readonly IDataEndpoint<T> _source;
         readonly IDataEndpoint<T> _target;
+        readonly bool _isBatchChannel;
         IObservable<T> _dispatcher;
         IDisposable _sourceSubscription;
-        bool _isBatchChannel = false;
+        
 
         public SynchronizationChannel(IDataEndpoint<T> source, IDataEndpoint<T> target, bool isBatchChannel)
         {
@@ -36,17 +37,20 @@ namespace Restore
 
         public void Open()
         {
-            //var _synchActions = null;
+            // The thing is the event should always come before any data coming in.
+            OnOpening();
             if (!_isBatchChannel)
             {
                 var synchActions = _dispatcher
                        .Select(ToSynchAction)
                        .Catch<ISynchronizationAction<T>, Exception>(ex => Observable.Return(new NullSynchAction<T>()));
-                _sourceSubscription = synchActions.Subscribe(OnNext);
+                _sourceSubscription = synchActions.Subscribe(OnNext, OnClosing);
             }else
             {
-                _sourceSubscription = _source.GetList().Select(t => t).Select(ToSynchAction)
-                    .Catch<ISynchronizationAction<T>, Exception>(ex => Observable.Return(new NullSynchAction<T>())).Subscribe(OnNext);
+                // TODO: Dispatcher is not used.
+                _sourceSubscription = _source.GetListAsync().Select(t => t).Select(ToSynchAction)
+                    .Catch<ISynchronizationAction<T>, Exception>(ex => Observable.Return(new NullSynchAction<T>()))
+                    .Subscribe(OnNext, OnClosing);
             }
         }
 
@@ -60,7 +64,7 @@ namespace Restore
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(action.ToString() + " Failed with message " + ex.Message);
+                Debug.WriteLine(action + " Failed with message " + ex.Message);
             }
         }
 
@@ -89,5 +93,31 @@ namespace Restore
         {
             _dispatcher = _dispatcher.Select(interceptor);
         }
+
+        public event EventHandler<EventArgs> Opening;
+
+        protected virtual void OnOpening()
+        {
+            IsOpen = true;
+            var handler = Opening;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
+        }
+
+        public event EventHandler<EventArgs> Closing;
+
+        protected virtual void OnClosing()
+        {
+            var handler = Closing;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
+            IsOpen = false;
+        }
+
+        public bool IsOpen { get; set; }
     }
 }

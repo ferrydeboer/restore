@@ -1,21 +1,17 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Restore.Tests
 {
     [TestFixture]
     public class OneWayPullTest
     {
-        // Simplest scenario is to pass in functions on both channel data sources that return the list.
-        // This way I don't even have to change the implementation of the GetAll()
-        // Will source push/return an observable?
         /**
+         * Mimics scenario where a list of items is being pulled in from the source to synchronize them with the target.
+         * Here it depends on the target to determine of something is deleted from the source.
          * Source: REST API
          * Targer: Local DB
          */
 
-        // Big difference: Change detection depends on both sources. This deviates from the one way push mechanism.
         // Scenarios:
         // - New item from source to target
         [Test]
@@ -35,7 +31,23 @@ namespace Restore.Tests
 
         // - Change from source to target
         // - Delete from source to target
+        [Test]
+        public void ShouldDeleteItemFromTarget()
+        {
+            var testSource = new InMemoryDataEndpoint<TestResource>(r => r.Id);
+            var testTarget = new BatchListCleanupEndpointDecorator<TestResource>(
+                new InMemoryDataEndpoint<TestResource>(r => r.Id));
+            var testResource = new TestResource(1) { Description = "Test" };
+            testTarget.Create(testResource);
+            testTarget.AddSyncAction((e, r) => e.Get(e.IdentityResolver(r)) == null, (e, r) => e.Create(r), "Create");
+            var testChannel = new SynchronizationChannel<TestResource>(testSource, testTarget, true);
+            testChannel.Opening += (s, e) => testTarget.Initialize();
+            testChannel.Closing += (s, e) => testTarget.Finish();
 
+            testChannel.Open();
 
+            Assert.IsNull(testTarget.Get(1));
+            Assert.IsFalse(testChannel.IsOpen);
+        }
     }
 }
