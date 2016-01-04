@@ -72,7 +72,7 @@ namespace Restore.Tests
             return _items.Values;
         }
 
-        public Func<T, Identifier> IdentityResolver
+        public override Func<T, Identifier> IdentityResolver
         {
             get { return _idResolver; }
         }

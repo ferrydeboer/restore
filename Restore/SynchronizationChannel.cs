@@ -83,11 +83,14 @@ namespace Restore
         
         public void Dispose()
         {
-            if (_sourceSubscription != null)
-            {
-                _sourceSubscription.Dispose();   
-            }
+            Dispose(true);
         }
+
+        protected virtual void Dispose(bool all)
+        {
+            _sourceSubscription?.Dispose();
+        }
+
 
         public void AddDispatchObserver(Func<T, T> interceptor)
         {
