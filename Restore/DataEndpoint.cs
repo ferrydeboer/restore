@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
 namespace Restore
 {
     public abstract class DataEndpoint<T> : IDataEndpoint<T>
