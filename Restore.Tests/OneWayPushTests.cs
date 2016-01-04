@@ -20,7 +20,6 @@ namespace Restore.Tests
             _testTarget.AddSyncAction(t => t.Deleted, (ds, t) => ds.Delete(t), "Delete");
             _testTarget.AddSyncAction(t => string.IsNullOrEmpty(t.CorrelationId), 
                 (ds, r) => ds.Create(r), "Create");
-            
             _testTarget.AddSyncAction(
                 t => !string.IsNullOrEmpty(t.CorrelationId), (ds, r) =>
                 {

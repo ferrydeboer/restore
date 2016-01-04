@@ -2,16 +2,17 @@
 
 namespace Restore.Tests
 {
+    
+    
+    /// <summary>
+    /// Mimics scenario where a list of items is being pulled in from the source to synchronize them with the target.
+    /// Here it depends on the target to determine of something is deleted from the source.
+    /// Source: REST API
+    /// Targer: Local DB
+    /// </summary>
     [TestFixture]
     public class OneWayPullTest
     {
-        /**
-         * Mimics scenario where a list of items is being pulled in from the source to synchronize them with the target.
-         * Here it depends on the target to determine of something is deleted from the source.
-         * Source: REST API
-         * Targer: Local DB
-         */
-
         // Scenarios:
         // - New item from source to target
         [Test]
@@ -30,6 +31,7 @@ namespace Restore.Tests
         }
 
         // - Change from source to target
+
         // - Delete from source to target
         [Test]
         public void ShouldDeleteItemFromTarget()

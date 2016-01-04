@@ -122,5 +122,21 @@ namespace Restore.Tests
                 });
             }
         }
+
+        /// <summary>
+        /// Currently it's primary usage is using this for testing. Still doubting wether this should become
+        /// part of the general DataEndpoint interfacing. Just need it now to complete the change streams.
+        /// </summary>
+        public void Finish()
+        {
+            foreach (var observer in _observers)
+            {
+                observer.OnCompleted();
+            }
+            foreach (var observer in _deleteObservers)
+            {
+                observer.OnCompleted();
+            }
+        }
     }
 }

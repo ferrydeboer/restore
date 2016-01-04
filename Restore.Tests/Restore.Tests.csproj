@@ -54,6 +54,8 @@
     <Compile Include="OneWayPullTest.cs" />
     <Compile Include="OneWayPushTests.cs" />
     <Compile Include="TestResource.cs" />
+    <Compile Include="TestSyncActions.cs" />
+    <Compile Include="TwoWayPushTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Restore\Restore.csproj">

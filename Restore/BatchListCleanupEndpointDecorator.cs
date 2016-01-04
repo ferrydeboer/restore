@@ -21,6 +21,10 @@ namespace Restore
             _decorated = decorated;
         }
 
+        /// <summary>
+        /// Because closing and opening is a concept of channels it is chosen to keep this out of the interface of
+        /// the data endpoints.
+        /// </summary>
         public void Initialize()
         {
             _unsynchedItems = GetList().ToList();

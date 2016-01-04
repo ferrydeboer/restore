@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Restore.Tests
@@ -34,6 +35,7 @@ namespace Restore.Tests
 
         public string CorrelationId { get; set; }
         public bool Deleted { get; set; }
+        public DateTime ServerModifiedAt { get; set; }
 
         /// <summary>
         /// Copy method to help creating distincts objects at both data endpoints.
