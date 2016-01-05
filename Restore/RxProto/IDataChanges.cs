@@ -1,8 +1,8 @@
 using System;
 
-namespace Restore
+namespace Restore.RxProto
 {
-    public interface IDataChanges<T>
+    public interface IDataChanges<out T>
     {
         IObservable<T> ResourceChanged { get; }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace Restore
+namespace Restore.RxProto
 {
     /// <summary>
     /// Just there if nothing needs to be synchronized between. Should in the end probably just go, just not sure how to do that

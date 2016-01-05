@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Restore
+﻿namespace Restore.RxProto
 {
     public class IntIdentifier : Identifier
     {
@@ -19,24 +17,7 @@ namespace Restore
             return new IntIdentifier(id);
         }
 
-        public int Id { get; set; }
-
-        private sealed class IdEqualityComparer : IEqualityComparer<IntIdentifier>
-        {
-            public bool Equals(IntIdentifier x, IntIdentifier y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
-                return x.Id == y.Id;
-            }
-
-            public int GetHashCode(IntIdentifier obj)
-            {
-                return obj.Id;
-            }
-        }
+        public int Id { get; }
 
         protected bool Equals(IntIdentifier other)
         {
@@ -47,7 +28,7 @@ namespace Restore
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((IntIdentifier) obj);
         }
 

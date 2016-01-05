@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Restore
+namespace Restore.RxProto
 {
     /// <summary>
     /// Endpoint decorator that triggers deletes items that are not synchronized from a source list. 
@@ -17,7 +17,7 @@ namespace Restore
 
         public BatchListCleanupEndpointDecorator(IDataEndpoint<T> decorated)
         {
-            if (decorated == null) { throw new ArgumentNullException("decorated"); }
+            if (decorated == null) { throw new ArgumentNullException(nameof(decorated)); }
             _decorated = decorated;
         }
 
@@ -34,7 +34,7 @@ namespace Restore
             }
         }
 
-        public IObservable<T> ResourceChanged { get; private set; }
+        public IObservable<T> ResourceChanged { get; protected set; }
 
         public void Update(T resource)
         {
@@ -72,15 +72,9 @@ namespace Restore
             return _decorated.GetList();
         }
 
-        public Func<T, Identifier> IdentityResolver
-        {
-            get { return _decorated.IdentityResolver; }
-        }
+        public Func<T, Identifier> IdentityResolver => _decorated.IdentityResolver;
 
-        public IEnumerable<ISynchronizationAction<T>> SynchActions
-        {
-            get { return _decorated.SynchActions; }
-        }
+        public IEnumerable<ISynchronizationAction<T>> SynchActions => _decorated.SynchActions;
 
         public void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execution, string name = null)
         {

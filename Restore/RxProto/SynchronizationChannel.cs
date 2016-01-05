@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reactive.Linq;
 
-namespace Restore
+namespace Restore.RxProto
 {
     /// <summary>
     /// Links between two data endpoints. Primary purpose is coordinate the change detection for certain objects.
@@ -103,10 +103,7 @@ namespace Restore
         {
             IsOpen = true;
             var handler = Opening;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
+            handler?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler<EventArgs> Closing;
@@ -114,10 +111,7 @@ namespace Restore
         protected virtual void OnClosing()
         {
             var handler = Closing;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
+            handler?.Invoke(this, EventArgs.Empty);
             IsOpen = false;
         }
 

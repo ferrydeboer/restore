@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Restore.RxProto;
 
 namespace Restore.Tests
 {
@@ -9,7 +10,7 @@ namespace Restore.Tests
     /// Simple in memory endpoint that serves testing purposes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class InMemoryDataEndpoint<T> : DataEndpoint<T>, IDataEndpoint<T>
+    public class InMemoryDataEndpoint<T> : DataEndpoint<T>
     {
         readonly IDictionary<Identifier, T> _items = new Dictionary<Identifier, T>();
         readonly Func<T, Identifier> _idResolver;
@@ -72,10 +73,7 @@ namespace Restore.Tests
             return _items.Values;
         }
 
-        public override Func<T, Identifier> IdentityResolver
-        {
-            get { return _idResolver; }
-        }
+        public override Func<T, Identifier> IdentityResolver => _idResolver;
 
         public void OnResourceChanged(T resource)
         {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Restore
+namespace Restore.RxProto
 {
     public class SynchronizationAction<T> : ISynchronizationAction<T>
     {
@@ -18,15 +18,9 @@ namespace Restore
             _name = name;
         }
 
-        public T Applicant
-        {
-            get { return _applicant; }
-        }
+        public T Applicant => _applicant;
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
 
         public bool AppliesTo(T resource)
         {
@@ -49,8 +43,7 @@ namespace Restore
             if (Applicant != null)
             {
                 var identityResolver = _dataEndpoint.IdentityResolver(Applicant);
-                result = string.Format("{0} Will be applied to resource of Type {1} with id {2}", _name, typeof (T).Name,
-                    identityResolver);
+                result = $"{_name} Will be applied to resource of Type {typeof (T).Name} with id {identityResolver}";
             }
             return result;
         }

@@ -35,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations.PCL328, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.10.0.0\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\JetBrains.Annotations.PCL328.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
@@ -54,21 +58,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BatchListCleanupEndpointDecorator.cs" />
-    <Compile Include="DataEndpoint.cs" />
-    <Compile Include="IDataChanges.cs" />
-    <Compile Include="IDataEndpoint.cs" />
-    <Compile Include="Identifier.cs" />
-    <Compile Include="IntIdentifier.cs" />
-    <Compile Include="ISynchronizationAction.cs" />
-    <Compile Include="NullSynchAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SynchronizationAction.cs" />
-    <Compile Include="SynchronizationChannel.cs" />
+    <Compile Include="RxProto\BatchListCleanupEndpointDecorator.cs" />
+    <Compile Include="RxProto\DataEndpoint.cs" />
+    <Compile Include="RxProto\IDataChanges.cs" />
+    <Compile Include="RxProto\IDataEndpoint.cs" />
+    <Compile Include="RxProto\Identifier.cs" />
+    <Compile Include="RxProto\IntIdentifier.cs" />
+    <Compile Include="RxProto\ISynchronizationAction.cs" />
+    <Compile Include="RxProto\NullSynchAction.cs" />
+    <Compile Include="RxProto\SynchronizationAction.cs" />
+    <Compile Include="RxProto\SynchronizationChannel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

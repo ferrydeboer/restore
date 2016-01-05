@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Restore.RxProto;
 
 namespace Restore.Tests
 {

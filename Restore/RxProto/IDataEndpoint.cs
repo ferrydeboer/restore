@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Restore
+namespace Restore.RxProto
 {
     public interface IDataEndpoint<T> : IDataChanges<T>
     {

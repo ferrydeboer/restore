@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Restore
+namespace Restore.RxProto
 {
     public abstract class DataEndpoint<T> : IDataEndpoint<T>
     {
@@ -19,17 +19,11 @@ namespace Restore
 
         public abstract IEnumerable<T> GetList();
 
-        public virtual Func<T, Identifier> IdentityResolver { get; private set; }
+        public virtual Func<T, Identifier> IdentityResolver { get; protected set; }
 
-        public virtual IObservable<T> ResourceChanged { get; private set; }
+        public virtual IObservable<T> ResourceChanged { get; protected set; }
 
-        public IEnumerable<ISynchronizationAction<T>> SynchActions 
-        {
-            get
-            {
-                return _synchActions;
-            }
-        }
+        public IEnumerable<ISynchronizationAction<T>> SynchActions => _synchActions;
 
         public void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
         {

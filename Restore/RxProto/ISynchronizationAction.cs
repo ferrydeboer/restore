@@ -1,4 +1,4 @@
-﻿namespace Restore
+﻿namespace Restore.RxProto
 {
     /// <summary>
     /// A Synchronization action is a possible scenario that can occur given the <typeparam name="T">resource</typeparam> and the

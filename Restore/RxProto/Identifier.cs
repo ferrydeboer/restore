@@ -1,4 +1,4 @@
-﻿namespace Restore
+﻿namespace Restore.RxProto
 {
     /// <summary>
     /// Object identifier abstraction to make <see cref="IDataEndpoint{T}"/> interface and implementation agnostic of

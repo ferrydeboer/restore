@@ -12,7 +12,7 @@ namespace Restore.Tests
             Id = id;
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
         public string Description
         {
@@ -27,10 +27,7 @@ namespace Restore.Tests
             }
         }
 
-        public List<string> LastUpdates
-        {
-            get { return _lastUpdates; }
-        }
+        public List<string> LastUpdates => _lastUpdates;
 
         public string CorrelationId { get; set; }
         public bool Deleted { get; set; }
