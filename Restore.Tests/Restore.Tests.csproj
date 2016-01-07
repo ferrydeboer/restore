@@ -60,6 +60,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LocalTestResource.cs" />
+    <Compile Include="Matching\ResultMatcherTest.cs" />
+    <Compile Include="TestAsyncDataEndpoint.cs" />
+    <Compile Include="RemoteTestResource.cs" />
     <Compile Include="RxProto\InMemoryDataEndpoint.cs" />
     <Compile Include="Matching\PredefinedQueryReplicatorTest.cs" />
     <Compile Include="RxProto\OneWayPullTest.cs" />
