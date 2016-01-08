@@ -34,7 +34,7 @@ namespace Restore.Matching
             await Replicate(e);
         }
 
-        public async Task<IEnumerable<T2>>  Replicate(DataLoadedEventArgs<T1> e)
+        public async Task<IEnumerable<T2>> Replicate(DataLoadedEventArgs<T1> e)
         {
             IEnumerable<T2> replicationResults;
             try
@@ -47,7 +47,7 @@ namespace Restore.Matching
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                throw new Exception("WrappedException, this is not catchable when raise event!");
+                throw new Exception("WrappedException, this is not catchable when using raised events!");
             }
             return replicationResults;
         }

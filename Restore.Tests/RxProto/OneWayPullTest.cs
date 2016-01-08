@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Restore.RxProto;
 
-namespace Restore.Tests
+namespace Restore.Tests.RxProto
 {
     [TestFixture]
     public class OneWayPullTest

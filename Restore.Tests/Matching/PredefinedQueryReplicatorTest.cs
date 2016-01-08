@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Restore.Matching;
@@ -40,6 +38,12 @@ namespace Restore.Tests.Matching
 
             // Trigger a query event on the local data endpoint.
             var replicated = await replicator.Replicate(new DataLoadedEventArgs<LocalTestResource>(localDataEndpoint.Data.AsEnumerable()));
+        }
+
+        [Test]
+        public void ShouldWrapExceptionOnReplicationFailure()
+        {
+            
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Restore.RxProto;
 
-namespace Restore.Tests
+namespace Restore.Tests.RxProto
 {
     /// <summary>
     /// Simple in memory endpoint that serves testing purposes.

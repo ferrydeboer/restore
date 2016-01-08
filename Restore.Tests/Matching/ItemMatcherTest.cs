@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using NUnit.Framework;
+using Restore.Channel.Configuration;
 using Restore.Matching;
 
 namespace Restore.Tests.Matching
@@ -16,7 +17,9 @@ namespace Restore.Tests.Matching
 
         public ItemMatcherTest()
         {
-            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int>(ltr => ltr.CorrelationId, ltr => ltr.Id);
+            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int>(
+                ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1, // This stinks somewhat. Not going with generics is probably the alternative?
+                ltr => ltr.Id);
             _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int>(channelConfig);
         }
 

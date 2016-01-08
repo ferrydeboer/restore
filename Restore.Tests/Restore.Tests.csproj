@@ -60,6 +60,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Channel\OneWayPullChannelTest.cs" />
+    <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
     <Compile Include="TestAsyncDataEndpoint.cs" />
