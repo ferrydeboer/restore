@@ -58,8 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeResolution\ITranslator.cs" />
     <Compile Include="Channel\Configuration\ChannelConfiguration.cs" />
-    <Compile Include="Channel\Configuration\DataSourceEndpointConfiguration.cs" />
+    <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
     <Compile Include="ICrudEndpoint.cs" />
     <Compile Include="IEndpointConfiguration.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
@@ -77,7 +78,7 @@
     <Compile Include="RxProto\IDataEndpoint.cs" />
     <Compile Include="RxProto\Identifier.cs" />
     <Compile Include="RxProto\IntIdentifier.cs" />
-    <Compile Include="RxProto\ISynchronizationAction.cs" />
+    <Compile Include="ISynchronizationAction.cs" />
     <Compile Include="RxProto\NullSynchAction.cs" />
     <Compile Include="RxProto\SynchronizationAction.cs" />
     <Compile Include="RxProto\SynchronizationChannel.cs" />

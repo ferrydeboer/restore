@@ -7,7 +7,7 @@ using Restore.Extensions;
 
 namespace Restore.Matching
 {
-    public class ItemMatcher<T1, T2, TId> where TId : IEquatable<TId>
+    public class ItemMatcher<T1, T2, TId, TSynch> where TId : IEquatable<TId>
     {
         [NotNull] readonly TypeConfiguration<T1, TId> _t1Config;
         [NotNull] readonly TypeConfiguration<T2, TId> _t2Config;
@@ -23,7 +23,7 @@ namespace Restore.Matching
             _t2Config = t2Config;
         }
 
-        public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId> channelConfig) : this(channelConfig.Type1Configuration, channelConfig.Type2Configuration)
+        public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId, TSynch> channelConfig) : this(channelConfig.Type1Configuration, channelConfig.Type2Configuration)
         {
             if (channelConfig == null) throw new ArgumentNullException(nameof(channelConfig));
 
@@ -31,7 +31,7 @@ namespace Restore.Matching
         }
 
         [NotNull]
-        public ChannelConfiguration<T1, T2, TId> ChannelConfig { get; }
+        public ChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
 
         [NotNull]
         public IEnumerable<ItemMatch<T1, T2>> Match(
@@ -60,7 +60,7 @@ namespace Restore.Matching
                 }
 
                 //var item2Match = result2List.FirstOrDefault(item2 => _t1Config.IdExtractor(item1).Equals(item1Id));
-                var item2Match = result2List.Extract(item2 => _t1Config.IdExtractor(item1).Equals(item1Id));
+                var item2Match = result2List.Extract(item2 => _t2Config.IdExtractor(item2).Equals(item1Id));
                 if (EqualityComparer<T2>.Default.Equals(item2Match, default(T2)))
                 {
                     yield return new ItemMatch<T1, T2>(item1, default(T2));

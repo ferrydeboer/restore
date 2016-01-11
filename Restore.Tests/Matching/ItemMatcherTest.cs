@@ -11,16 +11,16 @@ namespace Restore.Tests.Matching
     [TestFixture]
     public class ItemMatcherTest
     {
-        [NotNull] private readonly ItemMatcher<LocalTestResource, RemoteTestResource, int> _itemMatcherUnderTest;
+        [NotNull] private readonly ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _itemMatcherUnderTest;
         private List<LocalTestResource> _localResults;
         private List<RemoteTestResource> _remoteResults;
 
         public ItemMatcherTest()
         {
-            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int>(
+            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1, // This stinks somewhat. Not going with generics is probably the alternative?
                 ltr => ltr.Id);
-            _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int>(channelConfig);
+            _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(channelConfig);
         }
 
         [SetUp]
@@ -90,7 +90,7 @@ namespace Restore.Tests.Matching
             }
         }
     }
-
+    
 //    public static class ResultMatcherExtension
 //    {
 //        public static IEnumerable<ItemMatch<T1, T2>> Match<T1, T2, Tid>(

@@ -14,9 +14,9 @@ namespace Restore.RxProto
             throw new Exception("Applies should never be called for this type of action!");
         }
 
-        public void Execute()
+        public SynchronizationResult Execute()
         {
-            // Do nothing
+            return new SynchronizationResult(false);
         }
     }
 }

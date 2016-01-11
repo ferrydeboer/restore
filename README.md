@@ -9,6 +9,10 @@ For the paticular application of this library it needs to support the following 
 * Two way synchronization for changes on single items.
 * Two way batch synchronization for changes on lists of items.
 
+# Huh, a specific PCL Profile?
+The library has a specific PCL profile because that is the profile of the project it is being used in currently. Primary objective is getting this code battle tested in a production scenario.
+Only once that is done I have time to make this a proper library with full PCL support.
+
 # Concepts
 ## Matching
 This is an optional first step in the synchronization of lists of data in specific. If decisions need to be made based on the data of both items this step creates a match between two data endpoints.

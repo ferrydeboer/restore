@@ -60,6 +60,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeResolution\TestResourceTranslator.cs" />
     <Compile Include="Channel\OneWayPullChannelTest.cs" />
     <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Matching\PredefinedQueryReplicatorTest.cs" />
     <Compile Include="RxProto\OneWayPullTest.cs" />
     <Compile Include="RxProto\OneWayPushTests.cs" />
+    <Compile Include="TestData.cs" />
     <Compile Include="TestResource.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -11,18 +11,15 @@ namespace Restore.Channel.Configuration
     /// </summary>
     /// <typeparam name="T">The data type for this endpoint.</typeparam>
     /// <typeparam name="TId">The id that <typeparamref name="T"/> is identified by.</typeparam>
-    public class DataSourceEndpointConfiguration<T, TId> : IEndpointConfiguration<T, TId> where TId : IEquatable<TId>
+    public class EndpointConfiguration<T, TId> : IEndpointConfiguration<T, TId> where TId : IEquatable<TId>
     {
-        public DataSourceEndpointConfiguration(TypeConfiguration<T, TId> typeConfig, Func<Task<IEnumerable<T>>> dataSource, ICrudEndpoint<T, TId> endpoint)
+        public EndpointConfiguration(TypeConfiguration<T, TId> typeConfig, ICrudEndpoint<T, TId> endpoint)
         {
             TypeConfig = typeConfig;
-            DataSource = dataSource;
             Endpoint = endpoint;
         }
 
         public TypeConfiguration<T, TId> TypeConfig { get; }
-
-        public Func<Task<IEnumerable<T>>> DataSource { get; }
 
         public ICrudEndpoint<T, TId> Endpoint { get; }
     }

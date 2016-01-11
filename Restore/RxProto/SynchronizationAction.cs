@@ -32,9 +32,10 @@ namespace Restore.RxProto
             return applies;
         }
 
-        public void Execute()
+        public SynchronizationResult Execute()
         {
             _executeAction(_dataEndpoint, _applicant);
+            return new SynchronizationResult(false);
         }
 
         public override string ToString()
