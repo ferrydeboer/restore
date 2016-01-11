@@ -26,13 +26,23 @@ namespace Restore.ChangeResolution
 
         public ISynchronizationAction<TItem> Resolve(TItem item)
         {
-            foreach (var changeResolver in _resolvers)
+            try
             {
-                var synchronizationAction = changeResolver.Resolve(item);
-                if (synchronizationAction != null)
+                foreach (var changeResolver in _resolvers)
                 {
-                    return synchronizationAction;
+                    var synchronizationAction = changeResolver.Resolve(item);
+                    if (synchronizationAction != null)
+                    {
+                        return synchronizationAction;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new ChangeResolutionException(
+                    $"Failed to resolve change for {item}",
+                    ex,
+                    item);
             }
             // No Resolution/Synch is required.
             return new NullSynchAction<TItem>();
@@ -45,12 +55,14 @@ namespace Restore.ChangeResolution
             _observers.Add(action);
         }
 
-        // TODO This should be generelizeable by creating a step with TInput & TOutput
+        // TODO This should be generalizable by creating a step with TInput & TOutput
         public IEnumerable<ISynchronizationAction<TItem>> Compose(IEnumerable<TItem> input)
         {
             var pipeline = input.Select(Resolve);
             pipeline = _observers.Aggregate(pipeline, (current, observer) => current.Select(item =>
             {
+                // TODO: Maybe we should prevent observers from braking the chain?
+                // We might still need a logging mechanism to at least notify about this.
                 observer(item);
                 return item;
             }));

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Restore.Tests
 {
     public class LocalTestResource
@@ -18,5 +20,10 @@ namespace Restore.Tests
         public int LocalId { get; }
 
         public string Name { get; set; }
+
+        public override string ToString()
+        {
+            return $"LocalTestResource - {LocalId}";
+        }
     }
 }

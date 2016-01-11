@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeResolution\ChangeResolutionException.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionStep.cs" />
     <Compile Include="ChangeResolution\ChangeResolver.cs" />
     <Compile Include="ChangeResolution\ChangeResolverExt.cs" />
