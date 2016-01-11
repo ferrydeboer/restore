@@ -27,12 +27,12 @@ namespace Restore.RxProto
 
         public void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
         {
-            AddSyncAction(new SynchronizationAction<T>((e, r) => applies(r), execute, this, name));
+            AddSyncAction(new OldSynchronizationAction<T>((e, r) => applies(r), execute, this, name));
         }
 
         public void AddSyncAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> execute, string name)
         {
-            AddSyncAction(new SynchronizationAction<T>(applies, execute, this, name));
+            AddSyncAction(new OldSynchronizationAction<T>(applies, execute, this, name));
         }
 
         public void AddSyncAction(ISynchronizationAction<T> action)

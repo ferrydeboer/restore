@@ -58,9 +58,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeResolution\ChangeResolutionStep.cs" />
+    <Compile Include="ChangeResolution\ChangeResolver.cs" />
+    <Compile Include="ChangeResolution\ChangeResolverExt.cs" />
+    <Compile Include="ChangeResolution\IChangeResolver.cs" />
+    <Compile Include="ChangeResolution\ItemMatchSynchronizationAction.cs" />
     <Compile Include="ChangeResolution\ITranslator.cs" />
+    <Compile Include="ChangeResolution\SynchronizationAction.cs" />
     <Compile Include="Channel\Configuration\ChannelConfiguration.cs" />
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
+    <Compile Include="Channel\ISynchChannel.cs" />
+    <Compile Include="Channel\OneWayPullChannel.cs" />
     <Compile Include="ICrudEndpoint.cs" />
     <Compile Include="IEndpointConfiguration.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
@@ -80,7 +88,7 @@
     <Compile Include="RxProto\IntIdentifier.cs" />
     <Compile Include="ISynchronizationAction.cs" />
     <Compile Include="RxProto\NullSynchAction.cs" />
-    <Compile Include="RxProto\SynchronizationAction.cs" />
+    <Compile Include="RxProto\OldSynchronizationAction.cs" />
     <Compile Include="RxProto\SynchronizationChannel.cs" />
     <Compile Include="Channel\Configuration\TypeConfiguration.cs" />
   </ItemGroup>

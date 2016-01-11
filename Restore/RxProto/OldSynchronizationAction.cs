@@ -2,7 +2,7 @@ using System;
 
 namespace Restore.RxProto
 {
-    public class SynchronizationAction<T> : ISynchronizationAction<T>
+    public class OldSynchronizationAction<T> : ISynchronizationAction<T>
     {
         private readonly Func<IDataEndpoint<T>, T, bool> _applies;
         private readonly Action<IDataEndpoint<T>, T> _executeAction;
@@ -10,7 +10,7 @@ namespace Restore.RxProto
         private readonly string _name;
         private T _applicant;
 
-        public SynchronizationAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> executeAction, IDataEndpoint<T> dataEndpoint, string name = "Unnamed")
+        public OldSynchronizationAction(Func<IDataEndpoint<T>, T, bool> applies, Action<IDataEndpoint<T>, T> executeAction, IDataEndpoint<T> dataEndpoint, string name = "Unnamed")
         {
             _applies = applies;
             _executeAction = executeAction;
