@@ -60,5 +60,7 @@ namespace Restore.ChangeResolution
             _applicant = null;
             return _synchronizationResult;
         }
+
+        public ItemMatch<T1, T2> Applicant => _applicant;
     }
 }

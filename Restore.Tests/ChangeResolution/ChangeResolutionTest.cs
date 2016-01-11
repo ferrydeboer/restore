@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NUnit.Framework;
 using Restore.ChangeResolution;
 using Restore.RxProto;
@@ -56,14 +58,38 @@ namespace Restore.Tests.ChangeResolution
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void ShouldReturnNullSynchActionWhenUnResolved()
+        public void ShouldReturnNullSynchActionWhenUnresolved()
         {
+            _shouldResolve = false;
             var localTestResource = new LocalTestResource(1);
             var action = _resolutionStepUnderTest.Resolve(localTestResource);
 
             Assert.IsNotNull(action);
-            action.Execute();
+            Assert.AreEqual(typeof(NullSynchAction<LocalTestResource>), action.GetType());
+        }
+
+        [Test]
+        public void ShouldBuildPipelineWithObservers()
+        {
+            _shouldResolve = true;
+            LocalTestResource isCalled = null;
+            _resolutionStepUnderTest.AddResultObserver(action =>
+            {
+                isCalled = action.Applicant;
+            });
+
+            var compositionSource = new List<LocalTestResource>
+            {
+                new LocalTestResource(1)
+            };
+            var pipeline = _resolutionStepUnderTest.Compose(compositionSource);
+
+            foreach (var synchronizationAction in pipeline)
+            {
+                Debug.WriteLine(synchronizationAction.Applicant);
+            }
+            //var drained = pipeline.ToList();
+            Assert.AreEqual(compositionSource[0], isCalled);
         }
     }
 }

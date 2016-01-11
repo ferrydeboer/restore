@@ -18,5 +18,7 @@ namespace Restore.RxProto
         {
             return new SynchronizationResult(false);
         }
+
+        public T Applicant => default(T);
     }
 }

@@ -32,5 +32,7 @@ namespace Restore.ChangeResolution
         {
             return _action(_applicant, _config);
         }
+
+        public T Applicant => _applicant;
     }
 }
