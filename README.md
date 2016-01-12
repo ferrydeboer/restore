@@ -1,7 +1,7 @@
 # restore
-C# Library for synchronizing between to CRUD data sources. The primary objective of writing this library if to assist in the synchronization of a REST api and a local Sqlite database in an app. 
+C# Library for synchronizing between two CRUD data sources. The primary objective of writing this library is to assist in the synchronization of a REST api and a local Sqlite database in an app. 
 So far the essential concepts of this library is that synchronization is nothing more than equalizing data between two data sources. The implementations of these data sources and business rules 
-in the end should determine how the synchronization is executed. Given this the actualy implementation is expected to be fairly thin.
+in the end should determine how the synchronization is executed. Given this the actual implementation is expected to be fairly thin.
 
 ## Required scenario support
 For the paticular application of this library it needs to support the following scenarios
