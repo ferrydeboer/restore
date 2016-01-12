@@ -17,9 +17,9 @@ namespace Restore.Channel.Configuration
 
         public ITranslator<T1, T2> TypeTranslator { get; private set; }
 
-        [NotNull] private readonly IList<ISynchronizationAction<TSynch>> _synchronizationActions = new List<ISynchronizationAction<TSynch>>();
+        [NotNull] private readonly IList<ISynchronizationResolver<TSynch>> _synchronizationActions = new List<ISynchronizationResolver<TSynch>>();
 
-        public IEnumerable<ISynchronizationAction<TSynch>> SynchronizationActions => _synchronizationActions.AsEnumerable();
+        public IEnumerable<ISynchronizationResolver<TSynch>> SynchronizationResolvers => _synchronizationActions.AsEnumerable();
 
 
         public ChannelConfiguration(
@@ -64,7 +64,7 @@ namespace Restore.Channel.Configuration
             throw new NotImplementedException();
         }*/
 
-        public void AddSynchAction([NotNull] ISynchronizationAction<TSynch> action)
+        public void AddSynchAction([NotNull] ISynchronizationResolver<TSynch> action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
 

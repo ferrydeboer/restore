@@ -9,13 +9,13 @@ namespace Restore.ChangeResolution
     public class ChangeResolutionStep<TItem, TCfg>
     {
         [NotNull] [ItemNotNull]
-        private readonly IList<IChangeResolver<TItem>> _resolvers;
+        private readonly IList<ISynchronizationResolver<TItem>> _resolvers;
 
         [NotNull] private readonly IList<Action<ISynchronizationAction<TItem>>> _observers 
             = new List<Action<ISynchronizationAction<TItem>>>();
         [NotNull] private readonly TCfg _configuration;
 
-        public ChangeResolutionStep([NotNull] IList<IChangeResolver<TItem>> resolvers, [NotNull] TCfg configuration)
+        public ChangeResolutionStep([NotNull] IList<ISynchronizationResolver<TItem>> resolvers, [NotNull] TCfg configuration)
         {
             if (resolvers == null) throw new ArgumentNullException(nameof(resolvers));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));

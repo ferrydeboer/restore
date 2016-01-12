@@ -60,9 +60,9 @@
   <ItemGroup>
     <Compile Include="ChangeResolution\ChangeResolutionException.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionStep.cs" />
-    <Compile Include="ChangeResolution\ChangeResolver.cs" />
+    <Compile Include="ChangeResolution\SynchronizationResolver.cs" />
     <Compile Include="ChangeResolution\ChangeResolverExt.cs" />
-    <Compile Include="ChangeResolution\IChangeResolver.cs" />
+    <Compile Include="ChangeResolution\ISynchronizationResolver.cs" />
     <Compile Include="ChangeResolution\ItemMatchSynchronizationAction.cs" />
     <Compile Include="ChangeResolution\ITranslator.cs" />
     <Compile Include="ChangeResolution\SynchronizationAction.cs" />

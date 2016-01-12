@@ -2,7 +2,7 @@ using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
-    public interface IChangeResolver<T>
+    public interface ISynchronizationResolver<T>
     {
         ISynchronizationAction<T> Resolve(T item);
     }

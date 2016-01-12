@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Restore.ChangeResolution;
-using Restore.RxProto;
 
 namespace Restore.Channel
 {
@@ -24,6 +23,9 @@ namespace Restore.Channel
         [NotNull][ItemNotNull]
         private readonly IList<Action<TSynch>> _synchItemListeners = new List<Action<TSynch>>();
 
+        [NotNull]
+        private readonly ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>> _resolutionStep;
+
         public OneWayPullChannel(
             [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
             [NotNull] Func<Task<IEnumerable<T1>>> t1DataSource, 
@@ -36,6 +38,7 @@ namespace Restore.Channel
             _channelConfig = channelConfig;
             _t1DataSource = t1DataSource;
             _t2DataSource = t2DataSource;
+            _resolutionStep = new ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>>(channelConfig.SynchronizationResolvers.ToList(), channelConfig);
         }
 
         public async Task Synchronize()
@@ -52,10 +55,13 @@ namespace Restore.Channel
                 return item;
             }));
 
-            var endpipeLine = pipeline/*Inject Listeners here*/.ResolveChange(ChangeResolver)/*Inject Listeners here*/
-                .Select(Dispatcher);
+            var endPipeline = pipeline.ResolveChange(_resolutionStep).Select(Dispatcher);
+            /*
+            var endpipeLine = pipeline/*Inject Listeners here*/
+            //.ResolveChange(ChangeResolver)Inject Listeners here*/
+            //    .Select(Dispatcher);
 
-            foreach (SynchronizationResult result in endpipeLine)
+            foreach (SynchronizationResult result in endPipeline)
             {
                 if (!result)
                 {
@@ -70,14 +76,23 @@ namespace Restore.Channel
             _synchItemListeners.Add(action);
         }
 
+        public void AddSynchActionListener([NotNull] Action<ISynchronizationAction<TSynch>> action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
+            _resolutionStep.AddResultObserver(action);
+        }
+
+        /*
         public ISynchronizationAction<TSynch> ChangeResolver([NotNull] TSynch item)
         {
             if (item == null) {  throw new ArgumentNullException(nameof(item)); }
 
             // TODO: Error handling?
-            return _channelConfig.SynchronizationActions.FirstOrDefault(action => action.AppliesTo(item)) ?? new NullSynchAction<TSynch>();
+            //return _channelConfig.SynchronizationResolvers.FirstOrDefault(action => action.AppliesTo(item)) ?? new NullSynchAction<TSynch>();
             // Injecting NullSynchActions provides means of logging
         }
+        */
 
         public SynchronizationResult Dispatcher(ISynchronizationAction<TSynch> synchAction)
         {

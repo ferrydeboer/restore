@@ -11,7 +11,7 @@ namespace Restore.Tests.ChangeResolution
     [TestFixture]
     public class ChangeResolutionTest
     {
-        private ChangeResolver<LocalTestResource, string> _testChangeResolver;
+        private SynchronizationResolver<LocalTestResource, string> _testSynchronizationResolver;
         private bool _shouldResolve;
         private bool _isResolved;
         private ChangeResolutionStep<LocalTestResource, string> _resolutionStepUnderTest;
@@ -20,7 +20,7 @@ namespace Restore.Tests.ChangeResolution
         public void SetUpTest()
         {
             _shouldResolve = false;
-            _testChangeResolver = new ChangeResolver<LocalTestResource, string>(
+            _testSynchronizationResolver = new SynchronizationResolver<LocalTestResource, string>(
                 "bogus config",
                 (item, cfg) => _shouldResolve,
                 (item, cfg) =>
@@ -29,9 +29,9 @@ namespace Restore.Tests.ChangeResolution
                     return new SynchronizationResult(true);
                 });
 
-            var changeResolvers = new List<IChangeResolver<LocalTestResource>>
+            var changeResolvers = new List<ISynchronizationResolver<LocalTestResource>>
             {
-                _testChangeResolver
+                _testSynchronizationResolver
             };
 
             _resolutionStepUnderTest = new ChangeResolutionStep<LocalTestResource, string>(
@@ -101,7 +101,7 @@ namespace Restore.Tests.ChangeResolution
         public void ShouldWrapExceptionIntoChangeResolutionException()
         {
             var exception = new Exception("Whatever resolution error");
-            _testChangeResolver = new ChangeResolver<LocalTestResource, string>(
+            _testSynchronizationResolver = new SynchronizationResolver<LocalTestResource, string>(
                 "bogus config",
                 (item, cfg) =>
                 {
@@ -113,9 +113,9 @@ namespace Restore.Tests.ChangeResolution
                     return new SynchronizationResult(true);
                 });
 
-            var changeResolvers = new List<IChangeResolver<LocalTestResource>>
+            var changeResolvers = new List<ISynchronizationResolver<LocalTestResource>>
             {
-                _testChangeResolver
+                _testSynchronizationResolver
             };
 
             _resolutionStepUnderTest = new ChangeResolutionStep<LocalTestResource, string>(

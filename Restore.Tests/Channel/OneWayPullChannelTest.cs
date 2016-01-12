@@ -42,7 +42,7 @@ namespace Restore.Tests.Channel
             var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
             var itemsPreprocessor = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(channelConfig);
             channelConfig.ItemsPreprocessor = itemsPreprocessor.Match;
-            channelConfig.AddSynchAction(new ItemMatchSynchronizationAction<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+            channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource,RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
                 channelConfig,
                 (item, cfg) =>
                 {

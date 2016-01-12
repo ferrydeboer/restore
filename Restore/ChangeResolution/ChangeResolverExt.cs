@@ -12,5 +12,10 @@ namespace Restore.ChangeResolution
             // How to handle errors here? Probably need a way to catch them and dispatch them onto a handler?
             return items.Select(item => transformer(item));
         }
+
+        public static IEnumerable<ISynchronizationAction<TSynch>> ResolveChange<TSynch, TCfg>(this IEnumerable<TSynch> items, ChangeResolutionStep<TSynch, TCfg> step)
+        {
+            return step.Compose(items);
+        }
     }
 }

@@ -1,16 +1,15 @@
 ﻿using System;
 using JetBrains.Annotations;
-using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
-    public class ChangeResolver<T, TCfg> : IChangeResolver<T>
+    public class SynchronizationResolver<T, TCfg> : ISynchronizationResolver<T>
     {
         [NotNull] private readonly TCfg _config;
         [NotNull] private readonly Func<T, TCfg, bool> _decision;
         [NotNull] private readonly Func<T, TCfg, SynchronizationResult> _action;
 
-        public ChangeResolver(
+        public SynchronizationResolver(
             TCfg config,
             [NotNull] Func<T, TCfg, bool> decision, 
             [NotNull] Func<T, TCfg, SynchronizationResult> action)
