@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeDispatching\ChangeDispatchingExt.cs" />
     <Compile Include="ChangeDispatching\ChangeDispatchingStep.cs" />
     <Compile Include="ChangeDispatching\DispatchingException.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionException.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="IAsyncDataEndpoint.cs" />
     <Compile Include="IChannelConfiguration.cs" />
+    <Compile Include="Matching\ItemMatchingStep.cs" />
     <Compile Include="Matching\PredefinedQueryReplicatorAsync.cs" />
     <Compile Include="Matching\QueryReplicationEventArgs.cs" />
     <Compile Include="Matching\ItemMatch.cs" />

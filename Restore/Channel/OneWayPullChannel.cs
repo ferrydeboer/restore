@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Restore.ChangeDispatching;
 using Restore.ChangeResolution;
 
 namespace Restore.Channel
@@ -25,6 +26,8 @@ namespace Restore.Channel
 
         [NotNull]
         private readonly ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>> _resolutionStep;
+        [NotNull]
+        private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
 
         public OneWayPullChannel(
             [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
@@ -38,7 +41,9 @@ namespace Restore.Channel
             _channelConfig = channelConfig;
             _t1DataSource = t1DataSource;
             _t2DataSource = t2DataSource;
+            // Further development should further help determine the signatures steps.
             _resolutionStep = new ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>>(channelConfig.SynchronizationResolvers.ToList(), channelConfig);
+            _dispatchStep = new ChangeDispatchingStep<TSynch>();
         }
 
         public async Task Synchronize()
@@ -55,11 +60,9 @@ namespace Restore.Channel
                 return item;
             }));
 
-            var endPipeline = pipeline.ResolveChange(_resolutionStep).Select(Dispatcher);
-            /*
-            var endpipeLine = pipeline/*Inject Listeners here*/
-            //.ResolveChange(ChangeResolver)Inject Listeners here*/
-            //    .Select(Dispatcher);
+            var endPipeline = pipeline
+                .ResolveChange(_resolutionStep)
+                .DispatchChange(_dispatchStep);
 
             foreach (SynchronizationResult result in endPipeline)
             {
@@ -81,23 +84,6 @@ namespace Restore.Channel
             if (action == null) throw new ArgumentNullException(nameof(action));
 
             _resolutionStep.AddResultObserver(action);
-        }
-
-        /*
-        public ISynchronizationAction<TSynch> ChangeResolver([NotNull] TSynch item)
-        {
-            if (item == null) {  throw new ArgumentNullException(nameof(item)); }
-
-            // TODO: Error handling?
-            //return _channelConfig.SynchronizationResolvers.FirstOrDefault(action => action.AppliesTo(item)) ?? new NullSynchAction<TSynch>();
-            // Injecting NullSynchActions provides means of logging
-        }
-        */
-
-        public SynchronizationResult Dispatcher(ISynchronizationAction<TSynch> synchAction)
-        {
-            // TODO: Error handling
-            return synchAction.Execute();
         }
     }
 }

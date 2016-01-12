@@ -67,6 +67,7 @@
     <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
+    <Compile Include="Matching\ItemMatchingStepTest.cs" />
     <Compile Include="TestAsyncDataEndpoint.cs" />
     <Compile Include="RemoteTestResource.cs" />
     <Compile Include="RxProto\InMemoryDataEndpoint.cs" />

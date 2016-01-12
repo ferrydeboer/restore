@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Restore.RxProto;
 
 namespace Restore.ChangeResolution
@@ -13,8 +14,11 @@ namespace Restore.ChangeResolution
             return items.Select(item => transformer(item));
         }
 
-        public static IEnumerable<ISynchronizationAction<TSynch>> ResolveChange<TSynch, TCfg>(this IEnumerable<TSynch> items, ChangeResolutionStep<TSynch, TCfg> step)
+        public static IEnumerable<ISynchronizationAction<TSynch>> ResolveChange<TSynch, TCfg>(
+            this IEnumerable<TSynch> items,
+            [NotNull] ChangeResolutionStep<TSynch, TCfg> step)
         {
+            if (step == null) throw new ArgumentNullException(nameof(step));
             return step.Compose(items);
         }
     }
