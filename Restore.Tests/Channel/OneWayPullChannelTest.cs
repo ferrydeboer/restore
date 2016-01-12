@@ -1,15 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
-using System.ServiceModel.Dispatcher;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Restore.ChangeResolution;
 using Restore.Channel;
 using Restore.Channel.Configuration;
 using Restore.Matching;
-using Restore.RxProto;
 using Restore.Tests.ChangeResolution;
-using Restore.Tests.RxProto;
 
 namespace Restore.Tests.Channel
 {
@@ -19,9 +17,10 @@ namespace Restore.Tests.Channel
     [TestFixture]
     public class OneWayPullChannelTest
     {
-        private ISynchChannel<LocalTestResource, RemoteTestResource, ItemMatch<LocalTestResource, RemoteTestResource>> _channelUnderTest;
+        private OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelUnderTest;
         private InMemoryCrudDataEndpoint<LocalTestResource, int> _localEndpoint;
         private InMemoryCrudDataEndpoint<RemoteTestResource, int> _remoteEndpoint;
+        private ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelConfig;
 
         [SetUp]
         public void SetUpTest()
@@ -39,11 +38,11 @@ namespace Restore.Tests.Channel
                 _remoteEndpoint);
 
             // This clearly requires a configuration API.
-            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
-            var itemsPreprocessor = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(channelConfig);
-            channelConfig.ItemsPreprocessor = itemsPreprocessor.Match;
-            channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource,RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
-                channelConfig,
+            _channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
+            var itemsPreprocessor = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(_channelConfig);
+            _channelConfig.ItemsPreprocessor = itemsPreprocessor.Match;
+            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource,RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                _channelConfig,
                 (item, cfg) =>
                 {
                     return item.Result1 == null;
@@ -60,7 +59,7 @@ namespace Restore.Tests.Channel
 
             //var t2epConfig = new EndpointConfiguration()
             _channelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                channelConfig,
+                _channelConfig,
                 () => Task.FromResult(_localEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult(_remoteEndpoint.ReadAll().AsEnumerable()));
         }
@@ -88,7 +87,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldCallSideEffectListenerOnMatchedData()
         {
             var matched = false;
-            _channelUnderTest.AddSynchItemListener<ItemMatch<LocalTestResource, RemoteTestResource>>(match =>
+            _channelUnderTest.AddSynchItemObserver<ItemMatch<LocalTestResource, RemoteTestResource>>(match =>
             {
                 matched = true;
             });
@@ -96,6 +95,64 @@ namespace Restore.Tests.Channel
             await _channelUnderTest.Synchronize();
 
             Assert.IsTrue(matched);
+        }
+
+        [Test]
+        public async Task ShouldWrapItemExceptionIntoSynchronizationException()
+        {
+            var expectedException = new Exception("An observer has broken the item");
+            _channelUnderTest.AddSynchActionObserver(action =>
+            {
+                throw expectedException;
+            });
+
+            try
+            {
+                await _channelUnderTest.Synchronize();
+            }
+            catch (ItemSynchronizationException ex)
+            {
+                // For step specific errors the steps will assign the item. Whenever some kind of exception
+                // occurs where it's not catched by a step, the actual item in the pipeline is unknown. 
+                // So for now we accept it's null.
+                Assert.IsNull(ex.Item);
+                Assert.AreEqual("Synchronization of an item failed for an unknown reason.", ex.Message);
+                Assert.AreEqual(expectedException, ex.InnerException);
+            }
+        }
+
+        [Test]
+        public async Task ShouldCallSynchronizationStartedObserver()
+        {
+            bool isCalled = false;
+            _channelUnderTest.AddSynchronizationStartedObserver(start =>
+            {
+                Assert.AreEqual(typeof(LocalTestResource), start.Type1);
+                Assert.AreEqual(typeof(RemoteTestResource), start.Type2);
+                isCalled = true;
+            });
+
+            await _channelUnderTest.Synchronize();
+
+            Assert.IsTrue(isCalled);
+        }
+
+        [Test]
+        public async Task ShouldCallSynchronizationFinishedObserver()
+        {
+            bool isCalled = false;
+            _channelUnderTest.AddSynchronizationFinishedObserver(finish =>
+            {
+                Assert.AreEqual(typeof(LocalTestResource), finish.Type1);
+                Assert.AreEqual(typeof(RemoteTestResource), finish.Type2);
+                Assert.AreEqual(3, finish.ItemsProcessed);
+                Assert.AreEqual(1, finish.ItemsSynchronized);
+                isCalled = true;
+            });
+
+            await _channelUnderTest.Synchronize();
+
+            Assert.IsTrue(isCalled);
         }
     }
 

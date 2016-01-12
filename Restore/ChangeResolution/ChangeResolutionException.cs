@@ -2,23 +2,18 @@
 
 namespace Restore.ChangeResolution
 {
-    public class ChangeResolutionException : Exception
+    public class ChangeResolutionException : ItemSynchronizationException
     {
-        public object Item { get; private set; }
-
-        public ChangeResolutionException(object item)
+        public ChangeResolutionException(object item) : base(item)
         {
-            Item = item;
         }
 
-        public ChangeResolutionException(string message, object item) : base(message)
+        public ChangeResolutionException(string message, object item) : base(message, item)
         {
-            Item = item;
         }
 
-        public ChangeResolutionException(string message, Exception innerException, object item) : base(message, innerException)
+        public ChangeResolutionException(string message, Exception innerException, object item) : base(message, innerException, item)
         {
-            Item = item;
         }
     }
 }

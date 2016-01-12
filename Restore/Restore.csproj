@@ -73,6 +73,7 @@
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
     <Compile Include="Channel\ISynchChannel.cs" />
     <Compile Include="Channel\OneWayPullChannel.cs" />
+    <Compile Include="Channel\SynchronizationStart.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="ICrudEndpoint.cs" />
     <Compile Include="IEndpointConfiguration.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="IAsyncDataEndpoint.cs" />
     <Compile Include="IChannelConfiguration.cs" />
+    <Compile Include="ItemSynchronizationException.cs" />
     <Compile Include="Matching\ItemMatchingStep.cs" />
     <Compile Include="Matching\PredefinedQueryReplicatorAsync.cs" />
     <Compile Include="Matching\QueryReplicationEventArgs.cs" />

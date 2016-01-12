@@ -6,6 +6,6 @@ namespace Restore.Channel
     public interface ISynchChannel<T1, T2, TSynch>
     {
         Task Synchronize();
-        void AddSynchItemListener<T>(Action<TSynch> action);
+        void AddSynchItemObserver<T>(Action<TSynch> observer);
     }
 }

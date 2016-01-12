@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Restore.ChangeDispatching;
 using Restore.ChangeResolution;
+using Restore.Extensions;
 
 namespace Restore.Channel
 {
@@ -29,6 +30,9 @@ namespace Restore.Channel
         [NotNull]
         private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
 
+        private event Action<SynchronizationStart> _synchronizationStart;
+        private event Action<SynchronizationFinished> _synchronizationFinished;
+
         public OneWayPullChannel(
             [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
             [NotNull] Func<Task<IEnumerable<T1>>> t1DataSource, 
@@ -50,6 +54,8 @@ namespace Restore.Channel
         {
             // Here we have to be careful about thread safety. It's one instance. There is no
             // point in having two synchronizations of the same resource running simultaneously/overlapping.
+
+            // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
             var t1Data = await _t1DataSource();
             var t2Data = await _t2DataSource();
             var pipeline =_channelConfig.ItemsPreprocessor(t1Data, t2Data);
@@ -60,30 +66,87 @@ namespace Restore.Channel
                 return item;
             }));
 
+            int itemsProcessed = 0;
             var endPipeline = pipeline
+                .Do(_ => itemsProcessed++)
                 .ResolveChange(_resolutionStep)
+                // Filter out NullSynchActions
+                .Where(action => action.Applicant != null)
                 .DispatchChange(_dispatchStep);
 
-            foreach (SynchronizationResult result in endPipeline)
+            OnSynchronizationStart(new SynchronizationStart(typeof(T1), typeof(T2)));
+            int itemsSynchronized = 0;
+            try
             {
-                if (!result)
+                foreach (SynchronizationResult result in endPipeline)
                 {
-                    Debug.WriteLine("Failed executing an item.");
+                    if (!result)
+                    {
+                        Debug.WriteLine("Failed executing an item.");
+                    }
+                    else
+                    {
+                        itemsSynchronized++;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+            }
+            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
         }
 
-        public void AddSynchItemListener<T>([NotNull] Action<TSynch> action)
+        // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
+        // while others are simply events on the channel. Under water events are simply used where appropriate.
+
+        public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-            _synchItemListeners.Add(action);
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            _synchItemListeners.Add(observer);
         }
 
-        public void AddSynchActionListener([NotNull] Action<ISynchronizationAction<TSynch>> action)
+        public void AddSynchActionObserver([NotNull] Action<ISynchronizationAction<TSynch>> observer)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
 
-            _resolutionStep.AddResultObserver(action);
+            _resolutionStep.AddResultObserver(observer);
         }
+
+        public void AddSynchronizationStartedObserver([NotNull] Action<SynchronizationStart> observer)
+        {
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            _synchronizationStart += observer;
+        }
+
+        public void OnSynchronizationStart(SynchronizationStart eventArgs)
+        {
+            _synchronizationStart?.Invoke(eventArgs);
+        }
+
+        public void AddSynchronizationFinishedObserver(Action<SynchronizationFinished> observer)
+        {
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            _synchronizationFinished += observer;
+        }
+
+        protected virtual void OnSynchronizationFinished(SynchronizationFinished eventArgs)
+        {
+            _synchronizationFinished?.Invoke(eventArgs);
+        }
+    }
+
+    
+    public class SynchronizationFinished : SynchronizationStart
+    {
+        public SynchronizationFinished(Type type1, Type type2, int itemsProcessed, int itemsSynchronized) : base(type1, type2)
+        {
+            ItemsProcessed = itemsProcessed;
+            ItemsSynchronized = itemsSynchronized;
+        }
+
+        public int ItemsProcessed { get; }
+
+        public int ItemsSynchronized { get; }
     }
 }
