@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeDispatching\ChangeDispatchingStep.cs" />
+    <Compile Include="ChangeDispatching\DispatchingException.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionException.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionStep.cs" />
     <Compile Include="ChangeResolution\SynchronizationResolver.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
     <Compile Include="Channel\ISynchChannel.cs" />
     <Compile Include="Channel\OneWayPullChannel.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="ICrudEndpoint.cs" />
     <Compile Include="IEndpointConfiguration.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
@@ -93,6 +96,7 @@
     <Compile Include="RxProto\SynchronizationChannel.cs" />
     <Compile Include="Channel\Configuration\TypeConfiguration.cs" />
     <Compile Include="SynchronizationResult.cs" />
+    <Compile Include="SynchronizationStep.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

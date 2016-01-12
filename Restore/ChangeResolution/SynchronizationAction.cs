@@ -1,6 +1,5 @@
 ﻿using System;
 using JetBrains.Annotations;
-using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
@@ -13,7 +12,8 @@ namespace Restore.ChangeResolution
         public SynchronizationAction(
             [NotNull] TCfg config, 
             [NotNull] Func<T, TCfg, SynchronizationResult> action,
-            T applicant)
+            T applicant,
+            string name = "Undefined")
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (action == null) throw new ArgumentNullException(nameof(action));
@@ -21,6 +21,7 @@ namespace Restore.ChangeResolution
             _config = config;
             _action = action;
             _applicant = applicant;
+            Name = name;
         }
 
         public bool AppliesTo(T item)
@@ -34,5 +35,7 @@ namespace Restore.ChangeResolution
         }
 
         public T Applicant => _applicant;
+
+        public string Name { get; }
     }
 }

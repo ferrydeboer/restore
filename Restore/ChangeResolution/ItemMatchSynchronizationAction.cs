@@ -15,11 +15,13 @@ namespace Restore.ChangeResolution
         public ItemMatchSynchronizationAction(
             IChannelConfiguration<T1, T2, TId, TSynch> channelConfig, 
             Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, bool> decision, 
-            Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, SynchronizationResult> action)
+            Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, SynchronizationResult> action,
+            string name = "Undefined")
         {
             _channelConfig = channelConfig;
             _decision = decision;
             _action = action;
+            Name = name;
         }
 
 
@@ -62,5 +64,7 @@ namespace Restore.ChangeResolution
         }
 
         public ItemMatch<T1, T2> Applicant => _applicant;
+
+        public string Name { get; }
     }
 }

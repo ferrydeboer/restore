@@ -20,5 +20,7 @@ namespace Restore.RxProto
         }
 
         public T Applicant => default(T);
+
+        public string Name => "Null action";
     }
 }

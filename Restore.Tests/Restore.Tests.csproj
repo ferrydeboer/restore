@@ -60,7 +60,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChangeResolution\ChangeResolutionTest.cs" />
+    <Compile Include="ChangeDispatching\ChangeDispatchingStepTest.cs" />
+    <Compile Include="ChangeResolution\ChangeResolutionStepTest.cs" />
     <Compile Include="ChangeResolution\TestResourceTranslator.cs" />
     <Compile Include="Channel\OneWayPullChannelTest.cs" />
     <Compile Include="InMemoryCrudDataEndpoint.cs" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using NUnit.Framework;
 using Restore.ChangeResolution;
 using Restore.RxProto;
@@ -9,7 +8,7 @@ using Restore.RxProto;
 namespace Restore.Tests.ChangeResolution
 {
     [TestFixture]
-    public class ChangeResolutionTest
+    public class ChangeResolutionStepTest
     {
         private SynchronizationResolver<LocalTestResource, string> _testSynchronizationResolver;
         private bool _shouldResolve;
