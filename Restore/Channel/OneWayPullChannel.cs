@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Restore.ChangeDispatching;
@@ -30,8 +31,11 @@ namespace Restore.Channel
         [NotNull]
         private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
 
-        private event Action<SynchronizationStart> _synchronizationStart;
-        private event Action<SynchronizationFinished> _synchronizationFinished;
+        private event Action<SynchronizationStart> SynchronizationStart;
+        private event Action<SynchronizationFinished> SynchronizationFinished;
+
+        private object _synchLock = new Object();
+        private bool _isSynchronizing = false;
 
         public OneWayPullChannel(
             [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
@@ -50,51 +54,76 @@ namespace Restore.Channel
             _dispatchStep = new ChangeDispatchingStep<TSynch>();
         }
 
+        public bool IsSynchronizing => _isSynchronizing;
+
+        /// <summary>
+        /// Synchronize will only run once. If being called by another thread at this stage of development 
+        /// it will simply ignore the call.
+        /// </summary>
+        /// <returns></returns>
         public async Task Synchronize()
         {
-            // Here we have to be careful about thread safety. It's one instance. There is no
-            // point in having two synchronizations of the same resource running simultaneously/overlapping.
-
-            // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
-            var t1Data = await _t1DataSource();
-            var t2Data = await _t2DataSource();
-            var pipeline =_channelConfig.ItemsPreprocessor(t1Data, t2Data);
-
-            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
+            // Prevent synchronization of this channel to run on multiple threads.
+            if (Monitor.TryEnter(_synchLock))
             {
-                listener(item);
-                return item;
-            }));
-
-            int itemsProcessed = 0;
-            var endPipeline = pipeline
-                .Do(_ => itemsProcessed++)
-                .ResolveChange(_resolutionStep)
-                // Filter out NullSynchActions
-                .Where(action => action.Applicant != null)
-                .DispatchChange(_dispatchStep);
-
-            OnSynchronizationStart(new SynchronizationStart(typeof(T1), typeof(T2)));
-            int itemsSynchronized = 0;
-            try
-            {
-                foreach (SynchronizationResult result in endPipeline)
+                _isSynchronizing = true;
+                try
                 {
-                    if (!result)
+                    OnSynchronizationStart(new SynchronizationStart(typeof(T1), typeof(T2)));
+
+                    // Here we have to be careful about thread safety. It's one instance. There is no
+                    // point in having two synchronizations of the same resource running simultaneously/overlapping.
+                    //Scheduler
+                    // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
+                    var t1Data = await _t1DataSource();
+                    var t2Data = await _t2DataSource();
+                    var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
+
+                    pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
                     {
-                        Debug.WriteLine("Failed executing an item.");
-                    }
-                    else
+                        listener(item);
+                        return item;
+                    }));
+
+                    int itemsProcessed = 0;
+                    var endPipeline = pipeline
+                        .Do(_ => itemsProcessed++)
+                        .ResolveChange(_resolutionStep)
+                        // Filter out NullSynchActions, which don't have an applicant instance.
+                        .Where(action => action.Applicant != null)
+                        .DispatchChange(_dispatchStep);
+
+
+                    // Pump items out at the end of the sequence. In the end is probably responsibility of separate
+                    // class.
+                    int itemsSynchronized = 0;
+                    try
                     {
-                        itemsSynchronized++;
+                        foreach (SynchronizationResult result in endPipeline)
+                        {
+                            if (!result)
+                            {
+                                Debug.WriteLine("Failed executing an item.");
+                            }
+                            else
+                            {
+                                itemsSynchronized++;
+                            }
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+                    }
+                    OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
+
+                }
+                finally
+                {
+                    _isSynchronizing = false;
+                    Monitor.Exit(_synchLock);
                 }
             }
-            catch (Exception ex)
-            {
-                throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
-            }
-            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
         }
 
         // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
@@ -116,23 +145,23 @@ namespace Restore.Channel
         public void AddSynchronizationStartedObserver([NotNull] Action<SynchronizationStart> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
-            _synchronizationStart += observer;
-        }
-
-        public void OnSynchronizationStart(SynchronizationStart eventArgs)
-        {
-            _synchronizationStart?.Invoke(eventArgs);
+            SynchronizationStart += observer;
         }
 
         public void AddSynchronizationFinishedObserver(Action<SynchronizationFinished> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
-            _synchronizationFinished += observer;
+            SynchronizationFinished += observer;
+        }
+
+        protected virtual void OnSynchronizationStart(SynchronizationStart eventArgs)
+        {
+            SynchronizationStart?.Invoke(eventArgs);
         }
 
         protected virtual void OnSynchronizationFinished(SynchronizationFinished eventArgs)
         {
-            _synchronizationFinished?.Invoke(eventArgs);
+            SynchronizationFinished?.Invoke(eventArgs);
         }
     }
 
