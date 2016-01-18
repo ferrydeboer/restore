@@ -1,13 +1,15 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Restore.Channel.Configuration;
 using Restore.Extensions;
 
 namespace Restore.Matching
 {
-    public class ItemMatcher<T1, T2, TId, TSynch> where TId : IEquatable<TId>
+    public class ItemMatcher<T1, T2, TId, TSynch> : IEnumerable<TSynch> where TId : IEquatable<TId>
     {
         [NotNull] readonly TypeConfiguration<T1, TId> _t1Config;
         [NotNull] readonly TypeConfiguration<T2, TId> _t2Config;
@@ -23,7 +25,8 @@ namespace Restore.Matching
             _t2Config = t2Config;
         }
 
-        public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId, TSynch> channelConfig) : this(channelConfig.Type1Configuration, channelConfig.Type2Configuration)
+        public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId, TSynch> channelConfig)
+            : this(channelConfig.Type1Configuration, channelConfig.Type2Configuration)
         {
             if (channelConfig == null) throw new ArgumentNullException(nameof(channelConfig));
 
@@ -58,6 +61,8 @@ namespace Restore.Matching
                     yield return new ItemMatch<T1, T2>(item1, default(T2));
                     continue;
                 }
+                // Essentially you can also wait untill here to load data from result 2. But that won't neccesarily lead to
+                // lazy loading of the second part I think.
 
                 //var item2Match = result2List.FirstOrDefault(item2 => _t1Config.IdExtractor(item1).Equals(item1Id));
                 var item2Match = result2List.Extract(item2 => _t2Config.IdExtractor(item2).Equals(item1Id));
@@ -76,5 +81,43 @@ namespace Restore.Matching
                 yield return new ItemMatch<T1, T2>(default(T1), item2);
             }
         }
+
+        public IEnumerator<TSynch> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
+
+    public class MatchEnumerator<T1, T2, TId, TSynch> : IEnumerator<TSynch>
+    {
+        //private list
+        public bool MoveNext()
+        {
+            // MoveNext on T1 untill exhausted, then movenext on T2
+            throw new NotImplementedException();
+        }
+
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public TSynch Current { get; }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

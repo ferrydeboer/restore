@@ -2,12 +2,12 @@ using System;
 
 namespace Restore.Channel
 {
-    public class SynchronizationStart
+    public class SynchronizationStarted
     {
         public Type Type1 { get; }
         public Type Type2 { get; }
 
-        public SynchronizationStart(Type type1, Type type2)
+        public SynchronizationStarted(Type type1, Type type2)
         {
             Type1 = type1;
             Type2 = type2;
