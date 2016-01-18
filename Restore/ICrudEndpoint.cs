@@ -13,7 +13,7 @@ namespace Restore
     /// </P>
     /// </summary>
     /// <typeparam name="T">The type this endpoint stores.</typeparam>
-    public interface ICrudEndpoint<T, TId> where TId : IEquatable<TId>
+    public interface ICrudEndpoint<T, TId> : IDataChangeNotifier<T> where TId : IEquatable<TId>
     {
         T Create(T item);
         T Read(TId id);

@@ -36,35 +36,43 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldContainSynchedDataOnceFinished()
         {
-            Debug.WriteLine("Calling async");
-            _channelUnderTest.AddSynchronizationStartedObserver(_ => Debug.WriteLine("Synch started"));
-            _channelUnderTest.AddSynchronizationFinishedObserver(_ => Debug.WriteLine("Synch finished"));
+
             var finish = await WaitForSynchFinish();
             Assert.AreEqual(3, finish.ItemsProcessed);
             Assert.AreEqual(1, finish.ItemsSynchronized);
-            Debug.WriteLine("Finished async");
         }
 
+        [Test]
+        public async Task ShouldContainsSynchedDataInReturnedObservable()
+        {
+//            _channelUnderTest.AddSynchronizationStartedObserver(_ => Debug.WriteLine("started"));
+//            _channelUnderTest.AddSynchronizationFinishedObserver(_ =>
+//            {
+//                Debug.WriteLine("finished");
+//            });
+            var synchedResult = await _channelUnderTest.Drain(true);
+            // Don't know a better way of waiting till full synch completion.
+            while (_channelUnderTest.IsSynchronizing)
+            {
+                await Task.Delay(500);
+            }
+            var localTestResource = synchedResult.FirstOrDefault(ltr => ltr.CorrelationId.HasValue && ltr.CorrelationId == 3);
+            Assert.AreEqual("Only Remote 3", localTestResource.Name);
+            synchedResult.Dispose();
+        }
 
-        public Task<SynchronizationFinished> WaitForSynchFinish()
+        public Task<SynchronizationFinished> WaitForSynchFinish(Action<ObservableCollection<LocalTestResource>> resultAssertion = null)
         {
             TaskCompletionSource<SynchronizationFinished> taskCompletion = new TaskCompletionSource<SynchronizationFinished>();
-            Task<ObservableCollection<LocalTestResource>> test = null;
             _channelUnderTest.AddSynchronizationFinishedObserver(finish =>
             {
-                var x = test.Result;
                 taskCompletion.SetResult(finish);
+                
             });
-            try
-            {
-                test = _channelUnderTest.Drain(true);
-            }
-            // This is not catching since the method is not awaited!
-            // Making method async changes expectations of TaskCompletionSource though.
-            catch (Exception ex)
-            {
-                taskCompletion.SetException(ex);
-            }
+            
+            Debug.WriteLine("Draining");
+            _channelUnderTest.Drain(true);
+            Debug.WriteLine("Drain Called");
 
             return taskCompletion.Task;
         }

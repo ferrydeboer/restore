@@ -146,24 +146,27 @@ namespace Restore.Channel
         /// be responsiblity of the channel, and since we only need this in a single scenario this
         /// suffices.</param>
         /// <returns></returns>
-        public async Task<ObservableCollection<T1>> Drain(bool condition)
+        public async Task<AttachedObservableCollection<T1>> Drain(bool condition)
         {
-            var t1Data = await _t1DataSource();
+            var t1DataEnum = await _t1DataSource();
+            var t1Data = t1DataEnum.ToList();
+            var attachedObservableCollection = new AttachedObservableCollection<T1>(t1Data, _channelConfig.Type1EndpointConfiguration.Endpoint);
             if (condition)
             {
+                // Set before starting on other thread because reading thread might be faster.
+                _isSynchronizing = true;
                 // Do synch on background! Including awaiting second data.
                 Fire(Synchronize(t1Data));
-                //Synchronize(t1Data);
             }
-            //OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T1), 0, 0));
-            return await Task.FromResult(new ObservableCollection<T1>(t1Data));
+            
+            return await Task.FromResult(attachedObservableCollection);
         }
 
         public async void Fire(Task synchTask)
         {
             try
             {
-                await Task.Run(async () => await synchTask);
+                await Task.Run( () => synchTask);
             }
             catch (Exception ex)
             {
@@ -179,7 +182,8 @@ namespace Restore.Channel
             // Prevent synchronization of this channel to run on multiple threads.
             if (await _lockSemaphore.WaitAsync(0))
             {
-                _isSynchronizing = true;
+                await Task.Delay(1000);
+                //_isSynchronizing = true;
                 try
                 {
                     OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));

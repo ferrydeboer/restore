@@ -35,6 +35,7 @@ namespace Restore.Tests
                 throw new ArgumentException("Item already exists");
             }
             _items.Add(_typeConfig.IdExtractor(item), item);
+            OnItemCreated(item);
             return item;
         }
 
@@ -63,6 +64,7 @@ namespace Restore.Tests
             {
                 // found, no default value atleast.
                 _items[itemId] = item;
+                OnItemUpdated(item);
             }
             else
             {
@@ -77,8 +79,28 @@ namespace Restore.Tests
             {
                 return item;
             }
+            OnItemDeleted(item);
             return default(T);
 
+        }
+
+        public event Action<T> ItemCreated;
+        public event Action<T> ItemUpdated;
+        public event Action<T> ItemDeleted;
+
+        protected virtual void OnItemCreated(T obj)
+        {
+            ItemCreated?.Invoke(obj);
+        }
+
+        protected virtual void OnItemUpdated(T obj)
+        {
+            ItemUpdated?.Invoke(obj);
+        }
+
+        protected virtual void OnItemDeleted(T obj)
+        {
+            ItemDeleted?.Invoke(obj);
         }
     }
 }

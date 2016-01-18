@@ -69,6 +69,7 @@
     <Compile Include="ChangeResolution\ItemMatchSynchronizationAction.cs" />
     <Compile Include="ChangeResolution\ITranslator.cs" />
     <Compile Include="ChangeResolution\SynchronizationAction.cs" />
+    <Compile Include="Channel\AttachedObservableCollection.cs" />
     <Compile Include="Channel\Configuration\ChannelConfiguration.cs" />
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
     <Compile Include="Channel\ISynchChannel.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Channel\SynchronizationStarted.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="ICrudEndpoint.cs" />
+    <Compile Include="IDataChangeNotifier.cs" />
     <Compile Include="IEndpointConfiguration.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
