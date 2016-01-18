@@ -45,11 +45,6 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldContainsSynchedDataInReturnedObservable()
         {
-//            _channelUnderTest.AddSynchronizationStartedObserver(_ => Debug.WriteLine("started"));
-//            _channelUnderTest.AddSynchronizationFinishedObserver(_ =>
-//            {
-//                Debug.WriteLine("finished");
-//            });
             var synchedResult = await _channelUnderTest.Drain(true);
             // Don't know a better way of waiting till full synch completion.
             while (_channelUnderTest.IsSynchronizing)

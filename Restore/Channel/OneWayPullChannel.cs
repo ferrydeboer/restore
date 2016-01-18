@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -65,15 +64,13 @@ namespace Restore.Channel
         public async Task Synchronize()
         {
             // In this case it makes more sense to acquire a lock here instead of the sync.
-            // Now still two syncs could potentially fire at the same time.
-            if (_isSynchronizing)
+            // Now still two syncs could potentially fire at the same time, even when checking the variable.
+            await LockSync(async () =>
             {
-                return;
-            }
-            _isSynchronizing = true;
-            var t1DataEnum = await _t1DataSource();
-            var t1Data = t1DataEnum.ToList();
-            await Synchronize(t1Data);
+                var t1DataEnum = await _t1DataSource();
+                var t1Data = t1DataEnum.ToList();
+                await Synchronize(t1Data);
+            });
         }
 
         /// <summary>
@@ -94,13 +91,17 @@ namespace Restore.Channel
             var t1DataEnum = await _t1DataSource();
             var t1Data = t1DataEnum.ToList();
             var attachedObservableCollection = new AttachedObservableCollection<T1>(t1Data, _channelConfig.Type1EndpointConfiguration.Endpoint);
-            if (condition)
+            await LockSync(async () =>
             {
-                // Set before starting on other thread because reading thread might be faster.
-                _isSynchronizing = true;
-                // Do synch on background! Including awaiting second data.
-                Fire(Synchronize(t1Data));
-            }
+                if (condition)
+                {
+                    // Set before starting on other thread because reading thread might be faster.
+                    _isSynchronizing = true;
+                    // Do synch on background! Including awaiting second data.
+                    Fire(Synchronize(t1Data));
+                }
+                await Task.FromResult(new object());
+            });
             
             return await Task.FromResult(attachedObservableCollection);
         }
@@ -109,31 +110,30 @@ namespace Restore.Channel
         {
             try
             {
-                await Task.Run( () => synchTask);
+                await Task.Run(() => synchTask);
             }
             catch (Exception ex)
             {
-                // rethrow, or move exception handling from actual method.
                 Debug.WriteLine("Caught exception with Fire");
-                throw;
+                // TODO: Now this back ground scenario will require a better error handling strategy.
+                // This goes into the void. But it's running on the back ground and the caller might have
+                // had already returned, so there is not much that can be done anyway.
+                throw ex;
             }
         }
 
         protected async Task Synchronize(IEnumerable<T1> input)
         {
             // Prevent synchronization of this channel to run on multiple threads.
-            if (await _lockSemaphore.WaitAsync(0))
+/*            if (await _lockSemaphore.WaitAsync(0))
             {
                 await Task.Delay(1000);
                 //_isSynchronizing = true;
                 try
-                {
+                {*/
                     OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
 
                     // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
-                    // Here we have to be careful about thread safety. It's one instance. There is no
-                    // point in having two synchronizations of the same resource running simultaneously/overlapping.
-                    //Scheduler
 
                     // TODO: Awaiting the data source(s) should become part of the pipeline!
                     // This is hard however, and not neccesarily relevant since all should occur on another thread.
@@ -180,6 +180,26 @@ namespace Restore.Channel
                         throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
                     }
                     OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
+/*                }
+                finally
+                {
+                    _isSynchronizing = false;
+                    _lockSemaphore.Release();
+                }
+            }*/
+        }
+
+        private async Task LockSync(Func<Task> mechanism)
+        {
+            // Prevent synchronization of this channel to run on multiple threads.
+            if (await _lockSemaphore.WaitAsync(0))
+            {
+                _isSynchronizing = true;
+                await Task.Delay(1000);
+                //_isSynchronizing = true;
+                try
+                {
+                    await mechanism();
                 }
                 finally
                 {
@@ -190,7 +210,7 @@ namespace Restore.Channel
         }
 
         // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
-        // while others are simply events on the channel. Under water events are simply used where appropriate.
+                // while others are simply events on the channel. Under water events are simply used where appropriate.
         public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));

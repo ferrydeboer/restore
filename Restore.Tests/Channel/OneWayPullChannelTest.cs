@@ -107,27 +107,16 @@ namespace Restore.Tests.Channel
         [Test]
         public void ShouldIgnoreSecondSynchCallIfASynchIsAlreadyRunning()
         {
-            // Make two threads
-            // Have first thread run synch
-            // - Cause this first thread to sleep using OnSynchronizationStartedHandler
-            // Have second thread run synch.
-            // I guess the only way to test this is to simply look what the timestamp was the thread finished.
-            // The second thread should be finished prior to the first. I could also have some sort of 
-            // event that is called when multiple synch calls are done.
-
             int startCallCount = 0;
             _channelUnderTest.AddSynchronizationStartedObserver(_ =>
             {
-                Debug.WriteLine("Synch start " + startCallCount);
-                Task.Delay(1000);
                 startCallCount++;
             });
             var task1 = _channelUnderTest.Synchronize();
-            var task2 = Task.Factory.StartNew(async () =>
-            {
-                await _channelUnderTest.Synchronize();
-            });
+            var task2 = _channelUnderTest.Synchronize();
             Task.WaitAll(task1, task2);
+
+            Assert.AreEqual(1, startCallCount);
 
             Assert.AreEqual(1, startCallCount);
         }
