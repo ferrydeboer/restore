@@ -35,7 +35,7 @@ namespace Restore.Channel
         private event Action<SynchronizationStarted> SynchronizationStart;
         private event Action<SynchronizationFinished> SynchronizationFinished;
 
-        private object _synchLock = new Object();
+        SemaphoreSlim _lockSemaphore = new SemaphoreSlim(1);
         private bool _isSynchronizing = false;
 
         public OneWayPullChannel(
@@ -64,73 +64,16 @@ namespace Restore.Channel
         /// <returns></returns>
         public async Task Synchronize()
         {
-            // Prevent synchronization of this channel to run on multiple threads.
-            if (Monitor.TryEnter(_synchLock))
+            // In this case it makes more sense to acquire a lock here instead of the sync.
+            // Now still two syncs could potentially fire at the same time.
+            if (_isSynchronizing)
             {
-                _isSynchronizing = true;
-                try
-                {
-                    OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
-
-                    // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
-                    // Here we have to be careful about thread safety. It's one instance. There is no
-                    // point in having two synchronizations of the same resource running simultaneously/overlapping.
-                    //Scheduler
-
-                    // TODO: Awaiting the data source(s) should become part of the pipeline!
-                    // This is hard however, and not neccesarily relevant since all should occur on another thread.
-                    // Input    -> T1 Data Source.
-                    // Output   -> SynchronizationResults.
-                    // Refactor, do this first, only do remaining work in thread.
-                    var t1Data = await _t1DataSource().ConfigureAwait(false);
-                    var t2Data = await _t2DataSource().ConfigureAwait(false);
-                    var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
-
-                    pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
-                    {
-                        listener(item);
-                        return item;
-                    }));
-
-                    int itemsProcessed = 0;
-                    var endPipeline = pipeline
-                        .Do(_ => itemsProcessed++)
-                        .ResolveChange(_resolutionStep)
-                        // Filter out NullSynchActions, which don't have an applicant instance.
-                        .Where(action => action.Applicant != null)
-                        .DispatchChange(_dispatchStep);
-
-
-                    // Pump items out at the end of the sequence. In the end is probably responsibility of separate
-                    // class.
-                    int itemsSynchronized = 0;
-                    try
-                    {
-                        foreach (SynchronizationResult result in endPipeline)
-                        {
-                            if (!result)
-                            {
-                                Debug.WriteLine("Failed executing an item.");
-                            }
-                            else
-                            {
-                                itemsSynchronized++;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
-                    }
-                    OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
-
-                }
-                finally
-                {
-                    _isSynchronizing = false;
-                    Monitor.Exit(_synchLock);
-                }
+                return;
             }
+            _isSynchronizing = true;
+            var t1DataEnum = await _t1DataSource();
+            var t1Data = t1DataEnum.ToList();
+            await Synchronize(t1Data);
         }
 
         /// <summary>
@@ -176,7 +119,6 @@ namespace Restore.Channel
             }
         }
 
-        SemaphoreSlim _lockSemaphore = new SemaphoreSlim(1);
         protected async Task Synchronize(IEnumerable<T1> input)
         {
             // Prevent synchronization of this channel to run on multiple threads.

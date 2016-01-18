@@ -122,10 +122,7 @@ namespace Restore.Tests.Channel
                 Task.Delay(1000);
                 startCallCount++;
             });
-            var task1 = Task.Factory.StartNew(async () =>
-            {
-                await _channelUnderTest.Synchronize();
-            });
+            var task1 = _channelUnderTest.Synchronize();
             var task2 = Task.Factory.StartNew(async () =>
             {
                 await _channelUnderTest.Synchronize();
