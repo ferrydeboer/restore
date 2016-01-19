@@ -73,7 +73,7 @@ namespace Restore.Channel
 
         protected override void InsertItem(int index, T item)
         {
-            Debug.WriteLine("InsertItem");
+            Debug.WriteLine("InsertItem at {0}", index);
             if (_filterPredicate(item))
             {
                 base.InsertItem(index, item);
@@ -88,19 +88,19 @@ namespace Restore.Channel
 
         protected override void MoveItem(int oldIndex, int newIndex)
         {
-            Debug.WriteLine("MoveItem");
+            Debug.WriteLine("MoveItem from {0} to {1}", oldIndex, newIndex);
             base.MoveItem(oldIndex, newIndex);
         }
 
         protected override void RemoveItem(int index)
         {
-            Debug.WriteLine("RemoveItem");
+            Debug.WriteLine("RemoveItem as {0}", index);
             base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, T item)
         {
-            Debug.WriteLine("SetItem");
+            Debug.WriteLine("SetItem at {0}", index);
             if (_filterPredicate(item))
             {
                 base.SetItem(index, item);
@@ -148,7 +148,20 @@ namespace Restore.Channel
                 }
                 else
                 {
-                    _changeDispatcher(() => SetItem(indexOfExisting, e.Item));
+                    if (_ordering != null)
+                    {
+                        // Simply remove the item and add it again at the right location. This is far simpler
+                        // because with reference equals you're always comparing the item with itself, which
+                        // then requires code to deal with as well.
+                        // TODO: Dispatch
+                        RemoveAt(indexOfExisting);
+                        AddItem(sender, e);
+                    }
+                    else
+                    {
+                        // This replaces where as MoveItem doesn't!
+                        _changeDispatcher(() => SetItem(indexOfExisting, e.Item));
+                    }
                 }
             }
             else
@@ -180,46 +193,42 @@ namespace Restore.Channel
             _ordering = new Order<T>(orderExpression);
             return _ordering;
         }
-    }
 
-    public class Order<T> : IOrder<T>
-    {
-        private readonly Expression<Func<T, IComparable>> _orderExpression;
-        private readonly Func<T, T, int> _comparer;
-        private int _direction = 0;
-        private bool _ascending = true;
-
-        public Order(Expression<Func<T, IComparable>> orderExpression)
+        private class Order<T> : IOrder<T>
         {
-            _orderExpression = orderExpression;
-            Func<T, IComparable> valueRetrieval = _orderExpression.Compile();
-            _comparer = (first, second) =>
+            private readonly Expression<Func<T, IComparable>> _orderExpression;
+            private int _direction;
+            private bool _ascending = true;
+
+            public Order(Expression<Func<T, IComparable>> orderExpression)
             {
-                var value1 = valueRetrieval(first);
-                var value2 = valueRetrieval(second);
-                var result = value1.CompareTo(value2);
-                Debug.WriteLine("{0} compared to {1} = {2}", value1, value2, result);
-                return result;
-            };
-        }
+                _orderExpression = orderExpression;
+                Func<T, IComparable> valueRetrieval = _orderExpression.Compile();
+                Comparer = (first, second) =>
+                {
+                    var value1 = valueRetrieval(first);
+                    var value2 = valueRetrieval(second);
+                    var result = value1.CompareTo(value2) * _direction;
+                    Debug.WriteLine("{0} compared to {1} = {2}", value1, value2, result);
+                    return result;
+                };
+            }
 
-        public IOrder<T> Asc()
-        {
-            _direction = 0;
-            return this;
-        }
+            public IOrder<T> Asc()
+            {
+                _direction = 0;
+                return this;
+            }
 
-        public IOrder<T> Desc()
-        {
-            _direction = -1;
-            return this;
-        }
+            public IOrder<T> Desc()
+            {
+                _direction = -1;
+                return this;
+            }
 
-        public bool Ascending => _direction == 0;
+            public bool Ascending => _direction == 0;
 
-        public Func<T, T, int> Comparer
-        {
-            get { return _comparer; }
+            public Func<T, T, int> Comparer { get; }
         }
     }
 

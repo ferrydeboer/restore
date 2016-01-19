@@ -11,9 +11,9 @@ namespace Restore.Tests.Channel
         private AttachedObservableCollection<LocalTestResource> _observableUnderTest;
 
         private InMemoryCrudDataEndpoint<LocalTestResource, int> _dateSource;
-        private readonly LocalTestResource _smallest = new LocalTestResource(10) { Name = "Anthony" };
-        private readonly LocalTestResource _bigger = new LocalTestResource(1) { Name = "Bert" };
-        private readonly LocalTestResource _biggest = new LocalTestResource(2) { Name = "Zack" };
+        private LocalTestResource _smallest;
+        private LocalTestResource _bigger;
+        private LocalTestResource _biggest;
         
         [SetUp]
         public void SetUpTest()
@@ -24,6 +24,9 @@ namespace Restore.Tests.Channel
                 _dateSource
                 , new LocalTestResourceIdComparer());
 
+            _smallest = new LocalTestResource(10) { Name = "Anthony" };
+            _bigger = new LocalTestResource(1) { Name = "Bert" };
+            _biggest = new LocalTestResource(2) { Name = "Zack" };
         }
 
         [Test]
@@ -49,5 +52,82 @@ namespace Restore.Tests.Channel
             Assert.AreEqual(_biggest, _observableUnderTest[0]);
             Assert.AreEqual(_smallest, _observableUnderTest[2]);
         }
+
+        [Test]
+        public void ShouldMoveItemToTopWhenChangedAndAscending()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Asc();
+
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            _dateSource.Create(_biggest);
+
+            _biggest.Name = "Aaron";
+            _dateSource.Update(_biggest);
+
+            Assert.AreEqual(_biggest, _observableUnderTest[0]);
+        }
+
+        [Test]
+        public void ShouldMoveItemToBottomWhenChangedAndDescending()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Desc();
+
+            _dateSource.Create(_biggest);
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            
+            _biggest.Name = "Aaron";
+            _dateSource.Update(_biggest);
+
+            Assert.AreEqual(_biggest, _observableUnderTest[2]);
+        }
+
+        [Test]
+        public void ShouldReplaceItemOnNewLocationWhenDifferentInstances()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Asc();
+
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            _dateSource.Create(_biggest);
+
+            var newBiggest = new LocalTestResource(2) { Name = "Aaron" };
+            _dateSource.Update(newBiggest);
+
+            Assert.IsFalse(_observableUnderTest.Contains(_biggest));
+            Assert.AreEqual(newBiggest, _observableUnderTest[0]);
+        }
+/*
+        [Test]
+        public void ShouldAddEqualItemBeforeOtherWhenAscending()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Asc();
+
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            _dateSource.Create(_biggest);
+
+            var smallest2 = new LocalTestResource(100) { Name = "Anthony" };
+            _dateSource.Create(smallest2);
+
+            Assert.AreEqual(smallest2, _observableUnderTest[0]);
+        }
+
+        [Test]
+        public void ShouldAddEqualItemAfterOtherWhenDesc()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Desc();
+
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            _dateSource.Create(_biggest);
+
+            var biggest2 = new LocalTestResource(200) { Name = "Zack" };
+            _dateSource.Create(biggest2);
+
+            Assert.AreEqual(biggest2, _observableUnderTest[3]);
+        }
+ */
     }
 }

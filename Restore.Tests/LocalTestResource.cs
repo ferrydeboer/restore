@@ -23,7 +23,7 @@ namespace Restore.Tests
 
         public override string ToString()
         {
-            return $"LocalTestResource - {LocalId}";
+            return $"LocalTestResource - {LocalId} : {Name}";
         }
     }
 }
