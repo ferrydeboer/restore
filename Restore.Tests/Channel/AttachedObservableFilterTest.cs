@@ -27,7 +27,7 @@ namespace Restore.Tests.Channel
         [Test]
         public void ShouldIgnoreAddedItemThatDoesNotPassFilter()
         {
-            _dataSource.Create(new LocalTestResource(1));
+            _dataSource.Create(new LocalTestResource(1) { Name = "Bla" });
             Assert.AreEqual(0, _observableUnderTest.Count);
         }
 
