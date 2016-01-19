@@ -3,51 +3,69 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using JetBrains.Annotations;
+using Restore.Extensions;
 
+// TODO: Probably better of in another namespace since now UI concerns are coupling on lower level namespaces.
 namespace Restore.Channel
 {
     public class AttachedObservableCollection<T> : ObservableCollection<T>, IDisposable
     {
         private readonly IEqualityComparer<T> _changeComparer;
-        private readonly Action<Action> _defaultChangeDispatcher = act => act();
         private readonly Action<Action> _changeDispatcher;
-        private Func<T, bool> _filterPredicate = _ => true;
-        
 
         /// <summary>
-        /// It does not make sense to change a notifier once the collection is constructed. This will break assumptions made
-        /// on the notifier.
+        ///     It does not make sense to change a notifier once the collection is constructed. This will break assumptions made
+        ///     on the notifier.
         /// </summary>
         private readonly IDataChangeNotifier<T> _contentChangeNotifier;
 
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier) 
+        private readonly Action<Action> _defaultChangeDispatcher = act => act();
+        private Func<T, bool> _filterPredicate = _ => true;
+
+        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier)
             : this(contentChangeNotifier, null, null)
         {
         }
 
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier, IEqualityComparer<T> changeComparer) 
+        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier,
+            IEqualityComparer<T> changeComparer)
             : this(contentChangeNotifier, changeComparer, null)
         {
         }
 
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier, IEqualityComparer<T> changeComparer, Action<Action> changeDispatcher)
+        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier,
+            IEqualityComparer<T> changeComparer, Action<Action> changeDispatcher)
         {
             _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
             _changeComparer = changeComparer ?? EqualityComparer<T>.Default;
             Attach(contentChangeNotifier);
         }
 
-        public AttachedObservableCollection(IEnumerable<T> collection, IDataChangeNotifier<T> contentChangeNotifier) : base(collection)
+        public AttachedObservableCollection(IEnumerable<T> collection, IDataChangeNotifier<T> contentChangeNotifier)
+            : base(collection)
         {
-            if (contentChangeNotifier == null) { throw new ArgumentNullException(nameof(contentChangeNotifier)); }
+            if (contentChangeNotifier == null)
+            {
+                throw new ArgumentNullException(nameof(contentChangeNotifier));
+            }
             _contentChangeNotifier = contentChangeNotifier;
             Attach(contentChangeNotifier);
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public ObservableCollection<T> Where([NotNull] Func<T, bool> predicate)
         {
-            if (predicate == null) { throw new ArgumentNullException(nameof(predicate)); }
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
 
             _filterPredicate = predicate;
             return this;
@@ -105,7 +123,14 @@ namespace Restore.Channel
 
         private void AddItem(object sender, DataChangeEventArgs<T> e)
         {
-            _changeDispatcher(() => Add(e.Item));
+            if (_ordering == null)
+            {
+                _changeDispatcher(() => Add(e.Item));
+            }
+            else
+            {
+                _changeDispatcher(() => this.SortInsert(e.Item, _ordering.Comparer, !_ordering.Ascending));
+            }
         }
 
         private void UpdateItem(object sender, DataChangeEventArgs<T> e)
@@ -141,12 +166,6 @@ namespace Restore.Channel
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -154,5 +173,61 @@ namespace Restore.Channel
                 Detach();
             }
         }
+
+        private IOrder<T> _ordering;
+        public IOrder<T> OrderBy(Expression<Func<T, IComparable>> orderExpression)
+        {
+            _ordering = new Order<T>(orderExpression);
+            return _ordering;
+        }
+    }
+
+    public class Order<T> : IOrder<T>
+    {
+        private readonly Expression<Func<T, IComparable>> _orderExpression;
+        private readonly Func<T, T, int> _comparer;
+        private int _direction = 0;
+        private bool _ascending = true;
+
+        public Order(Expression<Func<T, IComparable>> orderExpression)
+        {
+            _orderExpression = orderExpression;
+            Func<T, IComparable> valueRetrieval = _orderExpression.Compile();
+            _comparer = (first, second) =>
+            {
+                var value1 = valueRetrieval(first);
+                var value2 = valueRetrieval(second);
+                var result = value1.CompareTo(value2);
+                Debug.WriteLine("{0} compared to {1} = {2}", value1, value2, result);
+                return result;
+            };
+        }
+
+        public IOrder<T> Asc()
+        {
+            _direction = 0;
+            return this;
+        }
+
+        public IOrder<T> Desc()
+        {
+            _direction = -1;
+            return this;
+        }
+
+        public bool Ascending => _direction == 0;
+
+        public Func<T, T, int> Comparer
+        {
+            get { return _comparer; }
+        }
+    }
+
+    public interface IOrder<T>
+    {
+        IOrder<T> Asc();
+        IOrder<T> Desc();
+        bool Ascending { get; }
+        Func<T, T, int> Comparer { get; }
     }
 }

@@ -80,6 +80,7 @@
     <Compile Include="Channel\SynchronizationStarted.cs" />
     <Compile Include="DataChangeEventArgs.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\ObservableExtensions.cs" />
     <Compile Include="ICrudEndpoint.cs" />
     <Compile Include="IDataChangeNotifier.cs" />
     <Compile Include="IEndpointConfiguration.cs" />

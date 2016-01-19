@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Restore.Channel;
 using Restore.Channel.Configuration;
 
@@ -8,9 +7,9 @@ namespace Restore.Tests.Channel
     [TestFixture]
     public class AttachedObservableFilterTest
     {
+        private readonly LocalTestResource _validTestResource = new LocalTestResource(1, 10) { Name = "Ferry de Boer" };
         private InMemoryCrudDataEndpoint<LocalTestResource, int> _dataSource;
         private AttachedObservableCollection<LocalTestResource> _observableUnderTest;
-        private LocalTestResource _validTestResource = new LocalTestResource(1, 10) { Name = "Ferry de Boer" };
 
         [SetUp]
         public void SetUpTest()
