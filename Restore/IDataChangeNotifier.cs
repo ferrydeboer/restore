@@ -21,8 +21,13 @@ namespace Restore
         /// Fired when an items is updated in a data source.
         /// </summary>
         /// <remarks>
+        /// <p>
         /// It is assumed that the updated item might be a different instance. Handlers should know how to deal
         /// with potentially identifying equality.
+        /// </p>
+        /// <p>
+        /// It is assumed that an update could relate to a item for which no ItemCreated notification was sent out prior.
+        /// </p>
         /// </remarks>
         event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
 

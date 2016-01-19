@@ -64,6 +64,7 @@
     <Compile Include="ChangeResolution\ChangeResolutionStepTest.cs" />
     <Compile Include="ChangeResolution\TestResourceTranslator.cs" />
     <Compile Include="Channel\AttachedObservableCollectionTest.cs" />
+    <Compile Include="Channel\AttachedObservableFilterTest.cs" />
     <Compile Include="Channel\OneWayPullChannelDrainTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTestBase.cs" />

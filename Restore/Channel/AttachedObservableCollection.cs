@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 
 namespace Restore.Channel
 {
     public class AttachedObservableCollection<T> : ObservableCollection<T>, IDisposable
-    { 
+    {
+        private readonly IEqualityComparer<T> _changeComparer;
         private readonly Action<Action> _defaultChangeDispatcher = act => act();
         private readonly Action<Action> _changeDispatcher;
-        private readonly IEqualityComparer<T> _changeComparer;
+        private Func<T, bool> _filterPredicate = _ => true;
+        
 
         /// <summary>
         /// It does not make sense to change a notifier once the collection is constructed. This will break assumptions made
@@ -18,9 +21,13 @@ namespace Restore.Channel
         /// </summary>
         private readonly IDataChangeNotifier<T> _contentChangeNotifier;
 
-
         public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier) 
             : this(contentChangeNotifier, null, null)
+        {
+        }
+
+        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier, IEqualityComparer<T> changeComparer) 
+            : this(contentChangeNotifier, changeComparer, null)
         {
         }
 
@@ -36,6 +43,50 @@ namespace Restore.Channel
             if (contentChangeNotifier == null) { throw new ArgumentNullException(nameof(contentChangeNotifier)); }
             _contentChangeNotifier = contentChangeNotifier;
             Attach(contentChangeNotifier);
+        }
+
+        public ObservableCollection<T> Where([NotNull] Func<T, bool> predicate)
+        {
+            if (predicate == null) { throw new ArgumentNullException(nameof(predicate)); }
+
+            _filterPredicate = predicate;
+            return this;
+        }
+
+        protected override void InsertItem(int index, T item)
+        {
+            Debug.WriteLine("InsertItem");
+            if (_filterPredicate(item))
+            {
+                base.InsertItem(index, item);
+            }
+        }
+
+        protected override void ClearItems()
+        {
+            Debug.WriteLine("ClearItems");
+            base.ClearItems();
+        }
+
+        protected override void MoveItem(int oldIndex, int newIndex)
+        {
+            Debug.WriteLine("MoveItem");
+            base.MoveItem(oldIndex, newIndex);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            Debug.WriteLine("RemoveItem");
+            base.RemoveItem(index);
+        }
+
+        protected override void SetItem(int index, T item)
+        {
+            Debug.WriteLine("SetItem");
+            if (_filterPredicate(item))
+            {
+                base.SetItem(index, item);
+            }
         }
 
         private void Attach([NotNull] IDataChangeNotifier<T> contentChangeNotifier)
@@ -66,7 +117,18 @@ namespace Restore.Channel
             {
                 // Has item, so replace.
                 var indexOfExisting = IndexOf(hasItem);
-                _changeDispatcher(() => SetItem(indexOfExisting, e.Item));
+                if (!_filterPredicate(hasItem))
+                {
+                    _changeDispatcher(() => RemoveItem(indexOfExisting));
+                }
+                else
+                {
+                    _changeDispatcher(() => SetItem(indexOfExisting, e.Item));
+                }
+            }
+            else
+            {
+                AddItem(sender, e);
             }
         }
 

@@ -10,7 +10,7 @@ namespace Restore.Tests
         {
             if (x == null && y != null) { return false; }
             if (x != null && y == null) { return false; }
-            if (x == null && y == null) { return false; }
+            if (x == null) { return true; }
             if (ReferenceEquals(x, y))  { return true; }
 
             return x.LocalId.Equals(y.LocalId);
