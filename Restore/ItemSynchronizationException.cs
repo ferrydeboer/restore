@@ -9,6 +9,10 @@ namespace Restore
         /// </summary>
         public object Item { get; }
 
+        public ItemSynchronizationException() 
+        {
+        }
+
         public ItemSynchronizationException(object item)
         {
             Item = item;

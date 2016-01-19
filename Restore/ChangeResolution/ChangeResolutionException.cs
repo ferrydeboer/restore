@@ -4,6 +4,10 @@ namespace Restore.ChangeResolution
 {
     public class ChangeResolutionException : ItemSynchronizationException
     {
+        public ChangeResolutionException() : base()
+        {
+        }
+
         public ChangeResolutionException(object item) : base(item)
         {
         }

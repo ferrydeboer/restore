@@ -8,7 +8,7 @@ using Restore.Extensions;
 
 namespace Restore.Matching
 {
-    public class ItemMatcher<T1, T2, TId, TSynch> : IEnumerable<TSynch> where TId : IEquatable<TId>
+    public class ItemMatcher<T1, T2, TId, TSynch> where TId : IEquatable<TId>
     {
         [NotNull] readonly TypeConfiguration<T1, TId> _t1Config;
         [NotNull] readonly TypeConfiguration<T2, TId> _t2Config;
@@ -80,43 +80,5 @@ namespace Restore.Matching
                 yield return new ItemMatch<T1, T2>(default(T1), item2);
             }
         }
-
-        public IEnumerator<TSynch> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
     }
-
-    public class MatchEnumerator<T1, T2, TId, TSynch> : IEnumerator<TSynch>
-    {
-        //private list
-        public bool MoveNext()
-        {
-            // MoveNext on T1 untill exhausted, then movenext on T2
-            throw new NotImplementedException();
-        }
-
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
-
-        public TSynch Current { get; }
-
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }

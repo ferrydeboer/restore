@@ -33,24 +33,33 @@ namespace Restore.Channel
             _contentChangeNotifier.ItemDeleted -= DeleteItem;
         }
 
-        private void AddItem(T item)
+        private void AddItem(object sender, DataChangeEventArgs<T> e)
         {
-            Add(item);
+            Add(e.Item);
         }
 
-        private void UpdateItem(T item)
+        private void UpdateItem(object sender, DataChangeEventArgs<T> e)
         {
             throw new NotImplementedException();
         }
 
-        private void DeleteItem(T item)
+        private void DeleteItem(object sender, DataChangeEventArgs<T> e)
         {
             throw new NotImplementedException();
         }
 
         public void Dispose()
         {
-            Detach();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Detach();
+            }
         }
     }
 }

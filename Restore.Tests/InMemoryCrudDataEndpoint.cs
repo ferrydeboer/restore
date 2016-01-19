@@ -84,23 +84,23 @@ namespace Restore.Tests
 
         }
 
-        public event Action<T> ItemCreated;
-        public event Action<T> ItemUpdated;
-        public event Action<T> ItemDeleted;
+        public event EventHandler<DataChangeEventArgs<T>> ItemCreated;
+        public event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
+        public event EventHandler<DataChangeEventArgs<T>> ItemDeleted;
 
         protected virtual void OnItemCreated(T obj)
         {
-            ItemCreated?.Invoke(obj);
+            ItemCreated?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Create));
         }
 
         protected virtual void OnItemUpdated(T obj)
         {
-            ItemUpdated?.Invoke(obj);
+            ItemUpdated?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Update));
         }
 
         protected virtual void OnItemDeleted(T obj)
         {
-            ItemDeleted?.Invoke(obj);
+            ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Update));
         }
     }
 }

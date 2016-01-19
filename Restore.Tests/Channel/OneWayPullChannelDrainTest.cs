@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using NUnit.Framework;
 using Restore.Channel;
 
@@ -65,9 +62,7 @@ namespace Restore.Tests.Channel
                 
             });
             
-            Debug.WriteLine("Draining");
-            _channelUnderTest.Drain(true);
-            Debug.WriteLine("Drain Called");
+            var bogus = _channelUnderTest.Drain(true);
 
             return taskCompletion.Task;
         }

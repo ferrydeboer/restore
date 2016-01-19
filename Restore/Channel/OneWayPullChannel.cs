@@ -11,7 +11,7 @@ using Restore.Extensions;
 
 namespace Restore.Channel
 {
-    public class OneWayPullChannel<T1, T2, TId, TSynch> : ISynchChannel<T1, T2, TSynch> where TId : IEquatable<TId>
+    public class OneWayPullChannel<T1, T2, TId, TSynch> : ISynchChannel<T1, T2, TSynch>, IDisposable where TId : IEquatable<TId>
     {
         [NotNull] private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
 
@@ -244,6 +244,21 @@ namespace Restore.Channel
         protected virtual void OnSynchronizationFinished(SynchronizationFinished eventArgs)
         {
             SynchronizationFinished?.Invoke(eventArgs);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _lockSemaphore.Dispose();
+                _lockSemaphore = null;
+            }
         }
     }
 }

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Restore.Matching
 {
@@ -11,7 +7,7 @@ namespace Restore.Matching
         where TId : IEquatable<TId>
     {
         private TCfg _config;
-        private readonly IList<T2> _relatedItems;
+        //private readonly IList<T2> _relatedItems;
 
         public ItemMatchingStep(TCfg config)
         {
