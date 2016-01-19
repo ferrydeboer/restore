@@ -84,7 +84,7 @@ namespace Restore.Extensions
             var index = 0;
 
             while (index < collection.Count /*call first to prevent expression from further evaluating and raise ArgumentOutOfRangeException*/
-                   && comparer(item, collection[index]) < 0)
+                   && comparer(item, collection[index]) > 0)
             {
                 index++;
             }

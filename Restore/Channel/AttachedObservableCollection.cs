@@ -129,7 +129,7 @@ namespace Restore.Channel
             }
             else
             {
-                _changeDispatcher(() => this.SortInsert(e.Item, _ordering.Comparer, !_ordering.Ascending));
+                _changeDispatcher(() => this.SortInsert(e.Item, _ordering.Comparer));
             }
         }
 
@@ -154,7 +154,7 @@ namespace Restore.Channel
                         // because with reference equals you're always comparing the item with itself, which
                         // then requires code to deal with as well.
                         // TODO: Dispatch
-                        RemoveAt(indexOfExisting);
+                        _changeDispatcher(() => RemoveAt(indexOfExisting));
                         AddItem(sender, e);
                     }
                     else
