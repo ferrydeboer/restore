@@ -15,6 +15,12 @@ namespace Restore
     /// <typeparam name="T">The type this endpoint stores.</typeparam>
     public interface ICrudEndpoint<T, TId> : IDataChangeNotifier<T> where TId : IEquatable<TId>
     {
+        /// <summary>
+        /// Create an item once. Calling this method twice with the same object instance should result
+        /// in a second instance of the same item with a new identifier.
+        /// </summary>
+        /// <param name="item">The item to save.</param>
+        /// <returns>The item resulting from the operation.</returns>
         T Create(T item);
         T Read(TId id);
         T Update(T item);

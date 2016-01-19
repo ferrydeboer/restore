@@ -1,31 +1,34 @@
 using System;
-using System.Dynamic;
 
 namespace Restore
 {
+    /// <summary>
+    /// An object that notifies about changes on a certain data source. A few assumptions are made about the
+    /// implementors of this object.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IDataChangeNotifier<T>
     {
+        /// <summary>
+        /// Fired when an items is created/added to a data source.
+        /// </summary>
+        /// <remarks>
+        /// It is assumed an item is only added once.
+        /// </remarks>
         event EventHandler<DataChangeEventArgs<T>> ItemCreated;
+
+        /// <summary>
+        /// Fired when an items is updated in a data source.
+        /// </summary>
+        /// <remarks>
+        /// It is assumed that the updated item might be a different instance. Handlers should know how to deal
+        /// with potentially identifying equality.
+        /// </remarks>
         event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
+
+        /// <summary>
+        /// Fired when an items is deleted from a data source.
+        /// </summary>
         event EventHandler<DataChangeEventArgs<T>> ItemDeleted;
-    }
-
-    public class DataChangeEventArgs<T> : EventArgs
-    {
-        public T Item { get; private set; }
-        public ChangeType Change { get; private set; }
-
-        public DataChangeEventArgs(T item, ChangeType change)
-        {
-            Item = item;
-            Change = change;
-        }
-    }
-
-    public enum ChangeType
-    {
-        Create,
-        Update,
-        Delete
     }
 }

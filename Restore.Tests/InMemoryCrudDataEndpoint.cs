@@ -9,12 +9,22 @@ namespace Restore.Tests
     public class InMemoryCrudDataEndpoint<T, TId> : ICrudEndpoint<T, TId> where TId : IEquatable<TId>
     {
         [NotNull] private readonly TypeConfiguration<T, TId> _typeConfig;
+        [NotNull] private readonly IEqualityComparer<T> _comparer;
         [NotNull] private readonly IDictionary<TId, T> _items = new Dictionary<TId, T>();
 
-        public InMemoryCrudDataEndpoint([NotNull] TypeConfiguration<T, TId> typeConfig, [NotNull] IDictionary<TId, T> items) : this(typeConfig)
+        public InMemoryCrudDataEndpoint(
+            [NotNull] TypeConfiguration<T, TId> typeConfig, 
+            IEqualityComparer<T> comparer, 
+            [NotNull] IDictionary<TId, T> items)
+            : this(typeConfig, comparer)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
             _items = items;
+        }
+
+        public InMemoryCrudDataEndpoint([NotNull] TypeConfiguration<T, TId> typeConfig, [NotNull] IDictionary<TId, T> items) 
+            : this(typeConfig, null, items)
+        {
         }
 
         public InMemoryCrudDataEndpoint(TypeConfiguration<T, TId> typeConfig, IEnumerable<T> items) 
@@ -22,14 +32,21 @@ namespace Restore.Tests
         {
         }
 
-        public InMemoryCrudDataEndpoint([NotNull] TypeConfiguration<T, TId> typeConfig)
+        public InMemoryCrudDataEndpoint([NotNull] TypeConfiguration<T, TId> typeConfig, IEqualityComparer<T> comparer) 
         {
             if (typeConfig == null) throw new ArgumentNullException(nameof(typeConfig));
             _typeConfig = typeConfig;
+            _comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
-        public T Create(T item)
+        public InMemoryCrudDataEndpoint([NotNull] TypeConfiguration<T, TId> typeConfig) 
+            : this(typeConfig, (IEqualityComparer<T>)null)
         {
+        }
+
+        public T Create([NotNull] T item)
+        {
+            if (item == null) {  throw new ArgumentNullException(nameof(item)); }
             if (_items.ContainsKey(_typeConfig.IdExtractor(item)))
             {
                 throw new ArgumentException("Item already exists");
@@ -60,7 +77,8 @@ namespace Restore.Tests
             // Just replace the instance if it exists.
             var itemId = _typeConfig.IdExtractor(item);
             var inlist = Read(itemId);
-            if (EqualityComparer<T>.Default.Equals(inlist, default(T)))
+            //if (EqualityComparer<T>.Default.Equals(inlist, default(T)))
+            if (!_comparer.Equals(inlist, default(T)))
             {
                 // found, no default value atleast.
                 _items[itemId] = item;
@@ -77,9 +95,9 @@ namespace Restore.Tests
         {
             if (_items.Remove(_typeConfig.IdExtractor(item)))
             {
+                OnItemDeleted(item);
                 return item;
             }
-            OnItemDeleted(item);
             return default(T);
 
         }
@@ -100,7 +118,7 @@ namespace Restore.Tests
 
         protected virtual void OnItemDeleted(T obj)
         {
-            ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Update));
+            ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Delete));
         }
     }
 }

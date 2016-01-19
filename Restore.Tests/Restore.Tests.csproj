@@ -63,11 +63,13 @@
     <Compile Include="ChangeDispatching\ChangeDispatchingStepTest.cs" />
     <Compile Include="ChangeResolution\ChangeResolutionStepTest.cs" />
     <Compile Include="ChangeResolution\TestResourceTranslator.cs" />
+    <Compile Include="Channel\AttachedObservableCollectionTest.cs" />
     <Compile Include="Channel\OneWayPullChannelDrainTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTestBase.cs" />
     <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
+    <Compile Include="LocalTestResourceIdComparer.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatchingStepTest.cs" />
     <Compile Include="TestAsyncDataEndpoint.cs" />
