@@ -9,7 +9,7 @@ namespace Restore.Tests.Channel
     {
         private AttachedObservableCollection<LocalTestResource> _observableUnderTest;
         private InMemoryCrudDataEndpoint<LocalTestResource, int> _dataSource;
-
+        private bool _hasDispatched;
         [SetUp]
         public void SetUpTest()
         {
@@ -17,7 +17,20 @@ namespace Restore.Tests.Channel
                 new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1));
             _observableUnderTest = new AttachedObservableCollection<LocalTestResource>(
                 _dataSource
-                , new LocalTestResourceIdComparer());
+                ,new LocalTestResourceIdComparer(),
+                act =>
+                {
+                    _observableUnderTest.CollectionChanged += _observableUnderTest_CollectionChanged;
+                    act();
+                    _observableUnderTest.CollectionChanged -= _observableUnderTest_CollectionChanged;
+
+                });
+            _hasDispatched = false;
+        }
+
+        private void _observableUnderTest_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            _hasDispatched = true;
         }
 
         [Test]
@@ -27,6 +40,13 @@ namespace Restore.Tests.Channel
             _dataSource.Create(addedItem);
 
             Assert.IsTrue(_observableUnderTest.Contains(addedItem));
+        }
+
+        [Test]
+        public void ShouldDispatchWhenAdded()
+        {
+            _dataSource.Create(new LocalTestResource(1));
+            Assert.IsTrue(_hasDispatched);
         }
 
         [Test]
@@ -43,6 +63,16 @@ namespace Restore.Tests.Channel
         }
 
         [Test]
+        public void ShouldDispatchWhenUpdated()
+        {
+            var localTestResource = new LocalTestResource(1);
+            _dataSource.Create(localTestResource);
+            _hasDispatched = false;
+            _dataSource.Update(localTestResource);
+            Assert.IsTrue(_hasDispatched);
+        }
+
+        [Test]
         public void ShouldDeleteItem()
         {
             var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
@@ -51,6 +81,17 @@ namespace Restore.Tests.Channel
 
             Assert.IsFalse(_observableUnderTest.Contains(addedItem));
             Assert.AreEqual(0, _observableUnderTest.Count);
+        }
+
+        [Test]
+        public void ShouldDispatchWhenDeleting()
+        {
+            var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
+            _dataSource.Create(addedItem);
+            _hasDispatched = false;
+            _dataSource.Delete(addedItem);
+
+            Assert.IsTrue(_hasDispatched);
         }
     }
 }

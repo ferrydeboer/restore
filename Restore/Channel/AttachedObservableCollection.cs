@@ -7,7 +7,9 @@ using JetBrains.Annotations;
 namespace Restore.Channel
 {
     public class AttachedObservableCollection<T> : ObservableCollection<T>, IDisposable
-    {
+    { 
+        private readonly Action<Action> _defaultChangeDispatcher = act => act();
+        private readonly Action<Action> _changeDispatcher;
         private readonly IEqualityComparer<T> _changeComparer;
 
         /// <summary>
@@ -16,13 +18,15 @@ namespace Restore.Channel
         /// </summary>
         private readonly IDataChangeNotifier<T> _contentChangeNotifier;
 
+
         public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier) 
-            : this(contentChangeNotifier, null)
+            : this(contentChangeNotifier, null, null)
         {
         }
 
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier, IEqualityComparer<T> changeComparer)
+        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier, IEqualityComparer<T> changeComparer, Action<Action> changeDispatcher)
         {
+            _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
             _changeComparer = changeComparer ?? EqualityComparer<T>.Default;
             Attach(contentChangeNotifier);
         }
@@ -50,7 +54,7 @@ namespace Restore.Channel
 
         private void AddItem(object sender, DataChangeEventArgs<T> e)
         {
-            Add(e.Item);
+            _changeDispatcher(() => Add(e.Item));
         }
 
         private void UpdateItem(object sender, DataChangeEventArgs<T> e)
@@ -62,7 +66,7 @@ namespace Restore.Channel
             {
                 // Has item, so replace.
                 var indexOfExisting = IndexOf(hasItem);
-                SetItem(indexOfExisting, e.Item);
+                _changeDispatcher(() => SetItem(indexOfExisting, e.Item));
             }
         }
 
@@ -71,7 +75,7 @@ namespace Restore.Channel
             var hasItem = this.FirstOrDefault(item => _changeComparer.Equals(item, e.Item));
             if (!_changeComparer.Equals(hasItem, default(T)))
             {
-                Remove(hasItem);
+                _changeDispatcher(() => Remove(hasItem));
             }
         }
 
