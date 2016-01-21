@@ -48,7 +48,7 @@ namespace Restore.Tests.ChangeDispatching
             catch (DispatchingException ex)
             {
                 Assert.AreEqual(raisedException, ex.InnerException);
-                Assert.AreEqual("Failed executing action TestAction on LocalTestResource - 1!", ex.Message);
+                Assert.AreEqual($"Failed executing action TestAction on {action.Applicant}!", ex.Message);
             }
         }
 

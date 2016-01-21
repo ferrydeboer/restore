@@ -33,7 +33,6 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldContainSynchedDataOnceFinished()
         {
-
             var finish = await WaitForSynchFinish();
             Assert.AreEqual(3, finish.ItemsProcessed);
             Assert.AreEqual(1, finish.ItemsSynchronized);

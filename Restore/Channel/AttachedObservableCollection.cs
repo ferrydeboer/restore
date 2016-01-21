@@ -39,6 +39,43 @@ namespace Restore.Channel
         private Func<T, bool> _filterPredicate = _ => true;
         private Order<T> _ordering;
 
+        /// <summary>
+        /// Main constructor.
+        /// </summary>
+        /// <param name="contentChangeNotifier">The notifier updating this collection.</param>
+        /// <param name="changeComparer">Possible equality comparer used to determine updated items already exist in the list or not.</param>
+        /// <param name="changeDispatcher">Possible callback used to dispatch content changes to ensure they are executed on the UI thread.</param>
+        public AttachedObservableCollection(
+            [NotNull] IDataChangeNotifier<T> contentChangeNotifier,
+            IEqualityComparer<T> changeComparer,
+            Action<Action> changeDispatcher)
+        {
+            if (contentChangeNotifier == null)
+            {
+                throw new ArgumentNullException(nameof(contentChangeNotifier));
+            }
+            _contentChangeNotifier = contentChangeNotifier;
+            Attach(contentChangeNotifier);
+            _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
+            _changeComparer = changeComparer ?? EqualityComparer<T>.Default;
+        }
+
+        public AttachedObservableCollection(
+            IEnumerable<T> collection,
+            [NotNull] IDataChangeNotifier<T> contentChangeNotifier,
+            IEqualityComparer<T> changeComparer,
+            Action<Action> changeDispatcher) : base(collection)
+        {
+            if (contentChangeNotifier == null)
+            {
+                throw new ArgumentNullException(nameof(contentChangeNotifier));
+            }
+            _contentChangeNotifier = contentChangeNotifier;
+            Attach(_contentChangeNotifier);
+            _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
+            _changeComparer = changeComparer ?? EqualityComparer<T>.Default;
+        }
+
         public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier)
             : this(contentChangeNotifier, null, null)
         {
@@ -50,29 +87,9 @@ namespace Restore.Channel
         {
         }
 
-        /// <summary>
-        /// Main constructor.
-        /// </summary>
-        /// <param name="contentChangeNotifier">The notifier updating this collection.</param>
-        /// <param name="changeComparer">Possible equality comparer used to determine updated items already exist in the list or not.</param>
-        /// <param name="changeDispatcher">Possible callback used to dispatch content changes to ensure they are executed on the UI thread.</param>
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier,
-            IEqualityComparer<T> changeComparer, Action<Action> changeDispatcher)
-        {
-            _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
-            _changeComparer = changeComparer ?? EqualityComparer<T>.Default;
-            Attach(contentChangeNotifier);
-        }
-
         public AttachedObservableCollection(IEnumerable<T> collection, IDataChangeNotifier<T> contentChangeNotifier)
-            : base(collection)
+            : this(collection, contentChangeNotifier, null, null)
         {
-            if (contentChangeNotifier == null)
-            {
-                throw new ArgumentNullException(nameof(contentChangeNotifier));
-            }
-            _contentChangeNotifier = contentChangeNotifier;
-            Attach(contentChangeNotifier);
         }
 
         public void Dispose()

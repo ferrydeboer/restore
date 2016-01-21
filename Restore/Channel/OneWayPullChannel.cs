@@ -26,10 +26,8 @@ namespace Restore.Channel
         [NotNull][ItemNotNull]
         private readonly IList<Action<TSynch>> _synchItemListeners = new List<Action<TSynch>>();
 
-        [NotNull]
-        private readonly ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>> _resolutionStep;
-        [NotNull]
-        private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
+        [NotNull] private readonly ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>> _resolutionStep;
+        [NotNull] private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
 
         private event Action<SynchronizationStarted> SynchronizationStart;
         private event Action<SynchronizationFinished> SynchronizationFinished;
@@ -124,69 +122,56 @@ namespace Restore.Channel
 
         protected async Task Synchronize(IEnumerable<T1> input)
         {
-            // Prevent synchronization of this channel to run on multiple threads.
-/*            if (await _lockSemaphore.WaitAsync(0))
+            OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
+
+            // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
+
+            // TODO: Awaiting the data source(s) should become part of the pipeline!
+            // This is hard however, and not neccesarily relevant since all should occur on another thread.
+            // Input    -> T1 Data Source.
+            // Output   -> SynchronizationResults.
+            // Refactor, do this first, only do remaining work in thread.
+            var t1Data = input;
+            var t2Data = await _t2DataSource().ConfigureAwait(false);
+            var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
+
+            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
             {
-                await Task.Delay(1000);
-                //_isSynchronizing = true;
-                try
-                {*/
-                    OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
+                listener(item);
+                return item;
+            }));
 
-                    // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
+            int itemsProcessed = 0;
+            var endPipeline = pipeline
+                .Do(_ => itemsProcessed++)
+                .ResolveChange(_resolutionStep)
+                // Filter out NullSynchActions, which don't have an applicant instance.
+                .Where(action => action.Applicant != null)
+                .DispatchChange(_dispatchStep);
 
-                    // TODO: Awaiting the data source(s) should become part of the pipeline!
-                    // This is hard however, and not neccesarily relevant since all should occur on another thread.
-                    // Input    -> T1 Data Source.
-                    // Output   -> SynchronizationResults.
-                    // Refactor, do this first, only do remaining work in thread.
-                    var t1Data = input;
-                    var t2Data = await _t2DataSource().ConfigureAwait(false);
-                    var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
-
-                    pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
-                    {
-                        listener(item);
-                        return item;
-                    }));
-
-                    int itemsProcessed = 0;
-                    var endPipeline = pipeline
-                        .Do(_ => itemsProcessed++)
-                        .ResolveChange(_resolutionStep)
-                        // Filter out NullSynchActions, which don't have an applicant instance.
-                        .Where(action => action.Applicant != null)
-                        .DispatchChange(_dispatchStep);
-
-                    // Pump items out at the end of the sequence. In the end is probably responsibility of separate
-                    // class.
-                    int itemsSynchronized = 0;
-                    try
-                    {
-                        foreach (SynchronizationResult result in endPipeline)
-                        {
-                            if (!result)
-                            {
-                                Debug.WriteLine("Failed executing an item.");
-                            }
-                            else
-                            {
-                                itemsSynchronized++;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
-                    }
-                    OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
-/*                }
-                finally
+            // Pump items out at the end of the sequence. In the end is probably responsibility of separate
+            // class.
+            int itemsSynchronized = 0;
+            try
+            {
+                foreach (SynchronizationResult result in endPipeline)
                 {
-                    _isSynchronizing = false;
-                    _lockSemaphore.Release();
+                    if (!result)
+                    {
+                        Debug.WriteLine("Failed executing an item.");
+                    }
+                    else
+                    {
+                        itemsSynchronized++;
+                    }
                 }
-            }*/
+            }
+            catch (Exception ex)
+            {
+                throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+            }
+            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
+
         }
 
         private async Task LockSync(Func<Task> mechanism)
@@ -195,8 +180,6 @@ namespace Restore.Channel
             if (await _lockSemaphore.WaitAsync(0))
             {
                 _isSynchronizing = true;
-                await Task.Delay(1000);
-                //_isSynchronizing = true;
                 try
                 {
                     await mechanism();

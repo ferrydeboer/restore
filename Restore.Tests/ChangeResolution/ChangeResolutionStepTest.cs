@@ -128,7 +128,7 @@ namespace Restore.Tests.ChangeResolution
             }
             catch(ChangeResolutionException ex)
             {
-                Assert.AreEqual("Failed to resolve change for LocalTestResource - 1", ex.Message);
+                Assert.AreEqual(string.Format("Failed to resolve change for {0}", ex.Item), ex.Message);
                 Assert.AreEqual(exception, ex.InnerException);
                 Assert.AreEqual(localTestResource, ex.Item);
             }

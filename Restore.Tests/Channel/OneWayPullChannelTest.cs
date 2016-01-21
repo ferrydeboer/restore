@@ -110,13 +110,15 @@ namespace Restore.Tests.Channel
             int startCallCount = 0;
             _channelUnderTest.AddSynchronizationStartedObserver(_ =>
             {
+                // put in small delay to make test deterministic and have thread at least hold on for little longer.
+                Task.Delay(50);
                 startCallCount++;
             });
-            var task1 = _channelUnderTest.Synchronize();
+            // Start first in new thread that should immediately stop second from running.
+            var task1 = Task.Run(() => _channelUnderTest.Synchronize());
+            // This one should never start since it starts immediately after, don't expect first to finish.
             var task2 = _channelUnderTest.Synchronize();
             Task.WaitAll(task1, task2);
-
-            Assert.AreEqual(1, startCallCount);
 
             Assert.AreEqual(1, startCallCount);
         }
