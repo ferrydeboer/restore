@@ -98,26 +98,11 @@ namespace Restore.Tests.Channel
             Assert.IsFalse(_observableUnderTest.Contains(_biggest));
             Assert.AreEqual(newBiggest, _observableUnderTest[0]);
         }
-/*
+
         [Test]
-        public void ShouldAddEqualItemBeforeOtherWhenAscending()
+        public void ShouldAddEqualItemAfterOtherWhenAscending()
         {
             _observableUnderTest.OrderBy(ltr => ltr.Name).Asc();
-
-            _dateSource.Create(_smallest);
-            _dateSource.Create(_bigger);
-            _dateSource.Create(_biggest);
-
-            var smallest2 = new LocalTestResource(100) { Name = "Anthony" };
-            _dateSource.Create(smallest2);
-
-            Assert.AreEqual(smallest2, _observableUnderTest[0]);
-        }
-
-        [Test]
-        public void ShouldAddEqualItemAfterOtherWhenDesc()
-        {
-            _observableUnderTest.OrderBy(ltr => ltr.Name).Desc();
 
             _dateSource.Create(_smallest);
             _dateSource.Create(_bigger);
@@ -128,6 +113,20 @@ namespace Restore.Tests.Channel
 
             Assert.AreEqual(biggest2, _observableUnderTest[3]);
         }
- */
+
+        [Test]
+        public void ShouldAddEqualItemBeforeOtherWhenDesc()
+        {
+            _observableUnderTest.OrderBy(ltr => ltr.Name).Desc();
+
+            _dateSource.Create(_smallest);
+            _dateSource.Create(_bigger);
+            _dateSource.Create(_biggest);
+
+            var biggest2 = new LocalTestResource(200) { Name = "Zack" };
+            _dateSource.Create(biggest2);
+
+            Assert.AreEqual(biggest2, _observableUnderTest[0]);
+        }
     }
 }

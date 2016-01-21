@@ -209,14 +209,18 @@ namespace Restore.Channel
                     var value1 = valueRetrieval(first);
                     var value2 = valueRetrieval(second);
                     var result = value1.CompareTo(value2) * _direction;
-                    Debug.WriteLine("{0} compared to {1} = {2}", value1, value2, result);
+                    // Introduce different behaviour based on order direction.
+                    if (result == 0)
+                    {
+                        result = _direction;
+                    }
                     return result;
                 };
             }
 
             public IOrder<T> Asc()
             {
-                _direction = 0;
+                _direction = 1;
                 return this;
             }
 
@@ -226,7 +230,7 @@ namespace Restore.Channel
                 return this;
             }
 
-            public bool Ascending => _direction == 0;
+            public bool Ascending => _direction == 1;
 
             public Func<T, T, int> Comparer { get; }
         }
