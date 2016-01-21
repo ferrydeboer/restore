@@ -10,21 +10,22 @@ namespace Restore.Tests
 {
     public class TestAsyncDataEndpoint<T> : IAsyncDataEndpoint<T>
     {
+        public event EventHandler<DataLoadedEventArgs<T>> DataLoaded;
+
         public TestAsyncDataEndpoint(string name)
         {
             Name = name;
         }
 
-        public TestAsyncDataEndpoint(string name, List<T> data) : this(name)
+        public TestAsyncDataEndpoint(string name, List<T> data)
+            : this(name)
         {
             Data = data;
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public event EventHandler<DataLoadedEventArgs<T>> DataLoaded;
-
-        [NotNull] public List<T> Data { get; private set; }
+        [NotNull] public List<T> Data { get; }
 
         public Task<IEnumerable<T>> GetAllAsync()
         {
@@ -41,19 +42,6 @@ namespace Restore.Tests
 
             // Best
             return Task.FromResult(Data.AsEnumerable());
-            
-            // Better
-            /*
-            return new TaskFactory().StartNew<IEnumerable<T>>(() =>
-            {
-                if (Name == "Remote")
-                {
-                    throw new Exception("This is not catchable in the event handler that call this.");
-                }
-                Debug.WriteLine($"Returning data from {Name}");
-                return Data;
-            });
-            */
         }
 
         protected virtual void OnDataLoaded(DataLoadedEventArgs<T> e)

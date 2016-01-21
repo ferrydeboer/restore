@@ -7,7 +7,8 @@ namespace Restore.Tests
             Name = name;
         }
 
-        public RemoteTestResource(int id, string name) : this(name)
+        public RemoteTestResource(int id, string name)
+            : this(name)
         {
             Id = id;
         }

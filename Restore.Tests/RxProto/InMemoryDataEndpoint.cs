@@ -7,21 +7,47 @@ using Restore.RxProto;
 namespace Restore.Tests.RxProto
 {
     /// <summary>
-    /// Simple in memory endpoint that serves testing purposes.
+    ///     Simple in memory endpoint that serves testing purposes.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class InMemoryDataEndpoint<T> : DataEndpoint<T>
     {
-        readonly IDictionary<Identifier, T> _items = new Dictionary<Identifier, T>();
-        readonly Func<T, Identifier> _idResolver;
-        readonly IList<IObserver<T>> _observers = new List<IObserver<T>>();
-        readonly List<IObserver<T>> _deleteObservers = new List<IObserver<T>>();
+        private readonly List<IObserver<T>> _deleteObservers = new List<IObserver<T>>();
+        private readonly Func<T, Identifier> _idResolver;
+        private readonly IDictionary<Identifier, T> _items = new Dictionary<Identifier, T>();
+        private readonly IList<IObserver<T>> _observers = new List<IObserver<T>>();
+
         // Should be made a constructor argument or built using factory method.
-
-
         public InMemoryDataEndpoint(Func<T, Identifier> idResolver)
         {
             _idResolver = idResolver;
+        }
+
+        public override Func<T, Identifier> IdentityResolver => _idResolver;
+
+        public override IObservable<T> ResourceChanged
+        {
+            get
+            {
+                return Observable.Create<T>(
+                    o =>
+                    {
+                        _observers.Add(o);
+                        return () => { _observers.Remove(o); };
+                    });
+            }
+        }
+
+        public IObservable<T> ResourceDeleted
+        {
+            get
+            {
+                return Observable.Create<T>(
+                    o =>
+                    {
+                        _deleteObservers.Add(o);
+                        return () => { _deleteObservers.Remove(o); };
+                    });
+            }
         }
 
         public override void Update(T resource)
@@ -39,11 +65,11 @@ namespace Restore.Tests.RxProto
             if (_items.ContainsKey(id))
             {
                 _items[id] = resource;
-            }
-            else
+            } else
             {
                 _items.Add(id, resource);
             }
+
             OnResourceChanged(resource);
         }
 
@@ -55,6 +81,7 @@ namespace Restore.Tests.RxProto
                 _items.Remove(id);
                 OnDelete(resource);
             }
+
             OnResourceChanged(resource);
         }
 
@@ -73,8 +100,6 @@ namespace Restore.Tests.RxProto
             return _items.Values;
         }
 
-        public override Func<T, Identifier> IdentityResolver => _idResolver;
-
         public void OnResourceChanged(T resource)
         {
             foreach (var observer in _observers)
@@ -83,41 +108,11 @@ namespace Restore.Tests.RxProto
             }
         }
 
-        public override IObservable<T> ResourceChanged
-        {
-            get
-            {
-                return Observable.Create<T>(o =>
-                {
-                    _observers.Add(o);
-                    return () =>
-                    {
-                        _observers.Remove(o);
-                    };
-                });
-            }
-        }
-
         private void OnDelete(T resource)
         {
             foreach (var observer in _deleteObservers)
             {
                 observer.OnNext(resource);
-            }
-        }
-
-        public IObservable<T> ResourceDeleted
-        {
-            get
-            {
-                return Observable.Create<T>(o =>
-                {
-                    _deleteObservers.Add(o);
-                    return () =>
-                    {
-                        _deleteObservers.Remove(o);
-                    };
-                });
             }
         }
     }

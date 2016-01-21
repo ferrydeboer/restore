@@ -230,16 +230,16 @@ namespace Restore.Channel
             return _ordering;
         }
 
-        private class Order<T> : IOrder<T>
+        private class Order<U> : IOrder<U>
         {
-            private readonly Expression<Func<T, IComparable>> _orderExpression;
+            private readonly Expression<Func<U, IComparable>> _orderExpression;
             private int _direction;
             private bool _ascending = true;
 
-            public Order(Expression<Func<T, IComparable>> orderExpression)
+            public Order(Expression<Func<U, IComparable>> orderExpression)
             {
                 _orderExpression = orderExpression;
-                Func<T, IComparable> valueRetrieval = _orderExpression.Compile();
+                Func<U, IComparable> valueRetrieval = _orderExpression.Compile();
                 Comparer = (first, second) =>
                 {
                     var value1 = valueRetrieval(first);
@@ -254,13 +254,13 @@ namespace Restore.Channel
                 };
             }
 
-            public IOrder<T> Asc()
+            public IOrder<U> Asc()
             {
                 _direction = 1;
                 return this;
             }
 
-            public IOrder<T> Desc()
+            public IOrder<U> Desc()
             {
                 _direction = -1;
                 return this;
@@ -268,7 +268,7 @@ namespace Restore.Channel
 
             public bool Ascending => _direction == 1;
 
-            public Func<T, T, int> Comparer { get; }
+            public Func<U, U, int> Comparer { get; }
         }
     }
 

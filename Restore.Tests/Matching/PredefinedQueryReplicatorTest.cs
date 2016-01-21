@@ -24,7 +24,9 @@ namespace Restore.Tests.Matching
                     new RemoteTestResource(2, "Remote 2"),
                     new RemoteTestResource(3, "Remote 3")
                 });
-            var replicator = new PredefinedQueryReplicatorAsync<LocalTestResource, RemoteTestResource>(localDataEndpoint, remoteDataEndpoint,
+            var replicator = new PredefinedQueryReplicatorAsync<LocalTestResource, RemoteTestResource>(
+                localDataEndpoint, 
+                remoteDataEndpoint,
                 async rde =>
                 {
                     Debug.WriteLine("Loading remote data!");
@@ -43,7 +45,6 @@ namespace Restore.Tests.Matching
         [Test]
         public void ShouldWrapExceptionOnReplicationFailure()
         {
-            
         }
     }
 }

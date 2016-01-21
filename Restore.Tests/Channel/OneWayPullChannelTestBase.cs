@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -9,7 +10,7 @@ using Restore.Tests.ChangeResolution;
 
 namespace Restore.Tests.Channel
 {
-    public class OneWayPullChannelTestBase
+    public class OneWayPullChannelTestBase : IDisposable
     {
         protected OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelUnderTest;
         protected InMemoryCrudDataEndpoint<LocalTestResource, int> _localEndpoint;
@@ -45,17 +46,22 @@ namespace Restore.Tests.Channel
                 {
                     var synchItem = item.Result1;
                     cfg.TypeTranslator.TranslateBackward(item.Result2, ref synchItem);
+
                     // Now the translate decides wether a new item has to be created, but the decision is there anyway because of the Create.
                     cfg.Type1EndpointConfiguration.Endpoint.Create(synchItem);
                     return new SynchronizationResult(true);
-                }
-                ));
+                }));
 
             //var t2epConfig = new EndpointConfiguration()
             _channelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 _channelConfig,
                 () => Task.FromResult(Enumerable.AsEnumerable<LocalTestResource>(_localEndpoint.ReadAll())),
                 () => Task.FromResult(_remoteEndpoint.ReadAll().AsEnumerable()));
+        }
+
+        public void Dispose()
+        {
+            _channelUnderTest.Dispose();
         }
     }
 }

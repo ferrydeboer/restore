@@ -82,12 +82,11 @@ namespace Restore.Tests.ChangeResolution
                 new LocalTestResource(1)
             };
             var pipeline = _resolutionStepUnderTest.Compose(compositionSource);
-
             foreach (var synchronizationAction in pipeline)
             {
                 Debug.WriteLine(synchronizationAction.Applicant);
             }
-            //var drained = pipeline.ToList();
+
             Assert.AreEqual(compositionSource[0], isCalled);
         }
 
@@ -126,7 +125,7 @@ namespace Restore.Tests.ChangeResolution
                 _resolutionStepUnderTest.Resolve(localTestResource);
                 Assert.Fail("Expecting ChangeResolutionException");
             }
-            catch(ChangeResolutionException ex)
+            catch (ChangeResolutionException ex)
             {
                 Assert.AreEqual(string.Format("Failed to resolve change for {0}", ex.Item), ex.Message);
                 Assert.AreEqual(exception, ex.InnerException);

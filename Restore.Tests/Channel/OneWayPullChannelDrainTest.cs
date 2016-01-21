@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -11,23 +10,32 @@ namespace Restore.Tests.Channel
     [TestFixture]
     public class OneWayPullChannelDrainTest : OneWayPullChannelTestBase
     {
-        [Test]
-        public async Task ShouldNoStartSynchronizationWhenConditionFalse()
+        public Task<SynchronizationFinished> WaitForSynchFinish(
+            Action<ObservableCollection<LocalTestResource>> resultAssertion = null)
         {
-            bool hasSynchronized = false;
-            _channelUnderTest.AddSynchronizationStartedObserver(_ => hasSynchronized = true);
-            await _channelUnderTest.Drain(false);
+            var taskCompletion = new TaskCompletionSource<SynchronizationFinished>();
+            _channelUnderTest.AddSynchronizationFinishedObserver(finish => { taskCompletion.SetResult(finish); });
 
-            Assert.IsFalse(hasSynchronized);
+            var bogus = _channelUnderTest.Drain(true);
+
+            return taskCompletion.Task;
         }
-        
-        [Test]
-        public async Task ShouldReturnOnlyLocalData()
-        {
-            var result = await _channelUnderTest.Drain(false);
 
-            Assert.AreEqual(TestData.LocalResults[0], result[0]);
-            Assert.AreEqual(TestData.LocalResults[1], result[1]);
+        [Test]
+        public async Task ShouldContainsSynchedDataInReturnedObservable()
+        {
+            var synchedResult = await _channelUnderTest.Drain(true);
+
+            // Don't know a better way of waiting till full synch completion.
+            while (_channelUnderTest.IsSynchronizing)
+            {
+                await Task.Delay(500);
+            }
+
+            var localTestResource =
+                synchedResult.FirstOrDefault(ltr => ltr.CorrelationId.HasValue && ltr.CorrelationId == 3);
+            Assert.AreEqual("Only Remote 3", localTestResource.Name);
+            synchedResult.Dispose();
         }
 
         [Test]
@@ -39,31 +47,22 @@ namespace Restore.Tests.Channel
         }
 
         [Test]
-        public async Task ShouldContainsSynchedDataInReturnedObservable()
+        public async Task ShouldNoStartSynchronizationWhenConditionFalse()
         {
-            var synchedResult = await _channelUnderTest.Drain(true);
-            // Don't know a better way of waiting till full synch completion.
-            while (_channelUnderTest.IsSynchronizing)
-            {
-                await Task.Delay(500);
-            }
-            var localTestResource = synchedResult.FirstOrDefault(ltr => ltr.CorrelationId.HasValue && ltr.CorrelationId == 3);
-            Assert.AreEqual("Only Remote 3", localTestResource.Name);
-            synchedResult.Dispose();
+            var hasSynchronized = false;
+            _channelUnderTest.AddSynchronizationStartedObserver(_ => hasSynchronized = true);
+            await _channelUnderTest.Drain(false);
+
+            Assert.IsFalse(hasSynchronized);
         }
 
-        public Task<SynchronizationFinished> WaitForSynchFinish(Action<ObservableCollection<LocalTestResource>> resultAssertion = null)
+        [Test]
+        public async Task ShouldReturnOnlyLocalData()
         {
-            TaskCompletionSource<SynchronizationFinished> taskCompletion = new TaskCompletionSource<SynchronizationFinished>();
-            _channelUnderTest.AddSynchronizationFinishedObserver(finish =>
-            {
-                taskCompletion.SetResult(finish);
-                
-            });
-            
-            var bogus = _channelUnderTest.Drain(true);
+            var result = await _channelUnderTest.Drain(false);
 
-            return taskCompletion.Task;
+            Assert.AreEqual(TestData.LocalResults[0], result[0]);
+            Assert.AreEqual(TestData.LocalResults[1], result[1]);
         }
     }
 }

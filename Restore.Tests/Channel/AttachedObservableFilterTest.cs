@@ -1,11 +1,12 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Restore.Channel;
 using Restore.Channel.Configuration;
 
 namespace Restore.Tests.Channel
 {
     [TestFixture]
-    public class AttachedObservableFilterTest
+    public class AttachedObservableFilterTest : IDisposable
     {
         private readonly LocalTestResource _validTestResource = new LocalTestResource(1, 10) { Name = "Ferry de Boer" };
         private InMemoryCrudDataEndpoint<LocalTestResource, int> _dataSource;
@@ -45,6 +46,11 @@ namespace Restore.Tests.Channel
             localTestResource.Name = "Dirk Drama";
             _dataSource.Update(localTestResource);
             Assert.AreEqual(0, _observableUnderTest.Count);
+        }
+
+        public void Dispose()
+        {
+            _observableUnderTest.Dispose();
         }
     }
 }

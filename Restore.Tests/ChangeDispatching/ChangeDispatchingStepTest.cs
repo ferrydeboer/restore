@@ -19,8 +19,10 @@ namespace Restore.Tests.ChangeDispatching
         {
             _stepUnderTest = new ChangeDispatchingStep<LocalTestResource>();
             _testActionResult = new SynchronizationResult(true);
-            _testAction = new SynchronizationAction<LocalTestResource, string>("bogus",
-                (resource, s) => _testActionResult, new LocalTestResource(1));
+            _testAction = new SynchronizationAction<LocalTestResource, string>(
+                "bogus",
+                (resource, s) => _testActionResult,
+                new LocalTestResource(1));
         }
 
         [Test]

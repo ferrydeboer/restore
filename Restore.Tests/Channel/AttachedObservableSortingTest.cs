@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Restore.Channel;
 using Restore.Channel.Configuration;
@@ -6,7 +7,7 @@ using Restore.Channel.Configuration;
 namespace Restore.Tests.Channel
 {
     [TestFixture]
-    public class AttachedObservableSortingTest
+    public class AttachedObservableSortingTest : IDisposable
     {
         private AttachedObservableCollection<LocalTestResource> _observableUnderTest;
 
@@ -14,7 +15,7 @@ namespace Restore.Tests.Channel
         private LocalTestResource _smallest;
         private LocalTestResource _bigger;
         private LocalTestResource _biggest;
-        
+
         [SetUp]
         public void SetUpTest()
         {
@@ -33,7 +34,7 @@ namespace Restore.Tests.Channel
         public void ShouldAddBeforeItemOnCreateIfSmallerOnAscending()
         {
             _observableUnderTest.OrderBy(ltr => ltr.Name).Asc();
-            
+
             _dateSource.Create(_bigger);
             _dateSource.Create(_smallest);
 
@@ -48,7 +49,7 @@ namespace Restore.Tests.Channel
             _dateSource.Create(_smallest);
             _dateSource.Create(_bigger);
             _dateSource.Create(_biggest);
-            
+
             Assert.AreEqual(_biggest, _observableUnderTest[0]);
             Assert.AreEqual(_smallest, _observableUnderTest[2]);
         }
@@ -76,7 +77,7 @@ namespace Restore.Tests.Channel
             _dateSource.Create(_biggest);
             _dateSource.Create(_smallest);
             _dateSource.Create(_bigger);
-            
+
             _biggest.Name = "Aaron";
             _dateSource.Update(_biggest);
 
@@ -127,6 +128,11 @@ namespace Restore.Tests.Channel
             _dateSource.Create(biggest2);
 
             Assert.AreEqual(biggest2, _observableUnderTest[0]);
+        }
+
+        public void Dispose()
+        {
+            _observableUnderTest.Dispose();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Restore.Tests
 
         public int GetHashCode([NotNull] LocalTestResource obj)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
 
             return obj.LocalId.GetHashCode();
         }

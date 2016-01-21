@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Specialized;
+using NUnit.Framework;
 using Restore.Channel;
 using Restore.Channel.Configuration;
 
@@ -25,25 +26,19 @@ namespace Restore.Tests.Channel
         {
             _observableUnderTest = new AttachedObservableCollection<LocalTestResource>(
                 _dataSource
-                , new LocalTestResourceIdComparer(),
-                act =>
+                , new LocalTestResourceIdComparer()
+                , act =>
                 {
-                    _observableUnderTest.CollectionChanged += _observableUnderTest_CollectionChanged;
+                    _observableUnderTest.CollectionChanged += ObservableUnderTest_CollectionChanged;
                     act();
-                    _observableUnderTest.CollectionChanged -= _observableUnderTest_CollectionChanged;
+                    _observableUnderTest.CollectionChanged -= ObservableUnderTest_CollectionChanged;
                 });
-        }
-
-        private void _observableUnderTest_CollectionChanged(object sender,
-            System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            _hasDispatched = true;
         }
 
         [Test]
         public void ShouldAddItemWhenNotInCollection()
         {
-            var addedItem = new LocalTestResource(1, 10) {Name = "TestResource"};
+            var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
             _dataSource.Create(addedItem);
 
             Assert.IsTrue(_observableUnderTest.Contains(addedItem));
@@ -59,9 +54,9 @@ namespace Restore.Tests.Channel
         [Test]
         public void ShouldSwapInstanceWhenUpdated()
         {
-            var addedItem = new LocalTestResource(1, 10) {Name = "TestResource"};
+            var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
             _dataSource.Create(addedItem);
-            var updatedItem = new LocalTestResource(1, 10) {Name = "Updated TestResource"};
+            var updatedItem = new LocalTestResource(1, 10) { Name = "Updated TestResource" };
             _dataSource.Update(updatedItem);
 
             Assert.IsFalse(_observableUnderTest.Contains(addedItem));
@@ -97,7 +92,7 @@ namespace Restore.Tests.Channel
         [Test]
         public void ShouldDeleteItem()
         {
-            var addedItem = new LocalTestResource(1, 10) {Name = "TestResource"};
+            var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
             _dataSource.Create(addedItem);
             _dataSource.Delete(addedItem);
 
@@ -108,12 +103,17 @@ namespace Restore.Tests.Channel
         [Test]
         public void ShouldDispatchWhenDeleting()
         {
-            var addedItem = new LocalTestResource(1, 10) {Name = "TestResource"};
+            var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
             _dataSource.Create(addedItem);
             _hasDispatched = false;
             _dataSource.Delete(addedItem);
 
             Assert.IsTrue(_hasDispatched);
+        }
+
+        private void ObservableUnderTest_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            _hasDispatched = true;
         }
     }
 }

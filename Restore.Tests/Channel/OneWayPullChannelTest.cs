@@ -17,7 +17,6 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldSynchNewDataFromRemote()
         {
-            //channelUnderTest.SynchStarted 
             // First just make a channel that we can call synch on.
             await _channelUnderTest.Synchronize();
 
@@ -62,7 +61,7 @@ namespace Restore.Tests.Channel
             catch (ItemSynchronizationException ex)
             {
                 // For step specific errors the steps will assign the item. Whenever some kind of exception
-                // occurs where it's not catched by a step, the actual item in the pipeline is unknown. 
+                // occurs where it's not catched by a step, the actual item in the pipeline is unknown.
                 // So for now we accept it's null.
                 Assert.IsNull(ex.Item);
                 Assert.AreEqual("Synchronization of an item failed for an unknown reason.", ex.Message);
@@ -114,8 +113,10 @@ namespace Restore.Tests.Channel
                 Task.Delay(50);
                 startCallCount++;
             });
+
             // Start first in new thread that should immediately stop second from running.
             var task1 = Task.Run(() => _channelUnderTest.Synchronize());
+
             // This one should never start since it starts immediately after, don't expect first to finish.
             var task2 = _channelUnderTest.Synchronize();
             Task.WaitAll(task1, task2);

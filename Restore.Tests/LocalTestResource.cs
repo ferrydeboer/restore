@@ -4,8 +4,8 @@ namespace Restore.Tests
 {
     public class LocalTestResource
     {
-
-        public LocalTestResource(int correlationId, int localId) : this(localId)
+        public LocalTestResource(int correlationId, int localId)
+            : this(localId)
         {
             CorrelationId = correlationId;
         }
