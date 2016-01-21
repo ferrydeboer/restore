@@ -10,6 +10,19 @@ using Restore.Extensions;
 // TODO: Probably better of in another namespace since now UI concerns are coupling on lower level namespaces.
 namespace Restore.Channel
 {
+    /// <summary>
+    /// <p>
+    /// Observable collection that updates based on incoming changes from an <see cref="IDataChangeNotifier{T}"/> given
+    /// defined filtering and sorting behaviour. For this reason it implements IDisposable so it allows detaching from
+    /// the notifier once not needed any longer.
+    /// </p>
+    /// <p>
+    /// Public change methods are however not overridable. This currently implies
+    /// that sorting does not work when using public API. Collection is currently intended only to be used a read only connection
+    /// thus it should be exposed through an interface.
+    /// </p>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class AttachedObservableCollection<T> : ObservableCollection<T>, IDisposable
     {
         private readonly IEqualityComparer<T> _changeComparer;
@@ -22,7 +35,9 @@ namespace Restore.Channel
         private readonly IDataChangeNotifier<T> _contentChangeNotifier;
 
         private readonly Action<Action> _defaultChangeDispatcher = act => act();
+
         private Func<T, bool> _filterPredicate = _ => true;
+        private Order<T> _ordering;
 
         public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier)
             : this(contentChangeNotifier, null, null)
@@ -35,6 +50,12 @@ namespace Restore.Channel
         {
         }
 
+        /// <summary>
+        /// Main constructor.
+        /// </summary>
+        /// <param name="contentChangeNotifier">The notifier updating this collection.</param>
+        /// <param name="changeComparer">Possible equality comparer used to determine updated items already exist in the list or not.</param>
+        /// <param name="changeDispatcher">Possible callback used to dispatch content changes to ensure they are executed on the UI thread.</param>
         public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier,
             IEqualityComparer<T> changeComparer, Action<Action> changeDispatcher)
         {
@@ -153,7 +174,6 @@ namespace Restore.Channel
                         // Simply remove the item and add it again at the right location. This is far simpler
                         // because with reference equals you're always comparing the item with itself, which
                         // then requires code to deal with as well.
-                        // TODO: Dispatch
                         _changeDispatcher(() => RemoveAt(indexOfExisting));
                         AddItem(sender, e);
                     }
@@ -187,7 +207,6 @@ namespace Restore.Channel
             }
         }
 
-        private IOrder<T> _ordering;
         public IOrder<T> OrderBy(Expression<Func<T, IComparable>> orderExpression)
         {
             _ordering = new Order<T>(orderExpression);
@@ -240,7 +259,5 @@ namespace Restore.Channel
     {
         IOrder<T> Asc();
         IOrder<T> Desc();
-        bool Ascending { get; }
-        Func<T, T, int> Comparer { get; }
     }
 }
