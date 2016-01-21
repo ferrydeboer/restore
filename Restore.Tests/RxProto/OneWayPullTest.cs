@@ -12,9 +12,9 @@ namespace Restore.Tests.RxProto
          * Source: REST API
          * Targer: Local DB
          */
-
         // Scenarios:
         // - New item from source to target
+
         [Test]
         public void ShouldAddItemToTarget()
         {
@@ -24,7 +24,6 @@ namespace Restore.Tests.RxProto
             testSource.Create(testResource);
             testTarget.AddSyncAction((e,r) => e.Get(e.IdentityResolver(r)) == null, (e, r) => e.Create(r), "Create");
             var testChannel = new SynchronizationChannel<TestResource>(testSource, testTarget, true);
-            
             testChannel.Open();
 
             Assert.IsNotNull(testTarget.Get(1));

@@ -8,10 +8,10 @@ namespace Restore.Tests.RxProto
     public class OneWayPushTests
     {
         private TestResource _testResource;
-        InMemoryDataEndpoint<TestResource> _testSource;
-        IDataEndpoint<TestResource> _testTarget;
+        private InMemoryDataEndpoint<TestResource> _testSource;
+        private IDataEndpoint<TestResource> _testTarget;
         private SynchronizationChannel<TestResource> _testChannel;
-            
+
         [SetUp]
         public void SetUpTest()
         {
@@ -19,11 +19,13 @@ namespace Restore.Tests.RxProto
             _testSource.ResourceDeleted.Subscribe(t => t.Deleted = true);
             _testTarget = new InMemoryDataEndpoint<TestResource>(t => t.Id);
             _testTarget.AddSyncAction(t => t.Deleted, (ds, t) => ds.Delete(t), "Delete");
-            _testTarget.AddSyncAction(t => string.IsNullOrEmpty(t.CorrelationId), 
-                (ds, r) => ds.Create(r), "Create");
-            
             _testTarget.AddSyncAction(
-                t => !string.IsNullOrEmpty(t.CorrelationId), (ds, r) =>
+                t => string.IsNullOrEmpty(t.CorrelationId),
+                (ds, r) => ds.Create(r),
+                "Create");
+            _testTarget.AddSyncAction(
+                t => !string.IsNullOrEmpty(t.CorrelationId),
+                (ds, r) =>
                 {
                     var resourceToUpdate = ds.Get(r.Id);
                     if (resourceToUpdate != null)
@@ -31,7 +33,8 @@ namespace Restore.Tests.RxProto
                         resourceToUpdate.Update(r);
                         ds.Update(resourceToUpdate);
                     }
-                }, "Update");
+                },
+                "Update");
 
             _testChannel = new SynchronizationChannel<TestResource>(_testSource, _testTarget);
         }
@@ -86,7 +89,7 @@ namespace Restore.Tests.RxProto
                 _testResource = new TestResource(1);
                 channel.Open();
                 _testSource.Create(_testResource);
-                
+
                 // Act
                 _testSource.Delete(_testResource);
 
@@ -99,12 +102,17 @@ namespace Restore.Tests.RxProto
         public void ShouldNotBreakPublishing()
         {
             _testTarget = new InMemoryDataEndpoint<TestResource>(t => t.Id);
-            _testTarget.AddSyncAction(t => t.Deleted, (ds, t) =>
-            {
-                throw new Exception("Ooops");
-            }, "Delete");
-            _testTarget.AddSyncAction(t => string.IsNullOrEmpty(t.CorrelationId),
-                (ds, r) => ds.Create(r), "Create");
+            _testTarget.AddSyncAction(
+                t => t.Deleted,
+                (ds, t) =>
+                {
+                    throw new Exception("Ooops");
+                },
+                "Delete");
+            _testTarget.AddSyncAction(
+                t => string.IsNullOrEmpty(t.CorrelationId),
+                (ds, r) => ds.Create(r),
+                "Create");
             using (var channel = new SynchronizationChannel<TestResource>(_testSource, _testTarget))
             {
                 channel.Open();

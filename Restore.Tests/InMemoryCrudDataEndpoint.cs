@@ -25,10 +25,8 @@ namespace Restore.Tests
             [NotNull] IDictionary<TId, T> items)
             : this(typeConfig, comparer)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+            if (items == null) { throw new ArgumentNullException(nameof(items)); }
+
             _items = items;
         }
 

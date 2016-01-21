@@ -52,6 +52,7 @@ namespace Restore.Tests.Matching
             {
                 Debug.WriteLine("{0} - {1}", match?.Result1?.Name, match?.Result2?.Name);
             }
+
             Assert.AreEqual(matches[0].Result1, _localResults[0]);
             Assert.AreEqual(matches.ElementAt(0).Result2, _remoteResults[0]);
         }
@@ -90,15 +91,4 @@ namespace Restore.Tests.Matching
             }
         }
     }
-    
-//    public static class ResultMatcherExtension
-//    {
-//        public static IEnumerable<ItemMatch<T1, T2>> Match<T1, T2, Tid>(
-//            [NotNull] this IEnumerable<T1> result1,
-//            [NotNull] IEnumerable<T2> result2
-//           /* EqualityComparer<T1, T2> */ )
-//        {
-//            //var matcher = new
-//        }
-//    }
 }

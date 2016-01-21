@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -52,7 +52,6 @@ namespace Restore.Tests.Channel
                     return new SynchronizationResult(true);
                 }));
 
-            //var t2epConfig = new EndpointConfiguration()
             _channelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 _channelConfig,
                 () => Task.FromResult(Enumerable.AsEnumerable<LocalTestResource>(_localEndpoint.ReadAll())),
