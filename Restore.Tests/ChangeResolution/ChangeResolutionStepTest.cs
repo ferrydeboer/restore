@@ -93,7 +93,7 @@ namespace Restore.Tests.ChangeResolution
         // Error handling:
         // In general we can't do much in term of error handling within each specific step.
         // It makes sense to wrap all exceptions so handling at a higher level becomes easier.
-        // I think by default we should use a mechanism where the execution of the list simply 
+        // I think by default we should use a mechanism where the execution of the list simply
         // halts unless specific rules are provided how to deal with item level exceptions.
         [Test]
         public void ShouldWrapExceptionIntoChangeResolutionException()

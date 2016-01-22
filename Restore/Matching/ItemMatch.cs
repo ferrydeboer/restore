@@ -5,8 +5,8 @@ namespace Restore.Matching
 {
     public class ItemMatch<T1, T2>
     {
-        public readonly T1 Result1;
-        public readonly T2 Result2;
+        public T1 Result1 { get; }
+        public T2 Result2 { get; }
 
         public ItemMatch(T1 result1, T2 result2)
         {

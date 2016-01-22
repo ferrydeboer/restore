@@ -11,14 +11,13 @@ namespace Restore.ChangeResolution
         [NotNull] [ItemNotNull]
         private readonly IList<ISynchronizationResolver<TItem>> _resolvers;
 
-        [NotNull] private readonly IList<Action<ISynchronizationAction<TItem>>> _observers 
-            = new List<Action<ISynchronizationAction<TItem>>>();
+        [NotNull] private readonly IList<Action<ISynchronizationAction<TItem>>> _observers = new List<Action<ISynchronizationAction<TItem>>>();
         [NotNull] private readonly TCfg _configuration;
 
         public ChangeResolutionStep([NotNull] IList<ISynchronizationResolver<TItem>> resolvers, [NotNull] TCfg configuration)
         {
-            if (resolvers == null) throw new ArgumentNullException(nameof(resolvers));
-            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            if (resolvers == null) { throw new ArgumentNullException(nameof(resolvers)); }
+            if (configuration == null) { throw new ArgumentNullException(nameof(configuration)); }
 
             _resolvers = resolvers;
             _configuration = configuration;
@@ -44,13 +43,14 @@ namespace Restore.ChangeResolution
                     ex,
                     item);
             }
+
             // No Resolution/Synch is required.
             return new NullSynchAction<TItem>();
         }
 
         public void AddResultObserver([NotNull] Action<ISynchronizationAction<TItem>> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action == null) { throw new ArgumentNullException(nameof(action)); }
 
             _observers.Add(action);
         }

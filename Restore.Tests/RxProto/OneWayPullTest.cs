@@ -3,18 +3,18 @@ using Restore.RxProto;
 
 namespace Restore.Tests.RxProto
 {
+    /// <summary>
+    ///  Mimics scenario where a list of items is being pulled in from the source to synchronize them with the target.
+    ///  Here it depends on the target to determine of something is deleted from the source.
+    /// Source: REST API
+    /// Targer: Local DB
+    /// </summary>
     [TestFixture]
     public class OneWayPullTest
     {
-        /**
-         * Mimics scenario where a list of items is being pulled in from the source to synchronize them with the target.
-         * Here it depends on the target to determine of something is deleted from the source.
-         * Source: REST API
-         * Targer: Local DB
-         */
-        // Scenarios:
-        // - New item from source to target
-
+        /// <summary>
+        /// Scenarios: New item from source to target
+        /// </summary>
         [Test]
         public void ShouldAddItemToTarget()
         {
@@ -29,8 +29,10 @@ namespace Restore.Tests.RxProto
             Assert.IsNotNull(testTarget.Get(1));
         }
 
-        // - Change from source to target
-        // - Delete from source to target
+        /// <summary>
+        /// Change from source to target
+        /// Delete from source to target
+        /// </summary>
         [Test]
         public void ShouldDeleteItemFromTarget()
         {

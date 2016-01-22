@@ -13,13 +13,14 @@ namespace Restore.Extensions
         /// <returns>The extracted item or it's default value.</returns>
         public static T Extract<T>([NotNull] this IList<T> list, Func<T, bool> predicate)
         {
-            if (list == null) throw new ArgumentNullException(nameof(list));
+            if (list == null) { throw new ArgumentNullException(nameof(list)); }
 
             var item = list.FirstOrDefault(predicate);
             if (item != null)
             {
                 list.Remove(item);
             }
+
             return item;
         }
     }

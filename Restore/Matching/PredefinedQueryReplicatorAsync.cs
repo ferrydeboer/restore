@@ -16,9 +16,9 @@ namespace Restore.Matching
             [NotNull] IAsyncDataEndpoint<T2> endpoint2,
             [NotNull] Func<IAsyncDataEndpoint<T2>, Task<IEnumerable<T2>>> endpoint2Query)
         {
-            if (endpoint1 == null) throw new ArgumentNullException(nameof(endpoint1));
-            if (endpoint2 == null) throw new ArgumentNullException(nameof(endpoint2));
-            if (endpoint2Query == null) throw new ArgumentNullException(nameof(endpoint2Query));
+            if (endpoint1 == null) { throw new ArgumentNullException(nameof(endpoint1)); }
+            if (endpoint2 == null) { throw new ArgumentNullException(nameof(endpoint2)); }
+            if (endpoint2Query == null) { throw new ArgumentNullException(nameof(endpoint2Query)); }
 
             Endpoint1 = endpoint1;
             Endpoint1.DataLoaded += Endpoint1_DataLoaded;
@@ -49,6 +49,7 @@ namespace Restore.Matching
                 Debug.WriteLine(ex.Message);
                 throw new Exception("WrappedException, this is not catchable when using raised events!");
             }
+
             return replicationResults;
         }
 

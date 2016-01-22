@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
@@ -18,7 +17,7 @@ namespace Restore.ChangeResolution
             this IEnumerable<TSynch> items,
             [NotNull] ChangeResolutionStep<TSynch, TCfg> step)
         {
-            if (step == null) throw new ArgumentNullException(nameof(step));
+            if (step == null) { throw new ArgumentNullException(nameof(step)); }
             return step.Compose(items);
         }
     }

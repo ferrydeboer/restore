@@ -10,7 +10,7 @@ namespace Restore
 
         public DataChangeEventArgs([NotNull] T item, ChangeType change)
         {
-            if (item == null) {  throw new ArgumentNullException(nameof(item)); }
+            if (item == null) { throw new ArgumentNullException(nameof(item)); }
 
             Item = item;
             Change = change;

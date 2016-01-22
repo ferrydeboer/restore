@@ -12,25 +12,26 @@ namespace Restore.Tests.Channel
 {
     public class OneWayPullChannelTestBase : IDisposable
     {
-        protected OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelUnderTest;
-        protected InMemoryCrudDataEndpoint<LocalTestResource, int> _localEndpoint;
-        protected InMemoryCrudDataEndpoint<RemoteTestResource, int> _remoteEndpoint;
+        protected OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> ChannelUnderTest { get; set; }
+
+        protected InMemoryCrudDataEndpoint<LocalTestResource, int> LocalEndpoint { get; set; }
+        protected InMemoryCrudDataEndpoint<RemoteTestResource, int> RemoteEndpoint { get; set; }
         private ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelConfig;
 
         [SetUp]
         public void SetUpTest()
         {
             var type1Config = new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1);
-            _localEndpoint = new InMemoryCrudDataEndpoint<LocalTestResource, int>(type1Config, TestData.LocalResults);
+            LocalEndpoint = new InMemoryCrudDataEndpoint<LocalTestResource, int>(type1Config, TestData.LocalResults);
             var endpoint1Config = new EndpointConfiguration<LocalTestResource, int>(
                 type1Config,
-                _localEndpoint);
+                LocalEndpoint);
 
             var type2Config = new TypeConfiguration<RemoteTestResource, int>(rtr => rtr.Id);
-            _remoteEndpoint = new InMemoryCrudDataEndpoint<RemoteTestResource, int>(type2Config, TestData.RemoteResults);
+            RemoteEndpoint = new InMemoryCrudDataEndpoint<RemoteTestResource, int>(type2Config, TestData.RemoteResults);
             var endpoint2Config = new EndpointConfiguration<RemoteTestResource, int>(
                 type2Config,
-                _remoteEndpoint);
+                RemoteEndpoint);
 
             // This clearly requires a configuration API.
             _channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
@@ -52,15 +53,15 @@ namespace Restore.Tests.Channel
                     return new SynchronizationResult(true);
                 }));
 
-            _channelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+            ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 _channelConfig,
-                () => Task.FromResult(Enumerable.AsEnumerable<LocalTestResource>(_localEndpoint.ReadAll())),
-                () => Task.FromResult(_remoteEndpoint.ReadAll().AsEnumerable()));
+                () => Task.FromResult(Enumerable.AsEnumerable<LocalTestResource>(LocalEndpoint.ReadAll())),
+                () => Task.FromResult(RemoteEndpoint.ReadAll().AsEnumerable()));
         }
 
         public void Dispose()
         {
-            _channelUnderTest.Dispose();
+            ChannelUnderTest.Dispose();
         }
     }
 }

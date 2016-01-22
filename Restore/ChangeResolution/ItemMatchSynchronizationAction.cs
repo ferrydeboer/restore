@@ -1,20 +1,20 @@
 using System;
 using Restore.Matching;
-using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
-    public class ItemMatchSynchronizationAction<T1, T2, TId, TSynch> : ISynchronizationAction<ItemMatch<T1, T2>> where TId : IEquatable<TId>
+    public class ItemMatchSynchronizationAction<T1, T2, TId, TSynch> : ISynchronizationAction<ItemMatch<T1, T2>>
+        where TId : IEquatable<TId>
     {
-        private IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
         private readonly Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, bool> _decision;
         private readonly Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, SynchronizationResult> _action;
+        private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
         private ItemMatch<T1, T2> _applicant;
         private SynchronizationResult _synchronizationResult;
 
         public ItemMatchSynchronizationAction(
-            IChannelConfiguration<T1, T2, TId, TSynch> channelConfig, 
-            Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, bool> decision, 
+            IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
+            Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, bool> decision,
             Func<ItemMatch<T1, T2>, IChannelConfiguration<T1, T2, TId, TSynch>, SynchronizationResult> action,
             string name = "Undefined")
         {
@@ -24,7 +24,6 @@ namespace Restore.ChangeResolution
             Name = name;
         }
 
-
         public bool AppliesTo(ItemMatch<T1, T2> item)
         {
             var appliesTo = _decision(item, _channelConfig);
@@ -32,6 +31,7 @@ namespace Restore.ChangeResolution
             {
                 _applicant = item;
             }
+
             return appliesTo;
         }
 
@@ -47,6 +47,7 @@ namespace Restore.ChangeResolution
             {
                 return () => _action(item, _channelConfig);
             }
+
             return null;
         }
 
@@ -56,7 +57,9 @@ namespace Restore.ChangeResolution
             {
                 throw new InvalidOperationException("Can't execute this synchronization action since there is no applicant.");
             }
+
             _synchronizationResult = _action(_applicant, _channelConfig);
+
             // Because the action contains state it can not be executed twice. Only other option is actually
             // returning a curried function from the AppliesTo.
             _applicant = null;

@@ -2,21 +2,21 @@
 {
     public class SynchronizationResult
     {
-
-        public SynchronizationResult(bool succes)
+        public SynchronizationResult(bool success)
         {
-            Succes = succes;
+            Success = success;
         }
 
         public SynchronizationResult()
         {
-            Succes = true;
+            Success = true;
         }
 
         public static implicit operator bool(SynchronizationResult result)
         {
-            return result.Succes;
+            return result.Success;
         }
-        public virtual bool Succes { get; private set; }
+
+        public virtual bool Success { get; private set; }
     }
 }

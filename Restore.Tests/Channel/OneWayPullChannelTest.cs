@@ -18,7 +18,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldSynchNewDataFromRemote()
         {
             // First just make a channel that we can call synch on.
-            await _channelUnderTest.Synchronize();
+            await ChannelUnderTest.Synchronize();
 
 /*            var synched1 = localEndpoint.Read(1);
             Assert.IsNotNull(synched1);
@@ -26,7 +26,7 @@ namespace Restore.Tests.Channel
 
             Assert.IsNull(localEndpoint.Read(2));*/
 
-            var synched3 = _localEndpoint.Read(3);
+            var synched3 = LocalEndpoint.Read(3);
             Assert.IsNotNull(synched3);
             Assert.AreEqual(TestData.RemoteResults[1].Name, synched3.Name);
         }
@@ -35,12 +35,12 @@ namespace Restore.Tests.Channel
         public async Task ShouldCallSideEffectListenerOnMatchedData()
         {
             var matched = false;
-            _channelUnderTest.AddSynchItemObserver<ItemMatch<LocalTestResource, RemoteTestResource>>(match =>
+            ChannelUnderTest.AddSynchItemObserver<ItemMatch<LocalTestResource, RemoteTestResource>>(match =>
             {
                 matched = true;
             });
 
-            await _channelUnderTest.Synchronize();
+            await ChannelUnderTest.Synchronize();
 
             Assert.IsTrue(matched);
         }
@@ -49,14 +49,14 @@ namespace Restore.Tests.Channel
         public async Task ShouldWrapItemExceptionIntoSynchronizationException()
         {
             var expectedException = new Exception("An observer has broken the item");
-            _channelUnderTest.AddSynchActionObserver(action =>
+            ChannelUnderTest.AddSynchActionObserver(action =>
             {
                 throw expectedException;
             });
 
             try
             {
-                await _channelUnderTest.Synchronize();
+                await ChannelUnderTest.Synchronize();
             }
             catch (ItemSynchronizationException ex)
             {
@@ -73,14 +73,14 @@ namespace Restore.Tests.Channel
         public async Task ShouldCallSynchronizationStartedObserver()
         {
             bool isCalled = false;
-            _channelUnderTest.AddSynchronizationStartedObserver(start =>
+            ChannelUnderTest.AddSynchronizationStartedObserver(start =>
             {
                 Assert.AreEqual(typeof(LocalTestResource), start.Type1);
                 Assert.AreEqual(typeof(RemoteTestResource), start.Type2);
                 isCalled = true;
             });
 
-            await _channelUnderTest.Synchronize();
+            await ChannelUnderTest.Synchronize();
 
             Assert.IsTrue(isCalled);
         }
@@ -89,7 +89,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldCallSynchronizationFinishedObserver()
         {
             bool isCalled = false;
-            _channelUnderTest.AddSynchronizationFinishedObserver(finish =>
+            ChannelUnderTest.AddSynchronizationFinishedObserver(finish =>
             {
                 Assert.AreEqual(typeof(LocalTestResource), finish.Type1);
                 Assert.AreEqual(typeof(RemoteTestResource), finish.Type2);
@@ -98,7 +98,7 @@ namespace Restore.Tests.Channel
                 isCalled = true;
             });
 
-            await _channelUnderTest.Synchronize();
+            await ChannelUnderTest.Synchronize();
 
             Assert.IsTrue(isCalled);
         }
@@ -107,7 +107,7 @@ namespace Restore.Tests.Channel
         public void ShouldIgnoreSecondSynchCallIfASynchIsAlreadyRunning()
         {
             int startCallCount = 0;
-            _channelUnderTest.AddSynchronizationStartedObserver(_ =>
+            ChannelUnderTest.AddSynchronizationStartedObserver(_ =>
             {
                 // put in small delay to make test deterministic and have thread at least hold on for little longer.
                 Task.Delay(50);
@@ -115,10 +115,10 @@ namespace Restore.Tests.Channel
             });
 
             // Start first in new thread that should immediately stop second from running.
-            var task1 = Task.Run(() => _channelUnderTest.Synchronize());
+            var task1 = Task.Run(() => ChannelUnderTest.Synchronize());
 
             // This one should never start since it starts immediately after, don't expect first to finish.
-            var task2 = _channelUnderTest.Synchronize();
+            var task2 = ChannelUnderTest.Synchronize();
             Task.WaitAll(task1, task2);
 
             Assert.AreEqual(1, startCallCount);

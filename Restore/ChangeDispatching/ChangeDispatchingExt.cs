@@ -10,7 +10,7 @@ namespace Restore.ChangeDispatching
             this IEnumerable<ISynchronizationAction<TSynch>> items,
             [NotNull] ChangeDispatchingStep<TSynch> step)
         {
-            if (step == null) throw new ArgumentNullException(nameof(step));
+            if (step == null) { throw new ArgumentNullException(nameof(step)); }
             return step.Compose(items);
         }
     }

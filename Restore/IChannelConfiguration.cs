@@ -18,7 +18,8 @@ namespace Restore
     /// <remarks>
     /// TODO: Figure out a way to get rid of this insanely large generic signature. Because the config is passed around everywhere angle brackets explode.
     /// </remarks>
-    public interface IChannelConfiguration<T1, T2, TId, TSynch> where TId : IEquatable<TId>
+    public interface IChannelConfiguration<T1, T2, TId, TSynch>
+        where TId : IEquatable<TId>
     {
         [Obsolete("Part of EndpointConfiguration now")]
         TypeConfiguration<T1, TId> Type1Configuration { get; }
@@ -33,15 +34,21 @@ namespace Restore
         Func<IEnumerable<T1>, IEnumerable<T2>, IEnumerable<TSynch>> ItemsPreprocessor { get; set; }
 
         /// <summary>
+        /// Gets the <see cref="ISynchronizationResolver{T}"/> that will be used to determine the applicable <see cref="SynchronizationAction{T,TCfg}"/>
+        /// </summary>
+        /// <remarks>
         /// Is primarily a part of Change Resolution. That's why the inteface is defined there.
         /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
-        /// </summary>
+        /// </remarks>
         [NotNull] IEnumerable<ISynchronizationResolver<TSynch>> SynchronizationResolvers { get; }
 
         /// <summary>
-        /// Is primarily a part of Change Resolution. That's why the inteface is defined there.
-        /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
+        /// Gets translator used to move data from <typeparamref name="T1"/> onto <typeparamref name="T2"/>.
         /// </summary>
+        /// <remarks>
+        /// is primarily a part of Change Resolution. That's why the inteface is defined there.
+        /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
+        /// </remarks>
         ITranslator<T1, T2> TypeTranslator { get; }
     }
 }

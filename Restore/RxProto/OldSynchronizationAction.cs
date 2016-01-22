@@ -29,6 +29,7 @@ namespace Restore.RxProto
             {
                 _applicant = resource;
             }
+
             return applies;
         }
 
@@ -44,8 +45,9 @@ namespace Restore.RxProto
             if (Applicant != null)
             {
                 var identityResolver = _dataEndpoint.IdentityResolver(Applicant);
-                result = $"{_name} Will be applied to resource of Type {typeof (T).Name} with id {identityResolver}";
+                result = $"{_name} Will be applied to resource of Type {typeof(T).Name} with id {identityResolver}";
             }
+
             return result;
         }
     }

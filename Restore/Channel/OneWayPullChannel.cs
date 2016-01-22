@@ -11,7 +11,8 @@ using Restore.Extensions;
 
 namespace Restore.Channel
 {
-    public class OneWayPullChannel<T1, T2, TId, TSynch> : ISynchChannel<T1, T2, TSynch>, IDisposable where TId : IEquatable<TId>
+    public class OneWayPullChannel<T1, T2, TId, TSynch> : ISynchChannel<T1, T2, TSynch>, IDisposable
+        where TId : IEquatable<TId>
     {
         [NotNull] private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
 
@@ -32,21 +33,22 @@ namespace Restore.Channel
         private event Action<SynchronizationStarted> SynchronizationStart;
         private event Action<SynchronizationFinished> SynchronizationFinished;
 
-        SemaphoreSlim _lockSemaphore = new SemaphoreSlim(1);
-        private bool _isSynchronizing = false;
+        private SemaphoreSlim _lockSemaphore = new SemaphoreSlim(1);
+        private bool _isSynchronizing;
 
         public OneWayPullChannel(
             [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
-            [NotNull] Func<Task<IEnumerable<T1>>> t1DataSource, 
+            [NotNull] Func<Task<IEnumerable<T1>>> t1DataSource,
             [NotNull] Func<Task<IEnumerable<T2>>> t2DataSource)
         {
-            if (channelConfig == null) throw new ArgumentNullException(nameof(channelConfig));
-            if (t1DataSource == null) throw new ArgumentNullException(nameof(t1DataSource));
-            if (t2DataSource == null) throw new ArgumentNullException(nameof(t2DataSource));
+            if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
+            if (t1DataSource == null) { throw new ArgumentNullException(nameof(t1DataSource)); }
+            if (t2DataSource == null) { throw new ArgumentNullException(nameof(t2DataSource)); }
 
             _channelConfig = channelConfig;
             _t1DataSource = t1DataSource;
             _t2DataSource = t2DataSource;
+
             // Further development should further help determine the signatures steps.
             _resolutionStep = new ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>>(channelConfig.SynchronizationResolvers.ToList(), channelConfig);
             _dispatchStep = new ChangeDispatchingStep<TSynch>();
@@ -55,10 +57,9 @@ namespace Restore.Channel
         public bool IsSynchronizing => _isSynchronizing;
 
         /// <summary>
-        /// Synchronize will only run once. If being called by another thread at this stage of development 
+        /// Synchronize will only run once. If being called by another thread at this stage of development
         /// it will simply ignore the call.
         /// </summary>
-        /// <returns></returns>
         public async Task Synchronize()
         {
             // In this case it makes more sense to acquire a lock here instead of the sync.
@@ -83,7 +84,6 @@ namespace Restore.Channel
         /// <param name="condition">Delegate decision to actually refresh/synchronize. Should not
         /// be responsiblity of the channel, and since we only need this in a single scenario this
         /// suffices.</param>
-        /// <returns></returns>
         public async Task<AttachedObservableCollection<T1>> Drain(bool condition)
         {
             var t1DataEnum = await _t1DataSource();
@@ -95,12 +95,13 @@ namespace Restore.Channel
                 {
                     // Set before starting on other thread because reading thread might be faster.
                     _isSynchronizing = true;
+
                     // Do synch on background! Including awaiting second data.
                     Fire(Synchronize(t1Data));
                 }
                 await Task.FromResult(new object());
             });
-            
+
             return await Task.FromResult(attachedObservableCollection);
         }
 
@@ -113,6 +114,7 @@ namespace Restore.Channel
             catch (Exception ex)
             {
                 Debug.WriteLine("Caught exception with Fire");
+
                 // TODO: Now this back ground scenario will require a better error handling strategy.
                 // This goes into the void. But it's running on the back ground and the caller might have
                 // had already returned, so there is not much that can be done anyway.
@@ -145,8 +147,7 @@ namespace Restore.Channel
             var endPipeline = pipeline
                 .Do(_ => itemsProcessed++)
                 .ResolveChange(_resolutionStep)
-                // Filter out NullSynchActions, which don't have an applicant instance.
-                .Where(action => action.Applicant != null)
+                .Where(action => action.Applicant != null) // Filter out NullSynchActions, which don't have an applicant instance.
                 .DispatchChange(_dispatchStep);
 
             // Pump items out at the end of the sequence. In the end is probably responsibility of separate
@@ -170,8 +171,8 @@ namespace Restore.Channel
             {
                 throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
             }
-            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
 
+            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
         }
 
         private async Task LockSync(Func<Task> mechanism)
@@ -196,26 +197,26 @@ namespace Restore.Channel
                 // while others are simply events on the channel. Under water events are simply used where appropriate.
         public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             _synchItemListeners.Add(observer);
         }
 
         public void AddSynchActionObserver([NotNull] Action<ISynchronizationAction<TSynch>> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
 
             _resolutionStep.AddResultObserver(observer);
         }
 
         public void AddSynchronizationStartedObserver([NotNull] Action<SynchronizationStarted> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             SynchronizationStart += observer;
         }
 
         public void AddSynchronizationFinishedObserver(Action<SynchronizationFinished> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             SynchronizationFinished += observer;
         }
 

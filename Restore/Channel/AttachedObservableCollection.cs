@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -50,10 +50,8 @@ namespace Restore.Channel
             IEqualityComparer<T> changeComparer,
             Action<Action> changeDispatcher)
         {
-            if (contentChangeNotifier == null)
-            {
-                throw new ArgumentNullException(nameof(contentChangeNotifier));
-            }
+            if (contentChangeNotifier == null) { throw new ArgumentNullException(nameof(contentChangeNotifier)); }
+
             _contentChangeNotifier = contentChangeNotifier;
             Attach(contentChangeNotifier);
             _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
@@ -64,12 +62,10 @@ namespace Restore.Channel
             IEnumerable<T> collection,
             [NotNull] IDataChangeNotifier<T> contentChangeNotifier,
             IEqualityComparer<T> changeComparer,
-            Action<Action> changeDispatcher) : base(collection)
+            Action<Action> changeDispatcher)
+            : base(collection)
         {
-            if (contentChangeNotifier == null)
-            {
-                throw new ArgumentNullException(nameof(contentChangeNotifier));
-            }
+            if (contentChangeNotifier == null) { throw new ArgumentNullException(nameof(contentChangeNotifier)); }
             _contentChangeNotifier = contentChangeNotifier;
             Attach(_contentChangeNotifier);
             _changeDispatcher = changeDispatcher ?? _defaultChangeDispatcher;
@@ -81,7 +77,8 @@ namespace Restore.Channel
         {
         }
 
-        public AttachedObservableCollection([NotNull] IDataChangeNotifier<T> contentChangeNotifier,
+        public AttachedObservableCollection(
+            [NotNull] IDataChangeNotifier<T> contentChangeNotifier,
             IEqualityComparer<T> changeComparer)
             : this(contentChangeNotifier, changeComparer, null)
         {
@@ -173,7 +170,7 @@ namespace Restore.Channel
 
         private void UpdateItem(object sender, DataChangeEventArgs<T> e)
         {
-            // Does it really matter, yes, because I need to replace the item. After all, 
+            // Does it really matter, yes, because I need to replace the item. After all,
             // if the reference has changed there is no point/need to do this.
             var hasItem = this.FirstOrDefault(item => _changeComparer.Equals(item, e.Item));
             if (!_changeComparer.Equals(hasItem, default(T)))
@@ -234,7 +231,6 @@ namespace Restore.Channel
         {
             private readonly Expression<Func<U, IComparable>> _orderExpression;
             private int _direction;
-            private bool _ascending = true;
 
             public Order(Expression<Func<U, IComparable>> orderExpression)
             {
@@ -245,11 +241,10 @@ namespace Restore.Channel
                     var value1 = valueRetrieval(first);
                     var value2 = valueRetrieval(second);
                     var result = value1.CompareTo(value2) * _direction;
+
                     // Introduce different behaviour based on order direction.
-                    if (result == 0)
-                    {
-                        result = _direction;
-                    }
+                    if (result == 0) { result = _direction; }
+
                     return result;
                 };
             }

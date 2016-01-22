@@ -10,13 +10,13 @@ namespace Restore.ChangeResolution
         [NotNull] private readonly T _applicant;
 
         public SynchronizationAction(
-            [NotNull] TCfg config, 
+            [NotNull] TCfg config,
             [NotNull] Func<T, TCfg, SynchronizationResult> action,
             T applicant,
             string name = "Undefined")
         {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (config == null) { throw new ArgumentNullException(nameof(config)); }
+            if (action == null) { throw new ArgumentNullException(nameof(action)); }
 
             _config = config;
             _action = action;

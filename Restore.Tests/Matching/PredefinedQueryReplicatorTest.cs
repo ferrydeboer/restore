@@ -25,7 +25,7 @@ namespace Restore.Tests.Matching
                     new RemoteTestResource(3, "Remote 3")
                 });
             var replicator = new PredefinedQueryReplicatorAsync<LocalTestResource, RemoteTestResource>(
-                localDataEndpoint, 
+                localDataEndpoint,
                 remoteDataEndpoint,
                 async rde =>
                 {

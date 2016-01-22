@@ -2,12 +2,13 @@
 
 namespace Restore.Matching
 {
-    public class ItemMatchingStep<T1, T2, TId, TCfg> : SynchronizationStep<T1, ItemMatch<T1, T2>> 
-        where TCfg : IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> 
+    public class ItemMatchingStep<T1, T2, TId, TCfg> : SynchronizationStep<T1, ItemMatch<T1, T2>>
+        where TCfg : IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>>
         where TId : IEquatable<TId>
     {
         private TCfg _config;
-        //private readonly IList<T2> _relatedItems;
+
+        // private readonly IList<T2> _relatedItems;
 
         public ItemMatchingStep(TCfg config)
         {

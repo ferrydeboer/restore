@@ -5,7 +5,7 @@ using System.Linq;
 namespace Restore.RxProto
 {
     /// <summary>
-    /// Endpoint decorator that triggers deletes items that are not synchronized from a source list. 
+    /// Endpoint decorator that triggers deletes items that are not synchronized from a source list.
     /// There is a problem with this approach since it now by passes the general channel feedback mechanism!
     /// If I simply have this endpoint already containing an action for registration what is then still
     /// needed is something to feed back into the result channel from the channel (that is currently not there yet).
@@ -53,12 +53,13 @@ namespace Restore.RxProto
 
         public T Get(Identifier id)
         {
-            //var synchedItem = _decorated.Get(id);
+            // var synchedItem = _decorated.Get(id);
             var unsynchedItem = _unsynchedItems.FirstOrDefault(item => IdentityResolver(item) == id);
             if (unsynchedItem != null)
             {
                 _unsynchedItems.Remove(unsynchedItem);
             }
+
             return unsynchedItem;
         }
 

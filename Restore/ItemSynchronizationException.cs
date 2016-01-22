@@ -5,11 +5,11 @@ namespace Restore
     public class ItemSynchronizationException : Exception
     {
         /// <summary>
-        /// The item that was being processed by a step and failed.
+        /// Gets the item that was being processed by a step and failed.
         /// </summary>
         public object Item { get; }
 
-        public ItemSynchronizationException() 
+        public ItemSynchronizationException()
         {
         }
 
@@ -18,12 +18,14 @@ namespace Restore
             Item = item;
         }
 
-        public ItemSynchronizationException(string message, object item) : base(message)
+        public ItemSynchronizationException(string message, object item)
+            : base(message)
         {
             Item = item;
         }
 
-        public ItemSynchronizationException(string message, Exception innerException, object item) : base(message, innerException)
+        public ItemSynchronizationException(string message, Exception innerException, object item)
+            : base(message, innerException)
         {
             Item = item;
         }

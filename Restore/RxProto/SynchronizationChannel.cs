@@ -10,12 +10,11 @@ namespace Restore.RxProto
     /// <typeparam name="T"></typeparam>
     public class SynchronizationChannel<T> : IDisposable
     {
-        readonly IDataEndpoint<T> _source;
-        readonly IDataEndpoint<T> _target;
-        readonly bool _isBatchChannel;
-        IObservable<T> _dispatcher;
-        IDisposable _sourceSubscription;
-        
+        private readonly IDataEndpoint<T> _source;
+        private readonly IDataEndpoint<T> _target;
+        private readonly bool _isBatchChannel;
+        private IObservable<T> _dispatcher;
+        private IDisposable _sourceSubscription;
 
         public SynchronizationChannel(IDataEndpoint<T> source, IDataEndpoint<T> target, bool isBatchChannel)
         {
@@ -25,11 +24,12 @@ namespace Restore.RxProto
             CreateDispatcher();
         }
 
-        public SynchronizationChannel(IDataEndpoint<T> source, IDataEndpoint<T> target) : this(source, target, false)
+        public SynchronizationChannel(IDataEndpoint<T> source, IDataEndpoint<T> target)
+            : this(source, target, false)
         {
         }
 
-        void CreateDispatcher()
+        private void CreateDispatcher()
         {
             // TODO: Doesn't really add much.
             _dispatcher = _source.ResourceChanged.Select(t => t);
@@ -45,7 +45,7 @@ namespace Restore.RxProto
                        .Select(ToSynchAction)
                        .Catch<ISynchronizationAction<T>, Exception>(ex => Observable.Return(new NullSynchAction<T>()));
                 _sourceSubscription = synchActions.Subscribe(OnNext, OnClosing);
-            }else
+            } else
             {
                 // TODO: Dispatcher is not used.
                 _sourceSubscription = _source.GetListAsync().Select(t => t).Select(ToSynchAction)
@@ -59,6 +59,7 @@ namespace Restore.RxProto
             try
             {
                 action.Execute();
+
                 // Could also added interceptor on this.
                 Debug.WriteLine(action);
             }
@@ -77,10 +78,11 @@ namespace Restore.RxProto
                     return action;
                 }
             }
+
             // It's better to filter out elements that don't have an applicable action in the end. HAve to figure out how.
             return new NullSynchAction<T>();
         }
-        
+
         public void Dispose()
         {
             Dispose(true);
@@ -90,7 +92,6 @@ namespace Restore.RxProto
         {
             _sourceSubscription?.Dispose();
         }
-
 
         public void AddDispatchObserver(Func<T, T> interceptor)
         {

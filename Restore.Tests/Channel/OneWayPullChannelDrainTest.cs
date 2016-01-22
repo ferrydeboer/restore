@@ -14,9 +14,9 @@ namespace Restore.Tests.Channel
             Action<ObservableCollection<LocalTestResource>> resultAssertion = null)
         {
             var taskCompletion = new TaskCompletionSource<SynchronizationFinished>();
-            _channelUnderTest.AddSynchronizationFinishedObserver(finish => { taskCompletion.SetResult(finish); });
+            ChannelUnderTest.AddSynchronizationFinishedObserver(finish => { taskCompletion.SetResult(finish); });
 
-            var bogus = _channelUnderTest.Drain(true);
+            var bogus = ChannelUnderTest.Drain(true);
 
             return taskCompletion.Task;
         }
@@ -24,10 +24,10 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldContainsSynchedDataInReturnedObservable()
         {
-            var synchedResult = await _channelUnderTest.Drain(true);
+            var synchedResult = await ChannelUnderTest.Drain(true);
 
             // Don't know a better way of waiting till full synch completion.
-            while (_channelUnderTest.IsSynchronizing)
+            while (ChannelUnderTest.IsSynchronizing)
             {
                 await Task.Delay(500);
             }
@@ -50,8 +50,8 @@ namespace Restore.Tests.Channel
         public async Task ShouldNoStartSynchronizationWhenConditionFalse()
         {
             var hasSynchronized = false;
-            _channelUnderTest.AddSynchronizationStartedObserver(_ => hasSynchronized = true);
-            await _channelUnderTest.Drain(false);
+            ChannelUnderTest.AddSynchronizationStartedObserver(_ => hasSynchronized = true);
+            await ChannelUnderTest.Drain(false);
 
             Assert.IsFalse(hasSynchronized);
         }
@@ -59,7 +59,7 @@ namespace Restore.Tests.Channel
         [Test]
         public async Task ShouldReturnOnlyLocalData()
         {
-            var result = await _channelUnderTest.Drain(false);
+            var result = await ChannelUnderTest.Drain(false);
 
             Assert.AreEqual(TestData.LocalResults[0], result[0]);
             Assert.AreEqual(TestData.LocalResults[1], result[1]);

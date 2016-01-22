@@ -36,11 +36,11 @@ namespace Restore.Tests.ChangeDispatching
         public void ShouldWrapExceptionInDispatchingException()
         {
             var raisedException = new InvalidOperationException("Update not possible");
-            ISynchronizationAction<LocalTestResource> action = new SynchronizationAction<LocalTestResource, string>("bogus",
-                (resource, s) =>
-                {
-                    throw raisedException;
-                }, new LocalTestResource(1), "TestAction");
+            ISynchronizationAction<LocalTestResource> action = new SynchronizationAction<LocalTestResource, string>(
+                "bogus"
+                , (resource, s) => { throw raisedException; }
+                , new LocalTestResource(1)
+                , "TestAction");
 
             try
             {

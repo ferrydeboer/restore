@@ -10,7 +10,7 @@ namespace Restore
     /// Data Endpoint interface that is being used as a facade and add's notification mechanisms to which one can subscribe for various purposes.
     /// </p>
     /// <p>
-    /// Given the current asynchronous nature of a lot of application it is chosed to solely work with asynchronous definitions. Because it is fairly trivial 
+    /// Given the current asynchronous nature of a lot of application it is chosed to solely work with asynchronous definitions. Because it is fairly trivial
     /// to wrap a synchronous method in a Task within a facade implementation.
     /// </p>
     /// </summary>
@@ -18,13 +18,16 @@ namespace Restore
     public interface IAsyncDataEndpoint<T>
     {
         /// <summary>
-        /// Returns the name the endpoint which can be used to give it a clearer distinction than what the 
-        /// channel simply uses.
+        /// Gets the name of the endpoint.
         /// </summary>
+        /// <value>
+        /// The name of the endpoint which can be used to give it a clearer distinction than what the
+        /// channel simply uses.
+        /// </value>
         string Name { get; }
 
         /// <summary>
-        /// Thrown when a list of data is being loaded in a data endpoint by a query or some other event. This totally depends on the 
+        /// Thrown when a list of data is being loaded in a data endpoint by a query or some other event. This totally depends on the
         /// endpoint implementation.
         /// </summary>
         event EventHandler<DataLoadedEventArgs<T>> DataLoaded;

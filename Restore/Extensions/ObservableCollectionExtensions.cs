@@ -19,32 +19,12 @@ namespace Restore.Extensions
         /// <param name="descending">Assumes the collection is ascending by default. Set to true if the collection is descending.</param>
         public static void SortInsert<T>(this ObservableCollection<T> collection, T item, Func<T, T, int> comparer, bool descending)
         {
-/*            // Can only modify the collection one at a time.
-            lock (collection)
-            {
-                if (collection.Count == 0)
-                {
-                    collection.Add(item);
-                    return;
-                }
-
-                var sort = descending ? DescendingSort : AscendingSort;
-                var index = 0;
-
-                while (index < collection.Count
-                    /*call first to prevent expression from further evaluating and raise ArgumentOutOfRangeException#1#
-                       && sort(comparer(item, collection[index])))
-                {
-                    index++;
-                }
-
-                collection.Insert(index, item);
-            }*/
-            Func<T, T, int> finalComparer = comparer;
+            var finalComparer = comparer;
             if (descending)
             {
                 finalComparer = (arg1, arg2) => comparer(arg1, arg2) * -1;
             }
+
             collection.SortInsert(item, finalComparer);
         }
 
@@ -78,7 +58,7 @@ namespace Restore.Extensions
         /// <param name="collection">The collection to find the index in.</param>
         /// <param name="item">The item to find the index for.</param>
         /// <param name="comparer">The comparer to use to determine the item.</param>
-        /// <returns></returns>
+        /// <returns>The index withing the <paramref name="collection"/> where <paramref name="item"/> belongs</returns>
         public static int FindItemIndex<T>(this ObservableCollection<T> collection, T item, Func<T, T, int> comparer)
         {
             var index = 0;
@@ -88,6 +68,7 @@ namespace Restore.Extensions
             {
                 index++;
             }
+
             return index;
         }
 

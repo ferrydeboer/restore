@@ -18,11 +18,11 @@ namespace Restore.RxProto
         IEnumerable<T> GetList();
 
         /// <summary>
-        /// Resolves the 
+        /// Gets the callback that can resolve the identity for <typeparamref name="T"/>.
         /// </summary>
         Func<T, Identifier> IdentityResolver { get; }
 
-        IEnumerable<ISynchronizationAction<T>> SynchActions{ get; }
+        IEnumerable<ISynchronizationAction<T>> SynchActions { get; }
 
         void AddSyncAction(Func<T, bool> applies, Action<IDataEndpoint<T>, T> execution, string name = null);
 

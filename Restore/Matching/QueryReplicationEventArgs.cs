@@ -12,12 +12,12 @@ namespace Restore.Matching
         }
 
         /// <summary>
-        /// The results that originated the replication.
+        /// Gets the results that originated the replication.
         /// </summary>
         public IEnumerable<T1> OriginResults { get; }
 
         /// <summary>
-        /// The results from the opposite endpoint.
+        /// Gets the results from the opposite endpoint.
         /// </summary>
         public IEnumerable<T2> ReplicationResults { get; }
     }

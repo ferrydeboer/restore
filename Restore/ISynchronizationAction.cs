@@ -12,13 +12,12 @@
         SynchronizationResult Execute();
 
         /// <summary>
-        /// Facilitates any further introspection on what this action is operating on.
+        /// Gets the object to which this action will be applied to facilitate any further introspection on what this action is operating on.
         /// </summary>
         T Applicant { get; }
 
         /// <summary>
-        /// A possible name to identify what this action is doing exactly. This is primarily for Exceptions and
-        /// Logging.
+        /// Gets a possible name to identify what this action is doing exactly. This is primarily for Exceptions and Logging.
         /// </summary>
         string Name { get; }
     }
