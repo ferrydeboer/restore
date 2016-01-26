@@ -21,4 +21,10 @@ namespace Restore.Matching
             Result2 = result2;
         }
     }
+
+    public interface IItemMatch<out T1, out T2>
+    {
+        T1 Result1 { get; }
+        T2 Result2 { get; }
+    }
 }
