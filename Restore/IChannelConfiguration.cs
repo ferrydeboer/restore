@@ -21,11 +21,6 @@ namespace Restore
     public interface IChannelConfiguration<T1, T2, TId, TSynch>
         where TId : IEquatable<TId>
     {
-        [Obsolete("Part of EndpointConfiguration now")]
-        TypeConfiguration<T1, TId> Type1Configuration { get; }
-        [Obsolete("Part of EndpointConfiguration now")]
-        TypeConfiguration<T2, TId> Type2Configuration { get; }
-
         [NotNull]
         IEndpointConfiguration<T1, TId> Type1EndpointConfiguration { get; }
         [NotNull]

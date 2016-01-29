@@ -17,10 +17,9 @@ namespace Restore.Tests.Matching
 
         public ItemMatcherTest()
         {
-            var channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1, // This stinks somewhat. Not going with generics is probably the alternative?
-                ltr => ltr.Id);
-            _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(channelConfig);
+            _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+                new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId ?? -1)
+                , new TypeConfiguration<RemoteTestResource, int>(ltr => ltr.Id));
         }
 
         [SetUp]

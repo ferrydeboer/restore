@@ -13,7 +13,7 @@ namespace Restore.Matching
         [NotNull] private readonly TypeConfiguration<T1, TId> _t1Config;
         [NotNull] private readonly TypeConfiguration<T2, TId> _t2Config;
 
-        private ItemMatcher(
+        public ItemMatcher(
             [NotNull] TypeConfiguration<T1, TId> t1Config,
             [NotNull] TypeConfiguration<T2, TId> t2Config)
         {
@@ -25,15 +25,17 @@ namespace Restore.Matching
         }
 
         public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId, TSynch> channelConfig)
-            : this(channelConfig.Type1Configuration, channelConfig.Type2Configuration)
+            : this(channelConfig.Type1EndpointConfiguration.TypeConfig, channelConfig.Type2EndpointConfiguration.TypeConfig)
         {
             if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
 
-            ChannelConfig = channelConfig;
+            // ChannelConfig = channelConfig;
         }
 
+        /*
         [NotNull]
         public ChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
+        */
 
         [NotNull]
         public IEnumerable<ItemMatch<T1, T2>> Match(

@@ -15,5 +15,10 @@ namespace Restore.Channel.Configuration
 
             IdExtractor = idExtractor;
         }
+
+        public TypeConfiguration(IIdResolver<T, TId> resolver)
+        {
+            IdExtractor = t => resolver.Resolve(t);
+        }
     }
 }

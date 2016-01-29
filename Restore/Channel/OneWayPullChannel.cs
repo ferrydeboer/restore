@@ -135,6 +135,8 @@ namespace Restore.Channel
             // Refactor, do this first, only do remaining work in thread.
             var t1Data = input;
             var t2Data = await _t2DataSource().ConfigureAwait(false);
+
+            // TODO: Check t2Data for null. In that case we should simply stop further execution.
             var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
 
             pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
