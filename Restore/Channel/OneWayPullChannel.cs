@@ -196,7 +196,7 @@ namespace Restore.Channel
         }
 
         // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
-                // while others are simply events on the channel. Under water events are simply used where appropriate.
+        // while others are simply events on the channel. Under water events are simply used where appropriate.
         public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
@@ -216,7 +216,7 @@ namespace Restore.Channel
             SynchronizationStart += observer;
         }
 
-        public void AddSynchronizationFinishedObserver(Action<SynchronizationFinished> observer)
+        public void AddSynchronizationFinishedObserver([NotNull] Action<SynchronizationFinished> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             SynchronizationFinished += observer;
