@@ -6,12 +6,14 @@ namespace Restore.Channel
 {
     public interface ISynchChannel<T1, T2, TSynch> : ISynchChannel
     {
-        Task Synchronize();
         void AddSynchItemObserver<T>(Action<TSynch> observer);
     }
 
     public interface ISynchChannel
     {
+        // Synchronizes resources using given configuration.
+        Task Synchronize();
+
         /// <summary>
         /// Event observer called when the synchronization of items starts on this channel.
         /// </summary>

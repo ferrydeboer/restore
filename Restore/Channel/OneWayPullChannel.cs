@@ -11,7 +11,8 @@ using Restore.Extensions;
 
 namespace Restore.Channel
 {
-    public class OneWayPullChannel<T1, T2, TId, TSynch> : ISynchChannel<T1, T2, TSynch>, IDisposable
+    public class OneWayPullChannel<T1, T2, TId, TSynch>
+        : ISynchChannel<T1, T2, TSynch>, IOneWayPullChannel<T1>, IDisposable
         where TId : IEquatable<TId>
     {
         [NotNull] private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
@@ -105,6 +106,9 @@ namespace Restore.Channel
             return await Task.FromResult(attachedObservableCollection);
         }
 
+        /// <summary>
+        /// Runs the given task asynchronously.
+        /// </summary>
         public async void Fire(Task synchTask)
         {
             try
@@ -113,13 +117,21 @@ namespace Restore.Channel
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Caught exception with Fire");
-
-                // TODO: Now this back ground scenario will require a better error handling strategy.
-                // This goes into the void. But it's running on the back ground and the caller might have
-                // had already returned, so there is not much that can be done anyway.
-                throw ex;
+                if (!OnError(ex))
+                {
+                    throw ex;
+                }
             }
+        }
+
+        /// <summary>
+        /// Called when an error occurs in the synchronization process. Returns true if the error is handled.
+        /// </summary>
+        /// <param name="exception">The exception that was thrown.</param>
+        /// <returns>True if the error is handled.</returns>
+        protected virtual bool OnError(Exception exception)
+        {
+            return false;
         }
 
         protected async Task Synchronize(IEnumerable<T1> input)
@@ -159,6 +171,9 @@ namespace Restore.Channel
             {
                 foreach (SynchronizationResult result in endPipeline)
                 {
+                    // Only once synchroniazation is completely done we can actually 100 % sure
+                    // evaluate succes on the SynchronizationResults. For instance, deleting expenses is supported as a batch/bulk operation.
+                    // This is endpoint specific. This results can essentially be inconclusive.
                     if (!result)
                     {
                         Debug.WriteLine("Failed executing an item.");
@@ -171,9 +186,11 @@ namespace Restore.Channel
             }
             catch (Exception ex)
             {
+                // This simply end up in a void of another thread.
                 throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
             }
 
+            // This can fail because it for instance runs a transaction.
             OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
         }
 

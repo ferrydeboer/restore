@@ -62,7 +62,8 @@ namespace Restore.Tests
 
             _items.Add(_typeConfig.IdExtractor(item), item);
             OnItemCreated(item);
-            //return item;
+
+            // return item;
         }
 
         public T Read(TId id)
@@ -87,7 +88,7 @@ namespace Restore.Tests
                 throw new ArgumentException("Can not update unexisting item!");
             }
 
-            //return inlist;
+            // return inlist;
         }
 
         public void Delete(T item)
@@ -95,10 +96,11 @@ namespace Restore.Tests
             if (_items.Remove(_typeConfig.IdExtractor(item)))
             {
                 OnItemDeleted(item);
-                //return item;
+
+                // return item;
             }
 
-            //return default(T);
+            // return default(T);
         }
 
         /// <summary>

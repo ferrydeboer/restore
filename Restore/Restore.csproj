@@ -76,6 +76,7 @@
     <Compile Include="Channel\AttachedObservableCollection.cs" />
     <Compile Include="Channel\Configuration\ChannelConfiguration.cs" />
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
+    <Compile Include="Channel\IOneWayPullChannel.cs" />
     <Compile Include="Channel\ISynchChannel.cs" />
     <Compile Include="Channel\OneWayPullChannel.cs" />
     <Compile Include="Channel\SynchronizationFinished.cs" />
