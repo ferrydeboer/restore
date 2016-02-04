@@ -161,7 +161,10 @@ namespace Restore.Channel
             var endPipeline = pipeline
                 .Do(_ => itemsProcessed++)
                 .ResolveChange(_resolutionStep)
-                .Where(action => action.Applicant != null) // Filter out NullSynchActions, which don't have an applicant instance.
+                .Where(action =>
+                {
+                    return action.Applicant != null;
+                }) // Filter out NullSynchActions, which don't have an applicant instance.
                 .DispatchChange(_dispatchStep);
 
             // Pump items out at the end of the sequence. In the end is probably responsibility of separate
