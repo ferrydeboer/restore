@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Restore.ChangeResolution;
 using Restore.Channel;
+using Restore.Channel.Configuration;
 using Restore.Matching;
 
 namespace Restore.Tests.Channel
@@ -176,6 +177,30 @@ namespace Restore.Tests.Channel
             catch (Exception)
             {
                 Assert.Fail("Expecting exception to be wrapper in a SynchronizationException");
+            }
+        }
+
+        [Test]
+        public async Task ShouldNotWrapSynchExceptionInAnotherException()
+        {
+            var exception = new Exception("Test");
+
+            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                _channelConfig,
+                (item, cfg) =>
+                {
+                    throw exception;
+                },
+                (item, cfg) => new SynchronizationResult(true)));
+
+            ConstructTestSubject();
+            try
+            {
+                await ChannelUnderTest.Synchronize();
+            }
+            catch (ItemSynchronizationException ex)
+            {
+                Assert.AreEqual(exception, ex.InnerException);
             }
         }
     }

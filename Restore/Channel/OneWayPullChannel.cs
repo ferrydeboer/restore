@@ -162,6 +162,11 @@ namespace Restore.Channel
                     }
                 }
             }
+            catch (ItemSynchronizationException)
+            {
+                // Let already wrapped exception through!
+                throw;
+            }
             catch (Exception ex)
             {
                 // This simply end up in a void of another thread. Besides, It can wrap an already existing SynchronizationException

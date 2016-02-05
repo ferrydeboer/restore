@@ -53,7 +53,13 @@ namespace Restore.Tests.Channel
                     return new SynchronizationResult(true);
                 }));
 
-            ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+            ConstructTestSubject();
+        }
+
+        protected void ConstructTestSubject()
+        {
+            ChannelUnderTest = new OneWayPullChannel
+                <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 _channelConfig,
                 () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult(RemoteEndpoint.ReadAll().AsEnumerable()));
