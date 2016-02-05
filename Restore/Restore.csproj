@@ -111,6 +111,7 @@
     <Compile Include="RxProto\OldSynchronizationAction.cs" />
     <Compile Include="RxProto\SynchronizationChannel.cs" />
     <Compile Include="Channel\Configuration\TypeConfiguration.cs" />
+    <Compile Include="SynchronizationException.cs" />
     <Compile Include="SynchronizationResult.cs" />
     <Compile Include="SynchronizationStep.cs" />
   </ItemGroup>

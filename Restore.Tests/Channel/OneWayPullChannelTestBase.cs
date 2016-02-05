@@ -16,7 +16,7 @@ namespace Restore.Tests.Channel
 
         protected InMemoryCrudDataEndpoint<LocalTestResource, int> LocalEndpoint { get; set; }
         protected InMemoryCrudDataEndpoint<RemoteTestResource, int> RemoteEndpoint { get; set; }
-        private ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelConfig;
+        protected ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelConfig;
 
         [SetUp]
         public void SetUpTest()
@@ -55,7 +55,7 @@ namespace Restore.Tests.Channel
 
             ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 _channelConfig,
-                () => Task.FromResult(Enumerable.AsEnumerable<LocalTestResource>(LocalEndpoint.ReadAll())),
+                () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult(RemoteEndpoint.ReadAll().AsEnumerable()));
         }
 

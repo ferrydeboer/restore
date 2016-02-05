@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Restore.Channel;
 using Restore.Matching;
 
 namespace Restore.Tests.Channel
@@ -122,6 +125,58 @@ namespace Restore.Tests.Channel
             Task.WaitAll(task1, task2);
 
             Assert.AreEqual(1, startCallCount);
+        }
+
+        [Test]
+        [ExpectedException(typeof(SynchronizationException), ExpectedMessage = "Data source 2 delivered a null result!")]
+        public async Task ShouldBreakOutOfSynchronizationWhenDataSource2NullData()
+        {
+            // Should I throw an exception if one of the data providers returns null? I simply can not proceed. 
+            // Silently simply stepping out of the execution is not really informative.
+            ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+                _channelConfig,
+                () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
+                () => Task.FromResult((IEnumerable<RemoteTestResource>)null));
+
+            await ChannelUnderTest.Synchronize();
+        }
+
+        [Test]
+        [ExpectedException(typeof(SynchronizationException), ExpectedMessage = "Data source 1 delivered a null result!")]
+        public async Task ShouldBreakOutOfSynchronizationWhenDataSource1NullData()
+        {
+            // Should I throw an exception if one of the data providers returns null? I simply can not proceed. 
+            // Silently simply stepping out of the execution is not really informative.
+            ChannelUnderTest = new OneWayPullChannel
+                <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+                _channelConfig,
+                () => Task.FromResult((IEnumerable<LocalTestResource>) null),
+                () => Task.FromResult((IEnumerable<RemoteTestResource>) null));
+
+            await ChannelUnderTest.Synchronize();
+        }
+
+        [Test]
+        public async Task ShouldThrowSynchronizationExceptionWhenPreprocessingFails()
+        {
+            var exception = new Exception("Test");
+            _channelConfig.ItemsPreprocessor = (resources, enumerable) =>
+            {
+                throw exception;
+            };
+
+            try
+            {
+                await ChannelUnderTest.Synchronize();
+            }
+            catch (SynchronizationException ex)
+            {
+                Assert.AreEqual("Provided items preprocessor failed with message: \"Test\"", ex.Message);
+            }
+            catch (Exception)
+            {
+                Assert.Fail("Expecting exception to be wrapper in a SynchronizationException");
+            }
         }
     }
 }

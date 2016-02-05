@@ -28,8 +28,6 @@ namespace Restore.Matching
             : this(channelConfig.Type1EndpointConfiguration.TypeConfig, channelConfig.Type2EndpointConfiguration.TypeConfig)
         {
             if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
-
-            // ChannelConfig = channelConfig;
         }
 
         /*
@@ -47,6 +45,7 @@ namespace Restore.Matching
             if (result2 == null) { throw new ArgumentNullException(nameof(result2)); }
 
             // The disadvantage is that this can be blocking countrary to IObservable.
+            // Making an extension method where we choose to have that one blocking I could iterate on the enumerable of which I know it it blocking.
             var result1List = result1.ToList();
             var result2List = result2.ToList();
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -68,8 +69,7 @@ namespace Restore.Channel
             await LockSync(async () =>
             {
                 var t1DataEnum = await _t1DataSource();
-                var t1Data = t1DataEnum.ToList();
-                await Synchronize(t1Data);
+                await Synchronize(t1DataEnum);
             });
         }
 
@@ -138,41 +138,16 @@ namespace Restore.Channel
         {
             OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
 
-            // TODO: We should either make sure this doesn't fail or otherwise wrap in a SynchronizationStartException...
+            var pipeline = await BuildSynchPipeline(input);
 
-            // TODO: Awaiting the data source(s) should become part of the pipeline!
-            // This is hard however, and not neccesarily relevant since all should occur on another thread.
-            // Input    -> T1 Data Source.
-            // Output   -> SynchronizationResults.
-            // Refactor, do this first, only do remaining work in thread.
-            var t1Data = input;
-            var t2Data = await _t2DataSource().ConfigureAwait(false);
-
-            // TODO: Check t2Data for null. In that case we should simply stop further execution.
-            var pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
-
-            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
-            {
-                listener(item);
-                return item;
-            }));
-
-            int itemsProcessed = 0;
-            var endPipeline = pipeline
-                .Do(_ => itemsProcessed++)
-                .ResolveChange(_resolutionStep)
-                .Where(action =>
-                {
-                    return action.Applicant != null;
-                }) // Filter out NullSynchActions, which don't have an applicant instance.
-                .DispatchChange(_dispatchStep);
-
-            // Pump items out at the end of the sequence. In the end is probably responsibility of separate
-            // class.
-            int itemsSynchronized = 0;
+            // The problem with this type of error handling is that is does not allow us ignore errors and continue enumeration.
+            // However, it should be up to the implementor to distinguish expected failures like validation from actual exceptions
+            // that imply there is something really wrong.
             try
             {
-                foreach (SynchronizationResult result in endPipeline)
+                // Pump items out at the end of the sequence. In the end is probably responsibility of separate
+                // class.
+                foreach (SynchronizationResult result in pipeline)
                 {
                     // Only once synchroniazation is completely done we can actually 100 % sure
                     // evaluate succes on the SynchronizationResults. For instance, deleting expenses is supported as a batch/bulk operation.
@@ -183,18 +158,59 @@ namespace Restore.Channel
                     }
                     else
                     {
-                        itemsSynchronized++;
+                        pipeline.ItemsSynchronized++;
                     }
                 }
             }
             catch (Exception ex)
             {
-                // This simply end up in a void of another thread.
+                // This simply end up in a void of another thread. Besides, It can wrap an already existing SynchronizationException
                 throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
             }
 
-            // This can fail because it for instance runs a transaction.
-            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), itemsProcessed, itemsSynchronized));
+            // This can fail because it for instance runs a transaction. Then what?
+            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
+        }
+
+        private async Task<SynchPipeline> BuildSynchPipeline(IEnumerable<T1> t1Data)
+        {
+            if (t1Data == null)
+            {
+                throw new SynchronizationException("Data source 1 delivered a null result!");
+            }
+
+            // TODO: Awaiting the data source(s) should become part of the pipeline.
+            var t2Data = await _t2DataSource().ConfigureAwait(false);
+            if (t2Data == null)
+            {
+                throw new SynchronizationException("Data source 2 delivered a null result!");
+            }
+
+            IEnumerable<TSynch> pipeline;
+            try
+            {
+                pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
+            }
+            catch (Exception ex)
+            {
+                throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"");
+            }
+
+            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
+            {
+                listener(item);
+                return item;
+            }));
+
+            var synchPipeline = new SynchPipeline();
+            var endPipeline = pipeline
+                .Do(_ => synchPipeline.ItemsProcessed++)
+                .ResolveChange(_resolutionStep)
+                .Where(action => action.Applicant != null) // Filter out NullSynchActions, which don't have an applicant instance.
+                .DispatchChange(_dispatchStep);
+            synchPipeline.Pipeline = endPipeline;
+
+            return synchPipeline;
         }
 
         private async Task LockSync(Func<Task> mechanism)
@@ -264,6 +280,24 @@ namespace Restore.Channel
             {
                 _lockSemaphore.Dispose();
                 _lockSemaphore = null;
+            }
+        }
+
+        private class SynchPipeline : IEnumerable<SynchronizationResult>
+        {
+            public int ItemsProcessed { get; set; }
+            public int ItemsSynchronized { get; set; }
+
+            public IEnumerable<SynchronizationResult> Pipeline { private get; set; }
+
+            public IEnumerator<SynchronizationResult> GetEnumerator()
+            {
+                return Pipeline.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
     }
