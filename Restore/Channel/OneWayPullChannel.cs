@@ -16,7 +16,8 @@ namespace Restore.Channel
         : ISynchChannel<T1, T2, TSynch>, IOneWayPullChannel<T1>, IDisposable
         where TId : IEquatable<TId>
     {
-        [NotNull] private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfig;
+        [NotNull]
+        public IChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
 
         /// <summary>
         /// Didn't want to make this part of the more general configuration. It's not decided yet how to further work with data sources
@@ -47,7 +48,7 @@ namespace Restore.Channel
             if (t1DataSource == null) { throw new ArgumentNullException(nameof(t1DataSource)); }
             if (t2DataSource == null) { throw new ArgumentNullException(nameof(t2DataSource)); }
 
-            _channelConfig = channelConfig;
+            ChannelConfig = channelConfig;
             _t1DataSource = t1DataSource;
             _t2DataSource = t2DataSource;
 
@@ -89,7 +90,7 @@ namespace Restore.Channel
         {
             var t1DataEnum = await _t1DataSource();
             var t1Data = t1DataEnum.ToList();
-            var attachedObservableCollection = new AttachedObservableCollection<T1>(t1Data, _channelConfig.Type1EndpointConfiguration.Endpoint);
+            var attachedObservableCollection = new AttachedObservableCollection<T1>(t1Data, ChannelConfig.Type1EndpointConfiguration.Endpoint);
             await LockSync(async () =>
             {
                 if (condition)
@@ -119,7 +120,7 @@ namespace Restore.Channel
             {
                 if (!OnError(ex))
                 {
-                    throw ex;
+                    throw ex; // This never arrives anywhere given this method is async void!
                 }
             }
         }
@@ -162,18 +163,26 @@ namespace Restore.Channel
                     }
                 }
             }
-            catch (ItemSynchronizationException)
+            catch (ItemSynchronizationException ex)
             {
-                // Let already wrapped exception through!
-                throw;
+                if (!OnError(ex))
+                {
+                    // Let already wrapped exception through!
+                    throw;
+                }
             }
             catch (Exception ex)
             {
-                // This simply end up in a void of another thread. Besides, It can wrap an already existing SynchronizationException
-                throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+                if (!OnError(ex))
+                {
+                    // This simply end up in a void of another thread. Besides, It can wrap an already existing SynchronizationException
+                    throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+                }
             }
 
             // This can fail because it for instance runs a transaction. Then what?
+            // Should we instead always raise a synchronization finished regardless of the outcome?
+            // Only when this is really relevant we can further decide on this.
             OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
         }
 
@@ -194,7 +203,7 @@ namespace Restore.Channel
             IEnumerable<TSynch> pipeline;
             try
             {
-                pipeline = _channelConfig.ItemsPreprocessor(t1Data, t2Data);
+                pipeline = ChannelConfig.ItemsPreprocessor(t1Data, t2Data);
             }
             catch (Exception ex)
             {
@@ -290,8 +299,18 @@ namespace Restore.Channel
 
         private class SynchPipeline : IEnumerable<SynchronizationResult>
         {
+            private int _itemsSynchronized;
             public int ItemsProcessed { get; set; }
-            public int ItemsSynchronized { get; set; }
+
+            public int ItemsSynchronized
+            {
+                get { return _itemsSynchronized; }
+                set
+                {
+                    Debug.WriteLine($"{GetHashCode()} - Raising ItemsSycnhronized from {_itemsSynchronized} to {value}");
+                    _itemsSynchronized = value;
+                }
+            }
 
             public IEnumerable<SynchronizationResult> Pipeline { private get; set; }
 
@@ -303,6 +322,12 @@ namespace Restore.Channel
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return GetEnumerator();
+            }
+
+            public void Reset()
+            {
+                ItemsProcessed = 0;
+                ItemsSynchronized = 0;
             }
         }
     }
