@@ -25,5 +25,6 @@ namespace Restore.Channel
         void AddSynchronizationFinishedObserver([NotNull] Action<SynchronizationFinished> observer);
 
         // TODO: Error handling policies neccesary for a rollback.
+        bool IsSynchronizing { get; }
     }
 }
