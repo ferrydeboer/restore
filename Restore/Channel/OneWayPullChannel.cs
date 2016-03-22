@@ -60,6 +60,15 @@ namespace Restore.Channel
 
         public bool IsSynchronizing => _isSynchronizing;
 
+        public void AddChannelObserver([NotNull] ChannelObserver observer)
+        {
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
+
+            AddSynchronizationStartedObserver(observer.OnStarted);
+            AddSynchronizationFinishedObserver(observer.OnFinished);
+            AddSynchronizationErrorObserver(observer.OnError);
+        }
+
         /// <summary>
         /// Synchronize will only run once. If being called by another thread at this stage of development
         /// it will simply ignore the call.

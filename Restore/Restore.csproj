@@ -74,6 +74,7 @@
     <Compile Include="ChangeResolution\SynchronizationAction.cs" />
     <Compile Include="ChangeType.cs" />
     <Compile Include="Channel\AttachedObservableCollection.cs" />
+    <Compile Include="Channel\ChannelObserver.cs" />
     <Compile Include="Channel\Configuration\ChannelConfiguration.cs" />
     <Compile Include="Channel\Configuration\EndpointConfiguration.cs" />
     <Compile Include="Channel\IOneWayPullChannel.cs" />
