@@ -79,6 +79,8 @@
     <Compile Include="Channel\IOneWayPullChannel.cs" />
     <Compile Include="Channel\ISynchChannel.cs" />
     <Compile Include="Channel\OneWayPullChannel.cs" />
+    <Compile Include="Channel\SynchronizationError.cs" />
+    <Compile Include="Channel\SynchronizationEvent.cs" />
     <Compile Include="Channel\SynchronizationFinished.cs" />
     <Compile Include="Channel\SynchronizationStarted.cs" />
     <Compile Include="DataChangeEventArgs.cs" />

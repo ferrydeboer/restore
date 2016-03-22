@@ -2,7 +2,7 @@ using System;
 
 namespace Restore.Channel
 {
-    public class SynchronizationFinished : SynchronizationStarted
+    public class SynchronizationFinished : SynchronizationEvent
     {
         public SynchronizationFinished(Type type1, Type type2, int itemsProcessed, int itemsSynchronized)
             : base(type1, type2)

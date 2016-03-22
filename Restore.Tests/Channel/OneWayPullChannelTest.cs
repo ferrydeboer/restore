@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Restore.ChangeResolution;
 using Restore.Channel;
@@ -202,6 +203,26 @@ namespace Restore.Tests.Channel
             {
                 Assert.AreEqual(exception, ex.InnerException);
             }
+        }
+
+        [Test]
+        public void ShouldNotThrowExceptionIfHandledByObserver()
+        {
+            var exception = new Exception("Test");
+            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                _channelConfig,
+                (item, cfg) =>
+                {
+                    throw exception;
+                },
+                (item, cfg) => new SynchronizationResult(true)));
+
+            ConstructTestSubject();
+            ChannelUnderTest.AddSynchronizationErrorObserver(error =>
+            {
+                Assert.AreEqual(exception, error.Cause);
+                error.IsHandled = true;
+            });
         }
     }
 }

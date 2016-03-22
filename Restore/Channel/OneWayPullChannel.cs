@@ -35,6 +35,7 @@ namespace Restore.Channel
 
         private event Action<SynchronizationStarted> SynchronizationStart;
         private event Action<SynchronizationFinished> SynchronizationFinished;
+        private event Action<SynchronizationError> SynchronizationError;
 
         private SemaphoreSlim _lockSemaphore = new SemaphoreSlim(1);
         private bool _isSynchronizing;
@@ -132,20 +133,22 @@ namespace Restore.Channel
         /// <returns>True if the error is handled.</returns>
         protected virtual bool OnError(Exception exception)
         {
-            return false;
+            // First pass to handlers
+            var synchronizationError = new SynchronizationError(typeof(T1), typeof(T2), exception);
+            OnSynchronizationError(synchronizationError);
+            return synchronizationError.IsHandled;
         }
 
         protected async Task Synchronize(IEnumerable<T1> input)
         {
             OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
 
-            var pipeline = await BuildSynchPipeline(input);
-
             // The problem with this type of error handling is that is does not allow us ignore errors and continue enumeration.
             // However, it should be up to the implementor to distinguish expected failures like validation from actual exceptions
             // that imply there is something really wrong.
             try
             {
+                var pipeline = await BuildSynchPipeline(input);
                 // Pump items out at the end of the sequence. In the end is probably responsibility of separate
                 // class.
                 foreach (SynchronizationResult result in pipeline)
@@ -162,6 +165,11 @@ namespace Restore.Channel
                         pipeline.ItemsSynchronized++;
                     }
                 }
+
+                // This can fail because it for instance runs a transaction. Then what?
+                // Should we instead always raise a synchronization finished regardless of the outcome?
+                // Only when this is really relevant we can further decide on this.
+                OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
             }
             catch (ItemSynchronizationException ex)
             {
@@ -179,11 +187,6 @@ namespace Restore.Channel
                     throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
                 }
             }
-
-            // This can fail because it for instance runs a transaction. Then what?
-            // Should we instead always raise a synchronization finished regardless of the outcome?
-            // Only when this is really relevant we can further decide on this.
-            OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
         }
 
         private async Task<SynchPipeline> BuildSynchPipeline(IEnumerable<T1> t1Data)
@@ -272,6 +275,12 @@ namespace Restore.Channel
             SynchronizationFinished += observer;
         }
 
+        public void AddSynchronizationErrorObserver(Action<SynchronizationError> observer)
+        {
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
+            SynchronizationError += observer;
+        }
+
         protected virtual void OnSynchronizationStart(SynchronizationStarted eventArgs)
         {
             SynchronizationStart?.Invoke(eventArgs);
@@ -280,6 +289,11 @@ namespace Restore.Channel
         protected virtual void OnSynchronizationFinished(SynchronizationFinished eventArgs)
         {
             SynchronizationFinished?.Invoke(eventArgs);
+        }
+
+        protected virtual void OnSynchronizationError(SynchronizationError eventArgs)
+        {
+            SynchronizationError?.Invoke(eventArgs);
         }
 
         public void Dispose()
