@@ -180,7 +180,7 @@ namespace Restore.Channel
                 // Only when this is really relevant we can further decide on this.
                 OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
             }
-            catch (ItemSynchronizationException ex)
+            catch (SynchronizationException ex)
             {
                 if (!OnError(ex))
                 {

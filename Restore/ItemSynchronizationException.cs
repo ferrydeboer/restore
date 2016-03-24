@@ -2,7 +2,7 @@ using System;
 
 namespace Restore
 {
-    public class ItemSynchronizationException : Exception
+    public class ItemSynchronizationException : SynchronizationException
     {
         /// <summary>
         /// Gets the item that was being processed by a step and failed.
