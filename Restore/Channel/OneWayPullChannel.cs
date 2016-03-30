@@ -252,7 +252,6 @@ namespace Restore.Channel
         private async Task LockSync(Func<Task> mechanism)
         {
             // Prevent synchronization of this channel to run on multiple threads.
-            // REVIEW SYNCH: Add tests with callers from multiple threads.
             if (await _lockSemaphore.WaitAsync(0))
             {
                 _isSynchronizing = true;
