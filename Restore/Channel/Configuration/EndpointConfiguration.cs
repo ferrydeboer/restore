@@ -15,6 +15,7 @@ namespace Restore.Channel.Configuration
         public EndpointConfiguration(TypeConfiguration<T, TId> typeConfig, ICrudEndpoint<T, TId> endpoint)
         {
             TypeConfig = typeConfig;
+            // REVIEW SYNCH: AFAIK The endpoint may be null here. I would add a check.
             Endpoint = endpoint;
         }
 
