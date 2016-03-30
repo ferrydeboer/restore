@@ -96,6 +96,7 @@ namespace Restore.Channel
         /// <param name="condition">Delegate decision to actually refresh/synchronize. Should not
         /// be responsiblity of the channel, and since we only need this in a single scenario this
         /// suffices.</param>
+        /// REVIEW SYNCH: Is this going to be used/tested?
         public async Task<AttachedObservableCollection<T1>> Drain(bool condition)
         {
             var t1DataEnum = await _t1DataSource();
@@ -140,6 +141,7 @@ namespace Restore.Channel
         /// </summary>
         /// <param name="exception">The exception that was thrown.</param>
         /// <returns>True if the error is handled.</returns>
+        /// REVIEW SYNCH: How does this ever return true?
         protected virtual bool OnError(Exception exception)
         {
             // First pass to handlers
@@ -242,7 +244,8 @@ namespace Restore.Channel
         private async Task LockSync(Func<Task> mechanism)
         {
             // Prevent synchronization of this channel to run on multiple threads.
-            if (await _lockSemaphore.WaitAsync(0))
+            // REVIEW SYNCH: Add tests with callers from multiple threads.
+            if(await _lockSemaphore.WaitAsync(0))
             {
                 _isSynchronizing = true;
                 try
