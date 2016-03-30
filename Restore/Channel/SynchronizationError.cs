@@ -7,7 +7,7 @@ namespace Restore.Channel
         public Exception Cause { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating if handled by a handler. If true after all handlers are called the Cause is not wrapped and thrown in a <see cref="SynchronizationException"/>
+        /// Gets or sets a value indicating whether handled by a handler. If true after all handlers are called the Cause is not wrapped and thrown in a <see cref="SynchronizationException"/>
         /// </summary>
         public bool IsHandled { get; set; }
 

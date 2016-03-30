@@ -30,11 +30,10 @@ namespace Restore.Tests.Matching
                 async rde =>
                 {
                     Debug.WriteLine("Loading remote data!");
-                    if(rde != null) {
+                    if (rde != null) {
                         return await rde.GetAllAsync();
                     }
                     return null;
-                    //return (await rde?.GetAllAsync() ?? Task.FromResult<IEnumerable<RemoteTestResource>>(null));
                 });
 
             replicator.QueryReplicated += (sender, args) =>

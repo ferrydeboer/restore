@@ -133,10 +133,10 @@ namespace Restore.Tests.Channel
         [ExpectedException(typeof(SynchronizationException), ExpectedMessage = "Data source 2 delivered a null result!")]
         public async Task ShouldBreakOutOfSynchronizationWhenDataSource2NullData()
         {
-            // Should I throw an exception if one of the data providers returns null? I simply can not proceed. 
+            // Should I throw an exception if one of the data providers returns null? I simply can not proceed.
             // Silently simply stepping out of the execution is not really informative.
             ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                _channelConfig,
+                ChannelConfig,
                 () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult((IEnumerable<RemoteTestResource>)null));
 
@@ -147,13 +147,13 @@ namespace Restore.Tests.Channel
         [ExpectedException(typeof(SynchronizationException), ExpectedMessage = "Data source 1 delivered a null result!")]
         public async Task ShouldBreakOutOfSynchronizationWhenDataSource1NullData()
         {
-            // Should I throw an exception if one of the data providers returns null? I simply can not proceed. 
+            // Should I throw an exception if one of the data providers returns null? I simply can not proceed.
             // Silently simply stepping out of the execution is not really informative.
             ChannelUnderTest = new OneWayPullChannel
                 <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                _channelConfig,
-                () => Task.FromResult((IEnumerable<LocalTestResource>) null),
-                () => Task.FromResult((IEnumerable<RemoteTestResource>) null));
+                ChannelConfig,
+                () => Task.FromResult((IEnumerable<LocalTestResource>)null),
+                () => Task.FromResult((IEnumerable<RemoteTestResource>)null));
 
             await ChannelUnderTest.Synchronize();
         }
@@ -162,7 +162,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldThrowSynchronizationExceptionWhenPreprocessingFails()
         {
             var exception = new Exception("Test");
-            _channelConfig.ItemsPreprocessor = (resources, enumerable) =>
+            ChannelConfig.ItemsPreprocessor = (resources, enumerable) =>
             {
                 throw exception;
             };
@@ -186,8 +186,8 @@ namespace Restore.Tests.Channel
         {
             var exception = new Exception("Test");
 
-            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
-                _channelConfig,
+            ChannelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                ChannelConfig,
                 (item, cfg) =>
                 {
                     throw exception;
@@ -209,8 +209,8 @@ namespace Restore.Tests.Channel
         public void ShouldNotThrowExceptionIfHandledByObserver()
         {
             var exception = new Exception("Test");
-            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
-                _channelConfig,
+            ChannelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource, RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                ChannelConfig,
                 (item, cfg) =>
                 {
                     throw exception;

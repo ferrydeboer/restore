@@ -158,6 +158,7 @@ namespace Restore.Channel
             try
             {
                 var pipeline = await BuildSynchPipeline(input);
+
                 // Pump items out at the end of the sequence. In the end is probably responsibility of separate
                 // class.
                 foreach (SynchronizationResult result in pipeline)

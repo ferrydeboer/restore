@@ -16,7 +16,7 @@ namespace Restore.Tests.Channel
 
         protected InMemoryCrudDataEndpoint<LocalTestResource, int> LocalEndpoint { get; set; }
         protected InMemoryCrudDataEndpoint<RemoteTestResource, int> RemoteEndpoint { get; set; }
-        protected ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _channelConfig;
+        protected ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> ChannelConfig { get; set; }
 
         [SetUp]
         public void SetUpTest()
@@ -34,11 +34,11 @@ namespace Restore.Tests.Channel
                 RemoteEndpoint);
 
             // This clearly requires a configuration API.
-            _channelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
-            var itemsPreprocessor = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(_channelConfig);
-            _channelConfig.ItemsPreprocessor = itemsPreprocessor.Match;
-            _channelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource,RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
-                _channelConfig,
+            ChannelConfig = new ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(endpoint1Config, endpoint2Config, new TestResourceTranslator());
+            var itemsPreprocessor = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(ChannelConfig);
+            ChannelConfig.ItemsPreprocessor = itemsPreprocessor.Match;
+            ChannelConfig.AddSynchAction(new SynchronizationResolver<ItemMatch<LocalTestResource,RemoteTestResource>, ChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>>(
+                ChannelConfig,
                 (item, cfg) =>
                 {
                     return item.Result1 == null;
@@ -60,7 +60,7 @@ namespace Restore.Tests.Channel
         {
             ChannelUnderTest = new OneWayPullChannel
                 <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                _channelConfig,
+                ChannelConfig,
                 () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult(RemoteEndpoint.ReadAll().AsEnumerable()));
         }

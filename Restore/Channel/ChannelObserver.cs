@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Restore.Channel
+﻿namespace Restore.Channel
 {
     /// <summary>
     /// Not in use yet. Was contemplating between attaching handlers using another component (lets call them appenders)
     /// under certain conditions or wether to inject a list of Observers. Now I think it's going to be a mix of both.
-    /// So I still keep appenders, but they just add observers. The appenders should run in a specific order because 
+    /// So I still keep appenders, but they just add observers. The appenders should run in a specific order because
     /// the observers need to be attached in a specific order in certain cases.
-    /// 
+    ///
     /// There's also the Individual item oberservers. For this I need something else probably. But cunstruction of the pipeline
     /// is going to change most probably anyway.
     /// </summary>
