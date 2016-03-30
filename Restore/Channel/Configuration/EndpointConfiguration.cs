@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 
 namespace Restore.Channel.Configuration
 {
@@ -12,10 +13,13 @@ namespace Restore.Channel.Configuration
     public class EndpointConfiguration<T, TId> : IEndpointConfiguration<T, TId>
         where TId : IEquatable<TId>
     {
-        public EndpointConfiguration(TypeConfiguration<T, TId> typeConfig, ICrudEndpoint<T, TId> endpoint)
+        public EndpointConfiguration(
+            [NotNull] TypeConfiguration<T, TId> typeConfig,
+            [NotNull] ICrudEndpoint<T, TId> endpoint)
         {
+            if (typeConfig == null) { throw new ArgumentNullException(nameof(typeConfig)); }
+            if (endpoint == null) { throw new ArgumentNullException(nameof(endpoint)); }
             TypeConfig = typeConfig;
-            // REVIEW SYNCH: AFAIK The endpoint may be null here. I would add a check.
             Endpoint = endpoint;
         }
 

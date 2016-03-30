@@ -34,7 +34,7 @@ namespace Restore.Matching
         [NotNull]
         public ChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
         */
-        // REVIEW SYNCH: How about Enumerable.Intersect ?
+
         [NotNull]
         public IEnumerable<ItemMatch<T1, T2>> Match(
             [NotNull] IEnumerable<T1> result1,

@@ -96,7 +96,6 @@ namespace Restore.Channel
         /// <param name="condition">Delegate decision to actually refresh/synchronize. Should not
         /// be responsiblity of the channel, and since we only need this in a single scenario this
         /// suffices.</param>
-        /// REVIEW SYNCH: Is this going to be used/tested?
         public async Task<AttachedObservableCollection<T1>> Drain(bool condition)
         {
             var t1DataEnum = await _t1DataSource();
@@ -141,7 +140,6 @@ namespace Restore.Channel
         /// </summary>
         /// <param name="exception">The exception that was thrown.</param>
         /// <returns>True if the error is handled.</returns>
-        /// REVIEW SYNCH: How does this ever return true?
         protected virtual bool OnError(Exception exception)
         {
             // First pass to handlers
@@ -209,7 +207,16 @@ namespace Restore.Channel
             }
 
             // TODO: Awaiting the data source(s) should become part of the pipeline.
-            var t2Data = await _t2DataSource().ConfigureAwait(false);
+            IEnumerable<T2> t2Data;
+            try
+            {
+                t2Data = await _t2DataSource().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new SynchronizationException($"Retrieving data from Data Source 2 failed with message: \"{ex.Message}\"", ex);
+            }
+
             if (t2Data == null)
             {
                 throw new SynchronizationException("Data source 2 delivered a null result!");
@@ -222,7 +229,7 @@ namespace Restore.Channel
             }
             catch (Exception ex)
             {
-                throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"");
+                throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"", ex);
             }
 
             pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
@@ -246,7 +253,7 @@ namespace Restore.Channel
         {
             // Prevent synchronization of this channel to run on multiple threads.
             // REVIEW SYNCH: Add tests with callers from multiple threads.
-            if(await _lockSemaphore.WaitAsync(0))
+            if (await _lockSemaphore.WaitAsync(0))
             {
                 _isSynchronizing = true;
                 try

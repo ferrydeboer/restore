@@ -23,7 +23,6 @@ namespace Restore.Channel
     /// </p>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// REVIEW SYNCH: Are you planning to write tests for this?
     public class AttachedObservableCollection<T> : ObservableCollection<T>, IDisposable
     {
         private readonly IEqualityComparer<T> _changeComparer;
@@ -92,12 +91,13 @@ namespace Restore.Channel
 
         // https://stackoverflow.com/questions/151051/when-should-i-use-gc-suppressfinalize
         // how about implementing the finalizer?
+        // Implemented like this because of CA1063. But we don't even have a finalizer.
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        // REVIEW SYNCH: Is this going to be used?
+
         public ObservableCollection<T> Where([NotNull] Func<T, bool> predicate)
         {
             if (predicate == null)
