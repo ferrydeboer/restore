@@ -15,5 +15,20 @@ namespace Restore
             Item = item;
             Change = change;
         }
+
+        public static DataChangeEventArgs<T> Create(T item)
+        {
+            return new DataChangeEventArgs<T>(item, ChangeType.Create);
+        }
+
+        public static DataChangeEventArgs<T> Update(T item)
+        {
+            return new DataChangeEventArgs<T>(item, ChangeType.Update);
+        }
+
+        public static DataChangeEventArgs<T> Delete(T item)
+        {
+            return new DataChangeEventArgs<T>(item, ChangeType.Delete);
+        }
     }
 }
