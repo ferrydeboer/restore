@@ -85,6 +85,7 @@
     <Compile Include="Channel\SynchronizationEvent.cs" />
     <Compile Include="Channel\SynchronizationFinished.cs" />
     <Compile Include="Channel\SynchronizationStarted.cs" />
+    <Compile Include="CrudEndpoint.cs" />
     <Compile Include="DataChangeEventArgs.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObservableCollectionExtensions.cs" />
