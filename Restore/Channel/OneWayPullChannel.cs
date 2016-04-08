@@ -17,6 +17,12 @@ namespace Restore.Channel
         where TId : IEquatable<TId>
     {
         [NotNull]
+        public Type Type1 { get; } = typeof(T1);
+
+        [NotNull]
+        public Type Type2 { get; } = typeof(T2);
+
+        [NotNull]
         public IChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
 
         /// <summary>

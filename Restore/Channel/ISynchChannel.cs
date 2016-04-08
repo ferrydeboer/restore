@@ -11,6 +11,12 @@ namespace Restore.Channel
 
     public interface ISynchChannel
     {
+        [NotNull]
+        Type Type1 { get; }
+
+        [NotNull]
+        Type Type2 { get; }
+
         // Synchronizes resources using given configuration.
         Task Synchronize();
 
