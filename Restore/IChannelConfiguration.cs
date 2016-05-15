@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Restore.ChangeResolution;
-using Restore.Channel.Configuration;
-using Restore.RxProto;
 
 namespace Restore
 {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
 using Restore.ChangeResolution;
-using Restore.RxProto;
 
 namespace Restore.Tests.ChangeResolution
 {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Restore.RxProto;
 
 namespace Restore.ChangeResolution
 {
