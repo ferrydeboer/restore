@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using NUnit.Framework;
 using Restore.Matching;
 
@@ -8,48 +7,80 @@ namespace Restore.Tests.Matching
     [TestFixture]
     public class SingleItemCompletionMatcherTest
     {
+        private TestConfiguration _channelConfiguration;
+        private SingleItemCompletionMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _matcherUnderTest;
+        private Type _completionSourceType;
+
         [SetUp]
         public void SetUpTest()
         {
-            var x = "test";
+            _channelConfiguration = new TestConfiguration();
+            _completionSourceType = typeof(LocalTestResource);
+            ConstructTestSubject();
+        }
+
+        private void ConstructTestSubject()
+        {
+            _matcherUnderTest = new SingleItemCompletionMatcher
+                <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+                _channelConfiguration,
+                _completionSourceType);
         }
 
         [Test]
-        public void ShouldTryMatchFromGivenSourceType()
+        public void ShouldTryMatchFromGivenSourceType1()
         {
-            // I need a complete configuration in order for this object to work. :o
-            var channelConfiguration = new TestConfiguration();
-            var _matcherUnderTest = new SingleItemCompletionMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                channelConfiguration,
-                typeof(LocalTestResource));
-
             // Add resource that should be retrieved by matcher
-            channelConfiguration.Type1EndpointConfiguration.Endpoint.Create(new LocalTestResource(1, 10));
+            var localTestResource = new LocalTestResource(1, 10);
+            _channelConfiguration.Type1EndpointConfiguration.Endpoint.Create(localTestResource);
 
             var testMatch = new ItemMatch<LocalTestResource, RemoteTestResource>(
                 null,
                 new RemoteTestResource(1, "Missing"));
-            _matcherUnderTest.Complete(testMatch);
+            var resultMatch = _matcherUnderTest.Complete(testMatch);
 
-            Assert.IsNotNull(testMatch.Result1);
-        }
-    }
-
-    public class SingleItemCompletionMatcher<T1, T2, TId, TSynch>
-        where TId : IEquatable<TId>
-    {
-        private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfiguration;
-        private readonly Type _completionSourceType;
-
-        public SingleItemCompletionMatcher(IChannelConfiguration<T1, T2, TId, TSynch> channelConfiguration, Type completionSourceType)
-        {
-            _channelConfiguration = channelConfiguration;
-            _completionSourceType = completionSourceType;
+            Assert.IsNotNull(resultMatch.Result1);
+            Assert.AreEqual(localTestResource, resultMatch.Result1);
         }
 
-        public void Complete(ItemMatch<LocalTestResource, RemoteTestResource> itemMatch)
+        [Test]
+        public void ShouldTryMatchFromGivenSourceType2()
         {
-            
+            _completionSourceType = typeof(RemoteTestResource);
+            ConstructTestSubject();
+            var remoteTestResource = new RemoteTestResource(1, "test");
+            _channelConfiguration.Type2EndpointConfiguration.Endpoint.Create(remoteTestResource);
+
+            var testMatch = new ItemMatch<LocalTestResource, RemoteTestResource>(
+                new LocalTestResource(1, 10), null);
+            var resultMatch = _matcherUnderTest.Complete(testMatch);
+
+            Assert.IsNotNull(resultMatch.Result2);
+            Assert.AreEqual(remoteTestResource, resultMatch.Result2);
+        }
+
+        [Test]
+        public void ShouldReturnSourceWhenReallyNoOppositeT1()
+        {
+            var testMatch = new ItemMatch<LocalTestResource, RemoteTestResource>(
+                null,
+                new RemoteTestResource(1, "Missing"));
+            var resultMatch = _matcherUnderTest.Complete(testMatch);
+
+            Assert.IsNull(resultMatch.Result1);
+        }
+
+        [Test]
+        public void ShouldReturnSourceWhenReallyNoOppositeT2()
+        {
+            _completionSourceType = typeof(RemoteTestResource);
+            ConstructTestSubject();
+            var testMatch = new ItemMatch<LocalTestResource, RemoteTestResource>(
+                new LocalTestResource(1),
+                null);
+            var resultMatch = _matcherUnderTest.Complete(testMatch);
+
+            Assert.IsNull(resultMatch.Result2);
         }
     }
 }

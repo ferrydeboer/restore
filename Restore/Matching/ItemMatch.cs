@@ -6,7 +6,12 @@ namespace Restore.Matching
     public class ItemMatch<T1, T2>
     {
         public T1 Result1 { get; }
+
         public T2 Result2 { get; }
+
+        public bool IsComplete =>
+            !EqualityComparer<T1>.Default.Equals(Result1, default(T1))
+            && !EqualityComparer<T2>.Default.Equals(Result2, default(T2));
 
         public ItemMatch(T1 result1, T2 result2)
         {

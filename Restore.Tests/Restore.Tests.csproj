@@ -67,9 +67,11 @@
     <Compile Include="LocalTestResourceIdComparer.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatchingStepTest.cs" />
+    <Compile Include="Matching\SingleItemCompletionMatcherTest.cs" />
     <Compile Include="TestAsyncDataEndpoint.cs" />
     <Compile Include="RemoteTestResource.cs" />
     <Compile Include="Matching\PredefinedQueryReplicatorTest.cs" />
+    <Compile Include="TestConfiguration.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="TestResource.cs" />
   </ItemGroup>

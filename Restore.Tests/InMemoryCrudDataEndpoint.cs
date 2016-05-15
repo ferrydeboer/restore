@@ -11,7 +11,9 @@ namespace Restore.Tests
     {
         [NotNull] private readonly IEqualityComparer<T> _comparer;
         [NotNull] private readonly IDictionary<TId, T> _items = new Dictionary<TId, T>();
-        [NotNull] private readonly TypeConfiguration<T, TId> _typeConfig;
+
+        [NotNull]
+        public TypeConfiguration<T, TId> TypeConfig { get; }
 
         public event EventHandler<DataChangeEventArgs<T>> ItemCreated;
 
@@ -46,7 +48,7 @@ namespace Restore.Tests
         {
             if (typeConfig == null) { throw new ArgumentNullException(nameof(typeConfig)); }
 
-            _typeConfig = typeConfig;
+            TypeConfig = typeConfig;
             _comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
@@ -58,9 +60,9 @@ namespace Restore.Tests
         public void Create([NotNull] T item)
         {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
-            if (_items.ContainsKey(_typeConfig.IdExtractor(item))) { throw new ArgumentException("Item already exists"); }
+            if (_items.ContainsKey(TypeConfig.IdExtractor(item))) { throw new ArgumentException("Item already exists"); }
 
-            _items.Add(_typeConfig.IdExtractor(item), item);
+            _items.Add(TypeConfig.IdExtractor(item), item);
             OnItemCreated(item);
 
             // return item;
@@ -76,7 +78,7 @@ namespace Restore.Tests
         public void Update(T item)
         {
             // Just replace the instance if it exists.
-            var itemId = _typeConfig.IdExtractor(item);
+            var itemId = TypeConfig.IdExtractor(item);
             var inlist = Read(itemId);
             if (!_comparer.Equals(inlist, default(T)))
             {
@@ -93,7 +95,7 @@ namespace Restore.Tests
 
         public void Delete(T item)
         {
-            if (_items.Remove(_typeConfig.IdExtractor(item)))
+            if (_items.Remove(TypeConfig.IdExtractor(item)))
             {
                 OnItemDeleted(item);
 
