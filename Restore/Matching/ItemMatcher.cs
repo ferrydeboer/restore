@@ -24,7 +24,7 @@ namespace Restore.Matching
             _t2Config = t2Config;
         }
 
-        public ItemMatcher([NotNull] ChannelConfiguration<T1, T2, TId, TSynch> channelConfig)
+        public ItemMatcher([NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig)
             : this(channelConfig.Type1EndpointConfiguration.TypeConfig, channelConfig.Type2EndpointConfiguration.TypeConfig)
         {
             if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
