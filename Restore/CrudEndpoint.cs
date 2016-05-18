@@ -9,10 +9,12 @@ namespace Restore
         public event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
         public event EventHandler<DataChangeEventArgs<T>> ItemDeleted;
 
-        public void Create(T item)
+        public T Create(T item)
         {
-            DoCreate(item);
+            var result = DoCreate(item);
             OnItemCreated(DataChangeEventArgs<T>.Create(item));
+
+            return result;
         }
 
         public virtual T Read(TId id)
@@ -20,21 +22,25 @@ namespace Restore
             return default(T);
         }
 
-        public void Update(T item)
+        public T Update(T item)
         {
-            DoUpdate(item);
+            var result = DoUpdate(item);
             OnItemUpdated(DataChangeEventArgs<T>.Update(item));
+
+            return result;
         }
 
-        public void Delete(T item)
+        public T Delete(T item)
         {
-            DoDelete(item);
+            var result = DoDelete(item);
             OnItemDeleted(DataChangeEventArgs<T>.Delete(item));
+
+            return result;
         }
 
-        protected abstract void DoCreate(T item);
-        protected abstract void DoUpdate(T item);
-        protected abstract void DoDelete(T item);
+        protected abstract T DoCreate(T item);
+        protected abstract T DoUpdate(T item);
+        protected abstract T DoDelete(T item);
 
         protected virtual void OnItemCreated(DataChangeEventArgs<T> e)
         {

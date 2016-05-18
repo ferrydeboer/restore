@@ -57,7 +57,7 @@ namespace Restore.Tests
         {
         }
 
-        public void Create([NotNull] T item)
+        public T Create([NotNull] T item)
         {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
             if (_items.ContainsKey(TypeConfig.IdExtractor(item))) { throw new ArgumentException("Item already exists"); }
@@ -65,7 +65,7 @@ namespace Restore.Tests
             _items.Add(TypeConfig.IdExtractor(item), item);
             OnItemCreated(item);
 
-            // return item;
+            return item;
         }
 
         public T Read(TId id)
@@ -75,7 +75,7 @@ namespace Restore.Tests
             return succes ? result : default(T);
         }
 
-        public void Update(T item)
+        public T Update(T item)
         {
             // Just replace the instance if it exists.
             var itemId = TypeConfig.IdExtractor(item);
@@ -90,10 +90,10 @@ namespace Restore.Tests
                 throw new ArgumentException("Can not update unexisting item!");
             }
 
-            // return inlist;
+            return inlist;
         }
 
-        public void Delete(T item)
+        public T Delete(T item)
         {
             if (_items.Remove(TypeConfig.IdExtractor(item)))
             {
@@ -102,7 +102,7 @@ namespace Restore.Tests
                 // return item;
             }
 
-            // return default(T);
+            return default(T);
         }
 
         /// <summary>

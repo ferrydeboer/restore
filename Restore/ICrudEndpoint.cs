@@ -11,6 +11,7 @@ namespace Restore
     /// </P>
     /// </summary>
     /// <typeparam name="T">The type this endpoint stores.</typeparam>
+    /// <typeparam name="TId">The type of the identifier that identifies <typeparamref name="T"/></typeparam>
     public interface ICrudEndpoint<T, TId> : IDataChangeNotifier<T>
         where TId : IEquatable<TId>
     {
@@ -19,12 +20,26 @@ namespace Restore
         /// in a second instance of the same item with a new identifier.
         /// </summary>
         /// <param name="item">The item to save.</param>
-        void Create(T item);
+        /// <returns>The resulting T which could possibly differ from <paramref name="item"/> due to
+        /// side effects of the operation implementation.</returns>
+        T Create(T item);
 
         T Read(TId id);
 
-        void Update(T item);
+        /// <summary>
+        /// Updates <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">The item to update.</param>
+        /// <returns>The resulting T which could possibly differ from <paramref name="item"/> due to
+        /// side effects of the operation implementation.</returns>
+        T Update(T item);
 
-        void Delete(T item);
+        /// <summary>
+        /// Deletes the <paramref name="item"/>
+        /// </summary>
+        /// <param name="item">The item to delete</param>
+        /// <returns>The resulting T which could possibly differ from <paramref name="item"/> due to
+        /// side effects of the operation implementation.</returns>
+        T Delete(T item);
     }
 }
