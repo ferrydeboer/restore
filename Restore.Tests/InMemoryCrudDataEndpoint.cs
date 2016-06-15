@@ -10,7 +10,7 @@ namespace Restore.Tests
         where TId : IEquatable<TId>
     {
         [NotNull] private readonly IEqualityComparer<T> _comparer;
-        [NotNull] private readonly IDictionary<TId, T> _items = new Dictionary<TId, T>();
+        [NotNull] private IDictionary<TId, T> _items = new Dictionary<TId, T>();
 
         [NotNull]
         public TypeConfiguration<T, TId> TypeConfig { get; }
@@ -126,6 +126,11 @@ namespace Restore.Tests
         protected virtual void OnItemDeleted(T obj)
         {
             ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Delete));
+        }
+
+        public void Clear()
+        {
+            _items = new Dictionary<TId, T>();
         }
     }
 }
