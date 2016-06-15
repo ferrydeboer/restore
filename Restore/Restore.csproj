@@ -87,6 +87,7 @@
     <Compile Include="IChannelConfiguration.cs" />
     <Compile Include="IIdResolver.cs" />
     <Compile Include="ItemSynchronizationException.cs" />
+    <Compile Include="Matching\IndividualItemMatcher.cs" />
     <Compile Include="Matching\ItemMatcherExt.cs" />
     <Compile Include="Matching\ItemMatchingStep.cs" />
     <Compile Include="Matching\PredefinedQueryReplicatorAsync.cs" />

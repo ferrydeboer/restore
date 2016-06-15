@@ -65,6 +65,7 @@
     <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="LocalTestResourceIdComparer.cs" />
+    <Compile Include="Matching\IndividualItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatchingStepTest.cs" />
     <Compile Include="Matching\SingleItemCompletionMatcherTest.cs" />
