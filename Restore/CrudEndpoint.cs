@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Restore
 {
@@ -17,10 +18,9 @@ namespace Restore
             return result;
         }
 
-        public virtual T Read(TId id)
-        {
-            return default(T);
-        }
+        public abstract T Read(TId id);
+
+        public abstract IEnumerable<T> Read(params TId[] ids);
 
         public T Update(T item)
         {

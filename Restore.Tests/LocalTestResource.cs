@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Restore.Tests
 {
     public class LocalTestResource

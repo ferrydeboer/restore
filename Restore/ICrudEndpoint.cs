@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace Restore
 {
@@ -25,6 +27,9 @@ namespace Restore
         T Create(T item);
 
         T Read(TId id);
+
+        [NotNull]
+        IEnumerable<T> Read(params TId[] ids);
 
         /// <summary>
         /// Updates <paramref name="item"/>.

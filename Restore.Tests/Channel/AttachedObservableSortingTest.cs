@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using NUnit.Framework;
 using Restore.Channel;
 using Restore.Channel.Configuration;

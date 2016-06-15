@@ -15,6 +15,10 @@ namespace Restore.Tests
         [NotNull]
         public TypeConfiguration<T, TId> TypeConfig { get; }
 
+        // InMemoryEndpoint specific since this class is only used for testing.
+        // This is used as a preferable alternative over Mocks.
+        public event EventHandler<DataReadEventArgs<T, TId>> ItemRead;
+
         public event EventHandler<DataChangeEventArgs<T>> ItemCreated;
 
         public event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
@@ -72,7 +76,13 @@ namespace Restore.Tests
         {
             T result;
             var succes = _items.TryGetValue(id, out result);
+            OnItemRead(new DataReadEventArgs<T, TId>(result, id));
             return succes ? result : default(T);
+        }
+
+        public IEnumerable<T> Read(params TId[] ids)
+        {
+            return ids.Select(Read).Where(result => !EqualityComparer<T>.Default.Equals(result, default(T)));
         }
 
         public T Update(T item)
@@ -112,6 +122,10 @@ namespace Restore.Tests
         {
             return _items.Values;
         }
+        protected virtual void OnItemRead(DataReadEventArgs<T, TId> e)
+        {
+            ItemRead?.Invoke(this, e);
+        }
 
         protected virtual void OnItemCreated(T obj)
         {
@@ -131,6 +145,19 @@ namespace Restore.Tests
         public void Clear()
         {
             _items = new Dictionary<TId, T>();
+        }
+    }
+
+    public class DataReadEventArgs<T, TId>
+    {
+        public T Item { get; }
+
+        public TId Id { get; }
+
+        public DataReadEventArgs(T item, TId id)
+        {
+            Item = item;
+            Id = id;
         }
     }
 }

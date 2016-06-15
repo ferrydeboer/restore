@@ -21,7 +21,10 @@ namespace Restore.Channel.Configuration
             if (endpoint == null) { throw new ArgumentNullException(nameof(endpoint)); }
             TypeConfig = typeConfig;
             Endpoint = endpoint;
+            EndpointType = typeof(T);
         }
+
+        public Type EndpointType { get; }
 
         public TypeConfiguration<T, TId> TypeConfig { get; }
 

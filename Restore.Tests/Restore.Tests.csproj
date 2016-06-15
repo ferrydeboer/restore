@@ -65,9 +65,12 @@
     <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="LocalTestResourceIdComparer.cs" />
+    <Compile Include="Matching\BatchItemMatcherExtension.cs" />
+    <Compile Include="Matching\BatchItemMatcherTest.cs" />
     <Compile Include="Matching\IndividualItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatchingStepTest.cs" />
+    <Compile Include="Matching\Setup.cs" />
     <Compile Include="Matching\SingleItemCompletionMatcherTest.cs" />
     <Compile Include="TestAsyncDataEndpoint.cs" />
     <Compile Include="RemoteTestResource.cs" />

@@ -18,7 +18,7 @@ namespace Restore.Channel.Configuration
 
         public TypeConfiguration(IIdResolver<T, TId> resolver)
         {
-            IdExtractor = t => resolver.Resolve(t);
+            IdExtractor = resolver.Resolve;
         }
     }
 }
