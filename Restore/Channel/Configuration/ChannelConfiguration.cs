@@ -32,11 +32,6 @@ namespace Restore.Channel.Configuration
             TypeTranslator = typeTranslator;
         }
 
-        /*public void AddSynchAction(ISynchronizationAction<> matchItemSynchAction)
-        {
-            throw new NotImplementedException();
-        }*/
-
         public void AddSynchAction([NotNull] ISynchronizationResolver<TSynch> action)
         {
             if (action == null) { throw new ArgumentNullException(nameof(action)); }

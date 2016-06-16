@@ -62,7 +62,6 @@
     <Compile Include="Channel\OneWayPullChannelDrainTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTest.cs" />
     <Compile Include="Channel\OneWayPullChannelTestBase.cs" />
-    <Compile Include="InMemoryCrudDataEndpoint.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="LocalTestResourceIdComparer.cs" />
     <Compile Include="Matching\BatchItemMatcherExtension.cs" />

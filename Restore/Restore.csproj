@@ -86,6 +86,8 @@
     <Compile Include="IAsyncDataEndpoint.cs" />
     <Compile Include="IChannelConfiguration.cs" />
     <Compile Include="IIdResolver.cs" />
+    <Compile Include="InMemoryCrudDataEndpoint.cs" />
+    <Compile Include="ISynchSourcesConfig.cs" />
     <Compile Include="ItemSynchronizationException.cs" />
     <Compile Include="Matching\IndividualItemMatcher.cs" />
     <Compile Include="Matching\ItemMatcherExt.cs" />

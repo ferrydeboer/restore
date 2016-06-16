@@ -11,7 +11,7 @@ namespace Restore.ChangeResolution
     /// with Rx and not important yet.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class NullSynchAction<T> : ISynchronizationAction<T>
+    public sealed class NullSynchAction<T> : ISynchronizationAction<T>
     {
         public bool AppliesTo(T resource)
         {
@@ -23,7 +23,7 @@ namespace Restore.ChangeResolution
             return new SynchronizationResult(true);
         }
 
-        public T Applicant { get; }
-        public string Name { get; }
+        public T Applicant { get; } = default(T);
+        public string Name { get; } = "Null Synch Action";
     }
 }

@@ -16,14 +16,9 @@ namespace Restore
     /// <remarks>
     /// TODO: Figure out a way to get rid of this insanely large generic signature. Because the config is passed around everywhere angle brackets explode.
     /// </remarks>
-    public interface IChannelConfiguration<T1, T2, TId, TSynch>
+    public interface IChannelConfiguration<T1, T2, TId, TSynch> : ISynchSourcesConfig<T1, T2, TId>
         where TId : IEquatable<TId>
     {
-        [NotNull]
-        IEndpointConfiguration<T1, TId> Type1EndpointConfiguration { get; }
-        [NotNull]
-        IEndpointConfiguration<T2, TId> Type2EndpointConfiguration { get; }
-
         Func<IEnumerable<T1>, IEnumerable<T2>, IEnumerable<TSynch>> ItemsPreprocessor { get; set; }
 
         /// <summary>
@@ -34,14 +29,5 @@ namespace Restore
         /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
         /// </remarks>
         [NotNull] IEnumerable<ISynchronizationResolver<TSynch>> SynchronizationResolvers { get; }
-
-        /// <summary>
-        /// Gets translator used to move data from <typeparamref name="T1"/> onto <typeparamref name="T2"/>.
-        /// </summary>
-        /// <remarks>
-        /// is primarily a part of Change Resolution. That's why the inteface is defined there.
-        /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
-        /// </remarks>
-        ITranslator<T1, T2> TypeTranslator { get; }
     }
 }

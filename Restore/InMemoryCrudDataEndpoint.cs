@@ -4,8 +4,12 @@ using System.Linq;
 using JetBrains.Annotations;
 using Restore.Channel.Configuration;
 
-namespace Restore.Tests
+namespace Restore
 {
+    /// <summary>
+    /// Simplest implementation of an endpoint which can be used for experimental
+    /// testing purposes.
+    /// </summary>
     public class InMemoryCrudDataEndpoint<T, TId> : ICrudEndpoint<T, TId>
         where TId : IEquatable<TId>
     {
@@ -15,10 +19,21 @@ namespace Restore.Tests
         [NotNull]
         public TypeConfiguration<T, TId> TypeConfig { get; }
 
-        // InMemoryEndpoint specific since this class is only used for testing.
-        // This is used as a preferable alternative over Mocks.
+        /// <summary>
+        /// InMemoryEndpoint specific to enable exposure of slightly more
+        /// information on how the endpoint is being used from synchronization
+        /// actions.
+        /// </summary>
         public event EventHandler<DataReadEventArgs<T, TId>> ItemRead;
 
+        /// <summary>
+        /// InMemoryEndpoint specific to enable exposure of slightly more
+        /// information on how the endpoint is being used from synchronization
+        /// actions.
+        /// </summary>
+        public event EventHandler<DataChangeEventArgs<T>> ItemCreate;
+
+        // Below are Interface events.
         public event EventHandler<DataChangeEventArgs<T>> ItemCreated;
 
         public event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
@@ -64,9 +79,13 @@ namespace Restore.Tests
         public T Create([NotNull] T item)
         {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
-            if (_items.ContainsKey(TypeConfig.IdExtractor(item))) { throw new ArgumentException("Item already exists"); }
 
-            _items.Add(TypeConfig.IdExtractor(item), item);
+            OnItemCreate(item);
+
+            var itemId = TypeConfig.IdExtractor(item);
+            if (_items.ContainsKey(itemId)) { throw new ArgumentException("Item already exists"); }
+
+            _items.Add(itemId, item);
             OnItemCreated(item);
 
             return item;
@@ -122,6 +141,12 @@ namespace Restore.Tests
         {
             return _items.Values;
         }
+
+        public void Clear()
+        {
+            _items = new Dictionary<TId, T>();
+        }
+
         protected virtual void OnItemRead(DataReadEventArgs<T, TId> e)
         {
             ItemRead?.Invoke(this, e);
@@ -142,9 +167,9 @@ namespace Restore.Tests
             ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Delete));
         }
 
-        public void Clear()
+        protected virtual void OnItemCreate(T obj)
         {
-            _items = new Dictionary<TId, T>();
+            ItemCreate?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Create));
         }
     }
 

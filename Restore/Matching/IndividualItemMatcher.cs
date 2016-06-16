@@ -33,12 +33,13 @@ namespace Restore.Matching
 
             if (initial == null) { throw new ArgumentNullException(nameof(initial)); }
 
-            if(initial.IsComplete) { return initial; }
+            if (initial.IsComplete) { return initial; }
 
             if (appendType == typeof(T1))
             {
                 return Append<T1>(initial);
             }
+
             return Append<T2>(initial);
         }
 
@@ -54,6 +55,7 @@ namespace Restore.Matching
                     return new ItemMatch<T1, T2>(result1, match.Result2);
                 }
             }
+
             if (typeof(T) == typeof(T2) && EqualityComparer<T2>.Default.Equals(match.Result2, default(T2)))
             {
                 var itemId = ChannelConfig.Type1EndpointConfiguration.TypeConfig.IdExtractor(match.Result1);
@@ -68,8 +70,8 @@ namespace Restore.Matching
         }
 
         /*
-        public ItemMatch<T1, T2> AppendT1(ItemMatch<T1, T2> match, 
-            Func<ItemMatch<T1, T2>, T1> itemReader, 
+        public ItemMatch<T1, T2> AppendT1(ItemMatch<T1, T2> match,
+            Func<ItemMatch<T1, T2>, T1> itemReader,
             Func<ItemMatch<T1, T2>, TId> idReader,
             Func<ItemMatch<T1, T2>, T1> itemEndpointReader)
         {
