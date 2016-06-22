@@ -31,6 +31,7 @@ namespace Restore.ChangeResolution
 
         public SynchronizationResult Execute()
         {
+            // If I want general exception handling on the dispatching I could put it here!
             return _action(_applicant, _config);
         }
 

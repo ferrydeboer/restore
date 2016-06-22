@@ -124,14 +124,14 @@ namespace Restore
 
         public T Delete(T item)
         {
-            if (_items.Remove(TypeConfig.IdExtractor(item)))
+            var idExtractor = TypeConfig.IdExtractor(item);
+            if (_items.Remove(idExtractor))
             {
                 OnItemDeleted(item);
-
-                // return item;
+                return default(T);
             }
 
-            return default(T);
+            return item;
         }
 
         /// <summary>
@@ -165,6 +165,11 @@ namespace Restore
         protected virtual void OnItemDeleted(T obj)
         {
             ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Delete));
+        }
+
+        protected virtual void OnItemDeleted(DataChangeEventArgs<T> args)
+        {
+            ItemDeleted?.Invoke(this, args);
         }
 
         protected virtual void OnItemCreate(T obj)

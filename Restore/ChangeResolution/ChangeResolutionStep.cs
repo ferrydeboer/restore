@@ -29,6 +29,9 @@ namespace Restore.ChangeResolution
                 foreach (var changeResolver in _resolvers)
                 {
                     var synchronizationAction = changeResolver.Resolve(item);
+
+                    // Could implement some debugginglogic that will tell if there are other applicable steps
+                    // That might indicate a configuration error.
                     if (synchronizationAction != null)
                     {
                         return synchronizationAction;
