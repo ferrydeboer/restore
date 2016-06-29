@@ -9,13 +9,17 @@ namespace Restore
     /// <typeparam name="T"></typeparam>
     public interface IDataChangeNotifier<T>
     {
+        event EventHandler<ItemCreateEventArgs<T>> ItemCreate;
+
         /// <summary>
         /// Fired when an items is created/added to a data source.
         /// </summary>
         /// <remarks>
         /// It is assumed an item is only added once.
         /// </remarks>
-        event EventHandler<DataChangeEventArgs<T>> ItemCreated;
+        event EventHandler<ItemCreateEventArgs<T>> ItemCreated;
+
+        event EventHandler<ItemUpdateEventArgs<T>> ItemUpdate;
 
         /// <summary>
         /// Fired when an items is updated in a data source.
@@ -29,11 +33,12 @@ namespace Restore
         /// It is assumed that an update could relate to a item for which no ItemCreated notification was sent out prior.
         /// </p>
         /// </remarks>
-        event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
+        event EventHandler<ItemUpdateEventArgs<T>> ItemUpdated;
 
+        event EventHandler<ItemChangeEventArgs<T>> ItemDelete;
         /// <summary>
         /// Fired when an items is deleted from a data source.
         /// </summary>
-        event EventHandler<DataChangeEventArgs<T>> ItemDeleted;
+        event EventHandler<ItemChangeEventArgs<T>> ItemDeleted;
     }
 }

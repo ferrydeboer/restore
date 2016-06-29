@@ -10,7 +10,7 @@ namespace Restore
     /// Simplest implementation of an endpoint which can be used for experimental
     /// testing purposes.
     /// </summary>
-    public class InMemoryCrudDataEndpoint<T, TId> : ICrudEndpoint<T, TId>
+    public class InMemoryCrudDataEndpoint<T, TId> : CrudEndpoint<T, TId>
         where TId : IEquatable<TId>
     {
         [NotNull] private readonly IEqualityComparer<T> _comparer;
@@ -26,19 +26,6 @@ namespace Restore
         /// </summary>
         public event EventHandler<DataReadEventArgs<T, TId>> ItemRead;
 
-        /// <summary>
-        /// InMemoryEndpoint specific to enable exposure of slightly more
-        /// information on how the endpoint is being used from synchronization
-        /// actions.
-        /// </summary>
-        public event EventHandler<DataChangeEventArgs<T>> ItemCreate;
-
-        // Below are Interface events.
-        public event EventHandler<DataChangeEventArgs<T>> ItemCreated;
-
-        public event EventHandler<DataChangeEventArgs<T>> ItemUpdated;
-
-        public event EventHandler<DataChangeEventArgs<T>> ItemDeleted;
 
         public InMemoryCrudDataEndpoint(
             [NotNull] TypeConfiguration<T, TId> typeConfig,
@@ -76,11 +63,11 @@ namespace Restore
         {
         }
 
-        public T Create([NotNull] T item)
+        protected override T DoCreate([NotNull] T item)
         {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
 
-            OnItemCreate(item);
+            OnItemCreate(new ItemCreateEventArgs<T>(item));
 
             var itemId = TypeConfig.IdExtractor(item);
             if (_items.ContainsKey(itemId)) { throw new ArgumentException("Item already exists"); }
@@ -91,7 +78,7 @@ namespace Restore
             return item;
         }
 
-        public T Read(TId id)
+        public override T Read(TId id)
         {
             T result;
             var succes = _items.TryGetValue(id, out result);
@@ -99,12 +86,12 @@ namespace Restore
             return succes ? result : default(T);
         }
 
-        public IEnumerable<T> Read(params TId[] ids)
+        public override IEnumerable<T> Read(params TId[] ids)
         {
             return ids.Select(Read).Where(result => !EqualityComparer<T>.Default.Equals(result, default(T)));
         }
 
-        public T Update(T item)
+        protected override T DoUpdate(T item)
         {
             // Just replace the instance if it exists.
             var itemId = TypeConfig.IdExtractor(item);
@@ -122,7 +109,7 @@ namespace Restore
             return inlist;
         }
 
-        public T Delete(T item)
+        protected override T DoDelete(T item)
         {
             var idExtractor = TypeConfig.IdExtractor(item);
             if (_items.Remove(idExtractor))
@@ -154,27 +141,17 @@ namespace Restore
 
         protected virtual void OnItemCreated(T obj)
         {
-            ItemCreated?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Create));
+            OnItemCreated(new ItemCreateEventArgs<T>(obj));
         }
 
         protected virtual void OnItemUpdated(T obj)
         {
-            ItemUpdated?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Update));
+            OnItemUpdated(new ItemUpdateEventArgs<T>(obj));
         }
 
         protected virtual void OnItemDeleted(T obj)
         {
-            ItemDeleted?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Delete));
-        }
-
-        protected virtual void OnItemDeleted(DataChangeEventArgs<T> args)
-        {
-            ItemDeleted?.Invoke(this, args);
-        }
-
-        protected virtual void OnItemCreate(T obj)
-        {
-            ItemCreate?.Invoke(this, new DataChangeEventArgs<T>(obj, ChangeType.Create));
+            OnItemDeleted(new ItemDeleteEventArgs<T>(obj));
         }
     }
 

@@ -159,7 +159,7 @@ namespace Restore.Channel
             _contentChangeNotifier.ItemDeleted -= DeleteItem;
         }
 
-        private void AddItem(object sender, DataChangeEventArgs<T> e)
+        private void AddItem(object sender, ItemChangeEventArgs<T> e)
         {
             if (_ordering == null)
             {
@@ -171,7 +171,7 @@ namespace Restore.Channel
             }
         }
 
-        private void UpdateItem(object sender, DataChangeEventArgs<T> e)
+        private void UpdateItem(object sender, ItemChangeEventArgs<T> e)
         {
             // Does it really matter, yes, because I need to replace the item. After all,
             // if the reference has changed there is no point/need to do this.
@@ -207,7 +207,7 @@ namespace Restore.Channel
             }
         }
 
-        private void DeleteItem(object sender, DataChangeEventArgs<T> e)
+        private void DeleteItem(object sender, ItemChangeEventArgs<T> e)
         {
             var hasItem = this.FirstOrDefault(item => _changeComparer.Equals(item, e.Item));
             if (!_changeComparer.Equals(hasItem, default(T)))
