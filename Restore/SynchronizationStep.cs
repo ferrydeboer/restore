@@ -24,4 +24,41 @@ namespace Restore
             return _afterStepObservers.Aggregate(input.Select(Process), (current, observer) => current.Do(observer));
         }
     }
+
+    public class Test
+    {
+        public void Bla()
+        {
+            var builder = new PipelineBuilder();
+            builder.StartWith(new TestStep<object>()).Then();
+        }
+    }
+
+    public class TestStep<T> : IPipelineStep<T>
+    {
+        public IPipelineStep<TOut> Then<TOut>(IPipelineStep<TOut> next)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PipelineBuilder
+    {
+        private List<IPipelineStep> steps = new List<IPipelineStep>();
+
+        public IPipelineStep<TIn> StartWith<TIn>(IPipelineStep<TIn> start)
+        {
+            steps.Add(start);
+            return start;
+        }
+    }
+
+    public interface IPipelineStep
+    {
+    }
+
+    public interface IPipelineStep<TIn> : IPipelineStep
+    {
+        IPipelineStep<TOut> Then<TOut>(IPipelineStep<TOut> next);
+    }
 }

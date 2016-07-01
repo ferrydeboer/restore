@@ -7,7 +7,8 @@ namespace Restore.Tests.Matching
 {
     public static class BatchItemMatcherExtension
     {
-        public static IEnumerable<ItemMatch<T1, T2>> BatchMatchMissing<T1, T2, TId>(this IEnumerable<ItemMatch<T1, T2>> original, IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> channelConfig, Type appendType = null) where TId : IEquatable<TId>
+        public static IEnumerable<ItemMatch<T1, T2>> BatchMatchMissing<T1, T2, TId>(this IEnumerable<ItemMatch<T1, T2>> original, IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> channelConfig, Type appendType = null)
+            where TId : IEquatable<TId>
         {
             if (appendType != null 
                 && appendType != channelConfig.Type1EndpointConfiguration.EndpointType

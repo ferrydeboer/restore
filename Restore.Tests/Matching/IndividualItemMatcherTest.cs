@@ -14,7 +14,7 @@ namespace Restore.Tests.Matching
         {
             _channelConfig = Setup.TestChannelConfig();
             _itemMatcherUnderTest = new IndividualItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                    _channelConfig, typeof(LocalTestResource));
+                    _channelConfig, TargetType.T1);
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Restore.Tests.Matching
             var item2 = new RemoteTestResource(1, "test");
             _channelConfig.Type2EndpointConfiguration.Endpoint.Create(item2);
 
-            var result = _itemMatcherUnderTest.AppendIndividualItem(itemMatch, typeof(RemoteTestResource));
+            var result = _itemMatcherUnderTest.AppendIndividualItem(itemMatch, TargetType.T2);
 
             Assert.AreEqual(item2, result.Result2);
             Assert.AreEqual(itemMatch.Result1, result.Result1);
@@ -77,7 +77,7 @@ namespace Restore.Tests.Matching
                 new LocalTestResource(1, 10),
                 null);
 
-            var result = _itemMatcherUnderTest.AppendIndividualItem(itemMatch, typeof(RemoteTestResource));
+            var result = _itemMatcherUnderTest.AppendIndividualItem(itemMatch, TargetType.T2);
 
             Assert.AreEqual(itemMatch, result);
         }

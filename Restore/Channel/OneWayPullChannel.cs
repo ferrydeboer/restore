@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using Restore.ChangeDispatching;
 using Restore.ChangeResolution;
 using Restore.Extensions;
+using Restore.Matching;
 
 namespace Restore.Channel
 {
@@ -16,10 +17,8 @@ namespace Restore.Channel
         : ISynchChannel<T1, T2, TSynch>, IOneWayPullChannel<T1>, IDisposable
         where TId : IEquatable<TId>
     {
-        [NotNull]
         public Type Type1 { get; } = typeof(T1);
 
-        [NotNull]
         public Type Type2 { get; } = typeof(T2);
 
         [NotNull]
@@ -228,6 +227,7 @@ namespace Restore.Channel
                 throw new SynchronizationException("Data source 2 delivered a null result!");
             }
 
+            // TODO: Call IPlumber.CreatePipeline(t1data, T2data);
             IEnumerable<TSynch> pipeline;
             try
             {
@@ -238,12 +238,15 @@ namespace Restore.Channel
                 throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"", ex);
             }
 
+            OnPreprocessedPipelineConstructed(pipeline);
+
             pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
             {
                 listener(item);
                 return item;
             }));
 
+            // This is an odd construct where the pipeline has to be constructed because it needs a counter in the do.
             var synchPipeline = new SynchPipeline();
             var endPipeline = pipeline
                 .Do(_ => synchPipeline.ItemsProcessed++)
@@ -253,6 +256,10 @@ namespace Restore.Channel
             synchPipeline.Pipeline = endPipeline;
 
             return synchPipeline;
+        }
+
+        protected virtual void OnPreprocessedPipelineConstructed(IEnumerable<TSynch> pipeline)
+        {
         }
 
         private async Task LockSync(Func<Task> mechanism)
@@ -335,39 +342,39 @@ namespace Restore.Channel
                 _lockSemaphore = null;
             }
         }
+    }
 
-        private class SynchPipeline : IEnumerable<SynchronizationResult>
+    public class SynchPipeline : IEnumerable<SynchronizationResult>
+    {
+        private int _itemsSynchronized;
+        public int ItemsProcessed { get; set; }
+
+        public int ItemsSynchronized
         {
-            private int _itemsSynchronized;
-            public int ItemsProcessed { get; set; }
-
-            public int ItemsSynchronized
+            get { return _itemsSynchronized; }
+            set
             {
-                get { return _itemsSynchronized; }
-                set
-                {
-                    Debug.WriteLine($"{GetHashCode()} - Raising ItemsSycnhronized from {_itemsSynchronized} to {value}");
-                    _itemsSynchronized = value;
-                }
+                Debug.WriteLine($"{GetHashCode()} - Raising ItemsSycnhronized from {_itemsSynchronized} to {value}");
+                _itemsSynchronized = value;
             }
+        }
 
-            public IEnumerable<SynchronizationResult> Pipeline { private get; set; }
+        public IEnumerable<SynchronizationResult> Pipeline { private get; set; }
 
-            public IEnumerator<SynchronizationResult> GetEnumerator()
-            {
-                return Pipeline.GetEnumerator();
-            }
+        public IEnumerator<SynchronizationResult> GetEnumerator()
+        {
+            return Pipeline.GetEnumerator();
+        }
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-            public void Reset()
-            {
-                ItemsProcessed = 0;
-                ItemsSynchronized = 0;
-            }
+        public void Reset()
+        {
+            ItemsProcessed = 0;
+            ItemsSynchronized = 0;
         }
     }
 }

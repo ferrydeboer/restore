@@ -25,8 +25,8 @@ namespace Restore
         public event EventHandler<ItemCreateEventArgs<T>> ItemCreated;
         public event EventHandler<ItemUpdateEventArgs<T>> ItemUpdate;
         public event EventHandler<ItemUpdateEventArgs<T>> ItemUpdated;
-        public event EventHandler<ItemChangeEventArgs<T>> ItemDelete;
-        public event EventHandler<ItemChangeEventArgs<T>> ItemDeleted;
+        public event EventHandler<ItemDeleteEventArgs<T>> ItemDelete;
+        public event EventHandler<ItemDeleteEventArgs<T>> ItemDeleted;
 
         public T Create(T item)
         {
@@ -82,7 +82,7 @@ namespace Restore
             ItemUpdated?.Invoke(this, e);
         }
 
-        protected virtual void OnItemDelete(ItemChangeEventArgs<T> e)
+        protected virtual void OnItemDelete(ItemDeleteEventArgs<T> e)
         {
             ItemDelete?.Invoke(this, e);
         }

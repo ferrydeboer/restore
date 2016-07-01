@@ -1,3 +1,5 @@
+using Restore.Matching;
+
 namespace Restore.Channel
 {
     /// <summary>
@@ -5,7 +7,7 @@ namespace Restore.Channel
     /// This has preference over the complex generic interface of channels which is less relevant for consumers.
     /// </summary>
     /// <typeparam name="T">The end type, ussually the local type that is consumed within the app.</typeparam>
-    public interface IOneWayPullChannel<T> : ISynchChannel
+    public interface IOneWayPullChannel<T> : ISynchChannel//<T, T, ItemMatch<T, T>>s
     {
     }
 }

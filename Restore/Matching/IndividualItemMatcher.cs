@@ -4,6 +4,12 @@ using JetBrains.Annotations;
 
 namespace Restore.Matching
 {
+    public enum TargetType
+    {
+        T1,
+        T2
+    }
+
     /// <summary>
     /// Used to append initial matchresults that is based on two lists. When the list does not contain
     /// the items it can still exist (somewhere else) since the list is only the basis for the synchronization
@@ -14,28 +20,29 @@ namespace Restore.Matching
     public class IndividualItemMatcher<T1, T2, TId, TSynch>
         where TId : IEquatable<TId>
     {
-        private readonly Type _appendType;
+        // Yeah, if we're synching the same types this obviously doesn't work!
+        private readonly TargetType _appendType;
         public IChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
 
-        public IndividualItemMatcher([NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig, Type appendType)
+        public IndividualItemMatcher([NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig, TargetType appendType)
         {
             _appendType = appendType;
             if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
             ChannelConfig = channelConfig;
         }
 
-        public ItemMatch<T1, T2> AppendIndividualItem([NotNull] ItemMatch<T1, T2> initial, Type appendType = null)
+        public ItemMatch<T1, T2> AppendIndividualItem([NotNull] ItemMatch<T1, T2> initial, TargetType appendType = TargetType.T1)
         {
-            if (appendType == null)
-            {
-                appendType = _appendType;
-            }
+//            if (appendType == null)
+//            {
+//                appendType = _appendType;
+//            }
 
             if (initial == null) { throw new ArgumentNullException(nameof(initial)); }
 
             if (initial.IsComplete) { return initial; }
 
-            if (appendType == typeof(T1))
+            if (appendType == TargetType.T1)
             {
                 return Append<T1>(initial);
             }

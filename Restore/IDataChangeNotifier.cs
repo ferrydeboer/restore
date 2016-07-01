@@ -35,10 +35,11 @@ namespace Restore
         /// </remarks>
         event EventHandler<ItemUpdateEventArgs<T>> ItemUpdated;
 
-        event EventHandler<ItemChangeEventArgs<T>> ItemDelete;
+        event EventHandler<ItemDeleteEventArgs<T>> ItemDelete;
+
         /// <summary>
         /// Fired when an items is deleted from a data source.
         /// </summary>
-        event EventHandler<ItemChangeEventArgs<T>> ItemDeleted;
+        event EventHandler<ItemDeleteEventArgs<T>> ItemDeleted;
     }
 }
