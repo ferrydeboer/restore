@@ -30,6 +30,7 @@ namespace Restore
 
         public T Create(T item)
         {
+            OnItemCreate(new ItemCreateEventArgs<T>(item));
             var result = DoCreate(item);
             OnItemCreated(new ItemCreateEventArgs<T>(item));
 

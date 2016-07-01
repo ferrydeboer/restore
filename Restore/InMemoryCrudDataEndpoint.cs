@@ -67,13 +67,10 @@ namespace Restore
         {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
 
-            OnItemCreate(new ItemCreateEventArgs<T>(item));
-
             var itemId = TypeConfig.IdExtractor(item);
             if (_items.ContainsKey(itemId)) { throw new ArgumentException("Item already exists"); }
 
             _items.Add(itemId, item);
-            OnItemCreated(item);
 
             return item;
         }
