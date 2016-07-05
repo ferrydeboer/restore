@@ -14,6 +14,12 @@ namespace Restore.Configuration
         public ISource<TBase1, TId> Source1 { get; set; }
         public ISource<TBase2, TId> Source2 { get; set; }
 
+        public RestoreConfiguration(ISource<TBase1, TId> source1, ISource<TBase2, TId> source2)
+        {
+            Source1 = source1;
+            Source2 = source2;
+        }
+
         public IPlumberFactory PlumberFactory { get; set; } = new PlumberFactory();
 
         private readonly RuleContainer<TBase1, TBase2, TId> _rules = new RuleContainer<TBase1, TBase2, TId>();
@@ -52,24 +58,6 @@ namespace Restore.Configuration
             var channelConfig = new ChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>>(t1EndpointConfig, t2EndpointConfig, setup.TypeTranslator);
 
             var plumber = PlumberFactory.Create(channelConfig, _rules);
-/*            // Everything below this is required for construction of the pipeline. If I would build an IPipelineFactory.
-            // Questions if wether to make the pipeline factory then part of the config or not and how to deal with the rules.
-            var itemMatcher = new ItemMatcher<T1, T2, TId, ItemMatch<T1, T2>>(channelConfig);
-            channelConfig.ItemsPreprocessor = itemMatcher.Match;
-
-            // - Instantiate Rules
-            foreach (Type rule in _rules)
-            {
-                var genericTypeDef = rule.GetGenericTypeDefinition();
-                var closedGenericTypeDef = genericTypeDef.MakeGenericType(typeof (T1), typeof (T2), typeof (TId));
-                var ruleInstance = Activator.CreateInstance(closedGenericTypeDef) as SynchronizationRule<T1, T2, TId>;
-                // - Create Rule instance
-                if (ruleInstance != null)
-                {
-                    var resolver = ruleInstance.ResolverInstance(channelConfig);
-                    channelConfig.AddSynchAction(resolver);
-                }
-            }*/
 
             // Could move towards a construction where factories are registered instead of the actual objects for preventing to many channels linguering
             // around in memory. However, right now the channels needs to be singletons and run in sequence due to sqlite limitations of having only one

@@ -247,24 +247,6 @@ namespace Restore.Channel
             }
         }
 
-        // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
-        // while others are simply events on the channel. Under water events are simply used where appropriate.
-/*        public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
-        {
-            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
-            throw new NotImplementedException();
-
-            // synchItemListeners.Add(observer);
-        }*/
-
-/*        public void AddSynchResultObserver([NotNull] Action<ISynchronizationAction<TSynch>> observer)
-        {
-            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
-            throw new NotImplementedException();
-
-            //_resolutionStep.AddResultObserver(observer);
-        }*/
-
         public void AddSynchronizationStartedObserver(Action<SynchronizationStarted> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }

@@ -2,7 +2,7 @@ using System;
 
 namespace Restore.ChangeDispatching
 {
-    public class DispatchingException : Exception
+    public class DispatchingException : SynchronizationException
     {
         public DispatchingException()
         {

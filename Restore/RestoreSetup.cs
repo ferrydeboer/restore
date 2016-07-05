@@ -7,7 +7,7 @@ using Restore.Configuration;
 
 namespace Restore
 {
-    public class Restore : IRestoreConfiguration
+    public class RestoreSetup : IRestoreConfiguration
     {
         private readonly List<IRestoreConfiguration> _configurations = new List<IRestoreConfiguration>();
 
@@ -48,9 +48,10 @@ namespace Restore
             });
         }
 
-        public ISynchChannel GetChannel<T>() where T : class, ISynchChannel
+        public ISynchChannel GetChannel<T>()
+            where T : class, ISynchChannel
         {
-            return GetChannel(typeof (T));
+            return GetChannel(typeof(T));
         }
 
         public ISynchChannel GetChannel(Type type)
@@ -60,6 +61,7 @@ namespace Restore
             {
                 throw new ArgumentException($"There are multiple channels for type {type.Name}");
             }
+
             return channels.First();
         }
     }

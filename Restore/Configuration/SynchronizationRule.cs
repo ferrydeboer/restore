@@ -6,7 +6,6 @@ namespace Restore.Configuration
 {
     /// <summary>
     /// Basically a class that provides mapping of strong typed rules to resolver/actions types that channels use internally.
-    /// TODO: Move to Restore after conceptualization phase.
     /// </summary>
     public abstract class SynchronizationRule<TBase1, TBase2, TId> : ISynchronizationRule<TBase1, TBase2, TId>
         where TId : IEquatable<TId>
