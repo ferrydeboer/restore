@@ -26,7 +26,6 @@ namespace Restore
         /// </summary>
         public event EventHandler<DataReadEventArgs<T, TId>> ItemRead;
 
-
         public InMemoryCrudDataEndpoint(
             [NotNull] TypeConfiguration<T, TId> typeConfig,
             IEqualityComparer<T> comparer,

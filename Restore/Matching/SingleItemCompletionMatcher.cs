@@ -3,18 +3,17 @@ using JetBrains.Annotations;
 
 namespace Restore.Matching
 {
-    public class SingleItemCompletionMatcher<T1, T2, TId, TSynch>
+    public class SingleItemCompletionMatcher<T1, T2, TId>
         where TId : IEquatable<TId>
     {
-        private readonly IChannelConfiguration<T1, T2, TId, TSynch> _channelConfiguration;
-        private readonly Type _completionSourceType;
+        private readonly ISynchSourcesConfig<T1, T2, TId> _channelConfiguration;
+        private readonly TargetType _completionSourceType;
 
         public SingleItemCompletionMatcher(
-            [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfiguration,
-            [NotNull] Type completionSourceType)
+            [NotNull] ISynchSourcesConfig<T1, T2, TId> channelConfiguration,
+            TargetType completionSourceType)
         {
             if (channelConfiguration == null) { throw new ArgumentNullException(nameof(channelConfiguration)); }
-            if (completionSourceType == null) { throw new ArgumentNullException(nameof(completionSourceType)); }
 
             _channelConfiguration = channelConfiguration;
             _completionSourceType = completionSourceType;
@@ -24,7 +23,7 @@ namespace Restore.Matching
         {
             if (itemMatch.IsComplete) { return itemMatch; }
 
-            if (_completionSourceType == typeof(T1) && itemMatch.Result1 == null)
+            if (_completionSourceType == TargetType.T1 && itemMatch.Result1 == null)
             {
                 var result2Id =
                     _channelConfiguration.Type2EndpointConfiguration.TypeConfig.IdExtractor(itemMatch.Result2);
@@ -32,7 +31,7 @@ namespace Restore.Matching
                 return new ItemMatch<T1, T2>(oppositeItem, itemMatch.Result2);
             }
 
-            if (_completionSourceType == typeof(T2) && itemMatch.Result2 == null)
+            if (_completionSourceType == TargetType.T2 && itemMatch.Result2 == null)
             {
                 var result1Id =
                     _channelConfiguration.Type1EndpointConfiguration.TypeConfig.IdExtractor(itemMatch.Result1);

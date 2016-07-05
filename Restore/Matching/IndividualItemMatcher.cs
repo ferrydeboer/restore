@@ -4,12 +4,6 @@ using JetBrains.Annotations;
 
 namespace Restore.Matching
 {
-    public enum TargetType
-    {
-        T1,
-        T2
-    }
-
     /// <summary>
     /// Used to append initial matchresults that is based on two lists. When the list does not contain
     /// the items it can still exist (somewhere else) since the list is only the basis for the synchronization
@@ -22,9 +16,9 @@ namespace Restore.Matching
     {
         // Yeah, if we're synching the same types this obviously doesn't work!
         private readonly TargetType _appendType;
-        public IChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
+        public ISynchSourcesConfig<T1, T2, TId> ChannelConfig { get; }
 
-        public IndividualItemMatcher([NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig, TargetType appendType)
+        public IndividualItemMatcher([NotNull] ISynchSourcesConfig<T1, T2, TId> channelConfig, TargetType appendType)
         {
             _appendType = appendType;
             if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
@@ -33,11 +27,6 @@ namespace Restore.Matching
 
         public ItemMatch<T1, T2> AppendIndividualItem([NotNull] ItemMatch<T1, T2> initial, TargetType appendType = TargetType.T1)
         {
-//            if (appendType == null)
-//            {
-//                appendType = _appendType;
-//            }
-
             if (initial == null) { throw new ArgumentNullException(nameof(initial)); }
 
             if (initial.IsComplete) { return initial; }
@@ -55,8 +44,8 @@ namespace Restore.Matching
             // Given the generics it very difficult to reduce duplication further here.
             if (typeof(T) == typeof(T1) && EqualityComparer<T1>.Default.Equals(match.Result1, default(T1)))
             {
-                var item1Id = ChannelConfig.Type2EndpointConfiguration.TypeConfig.IdExtractor(match.Result2);
-                var result1 = ChannelConfig.Type1EndpointConfiguration.Endpoint.Read(item1Id);
+                var item2Id = ChannelConfig.Type2EndpointConfiguration.TypeConfig.IdExtractor(match.Result2);
+                var result1 = ChannelConfig.Type1EndpointConfiguration.Endpoint.Read(item2Id);
                 if (!EqualityComparer<T1>.Default.Equals(result1, default(T1)))
                 {
                     return new ItemMatch<T1, T2>(result1, match.Result2);

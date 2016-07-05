@@ -22,7 +22,7 @@ namespace Restore.Channel
         public Type Type2 { get; } = typeof(T2);
 
         [NotNull]
-        public IChannelConfiguration<T1, T2, TId, TSynch> ChannelConfig { get; }
+        public ISynchSourcesConfig<T1, T2, TId> ChannelConfig { get; }
 
         /// <summary>
         /// Didn't want to make this part of the more general configuration. It's not decided yet how to further work with data sources
@@ -32,12 +32,6 @@ namespace Restore.Channel
 
         [NotNull] private readonly Func<Task<IEnumerable<T2>>> _t2DataSource;
 
-        [NotNull][ItemNotNull]
-        private readonly IList<Action<TSynch>> _synchItemListeners = new List<Action<TSynch>>();
-
-        [NotNull] private readonly ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>> _resolutionStep;
-        [NotNull] private readonly ChangeDispatchingStep<TSynch> _dispatchStep;
-
         private event Action<SynchronizationStarted> SynchronizationStart;
         private event Action<SynchronizationFinished> SynchronizationFinished;
         private event Action<SynchronizationError> SynchronizationError;
@@ -46,24 +40,24 @@ namespace Restore.Channel
         private bool _isSynchronizing;
 
         public OneWayPullChannel(
-            [NotNull] IChannelConfiguration<T1, T2, TId, TSynch> channelConfig,
+            [NotNull] ISynchSourcesConfig<T1, T2, TId> channelConfig,
+            [NotNull] IPlumber<T1, T2, TId> plumber,
             [NotNull] Func<Task<IEnumerable<T1>>> t1DataSource,
             [NotNull] Func<Task<IEnumerable<T2>>> t2DataSource)
         {
-            if (channelConfig == null) { throw new ArgumentNullException(nameof(channelConfig)); }
+            if (plumber == null) { throw new ArgumentNullException(nameof(plumber)); }
             if (t1DataSource == null) { throw new ArgumentNullException(nameof(t1DataSource)); }
             if (t2DataSource == null) { throw new ArgumentNullException(nameof(t2DataSource)); }
 
             ChannelConfig = channelConfig;
+            Plumber = plumber;
             _t1DataSource = t1DataSource;
             _t2DataSource = t2DataSource;
-
-            // Further development should further help determine the signatures steps.
-            _resolutionStep = new ChangeResolutionStep<TSynch, IChannelConfiguration<T1, T2, TId, TSynch>>(channelConfig.SynchronizationResolvers.ToList(), channelConfig);
-            _dispatchStep = new ChangeDispatchingStep<TSynch>();
         }
 
         public bool IsSynchronizing => _isSynchronizing;
+
+        public IPlumber<T1, T2, TId> Plumber { get; protected set; }
 
         public void AddChannelObserver([NotNull] ChannelObserver observer)
         {
@@ -211,7 +205,7 @@ namespace Restore.Channel
                 throw new SynchronizationException("Data source 1 delivered a null result!");
             }
 
-            // TODO: Awaiting the data source(s) should become part of the pipeline.
+            // TODO: Should awaiting the data source(s) become part of the pipeline?
             IEnumerable<T2> t2Data;
             try
             {
@@ -227,35 +221,8 @@ namespace Restore.Channel
                 throw new SynchronizationException("Data source 2 delivered a null result!");
             }
 
-            // TODO: Call IPlumber.CreatePipeline(t1data, T2data);
-            IEnumerable<TSynch> pipeline;
-            try
-            {
-                pipeline = ChannelConfig.ItemsPreprocessor(t1Data, t2Data);
-            }
-            catch (Exception ex)
-            {
-                throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"", ex);
-            }
-
-            OnPreprocessedPipelineConstructed(pipeline);
-
-            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
-            {
-                listener(item);
-                return item;
-            }));
-
-            // This is an odd construct where the pipeline has to be constructed because it needs a counter in the do.
-            var synchPipeline = new SynchPipeline();
-            var endPipeline = pipeline
-                .Do(_ => synchPipeline.ItemsProcessed++)
-                .ResolveChange(_resolutionStep)
-                .Where(action => action.Applicant != null) // Filter out NullSynchActions, which don't have an applicant instance.
-                .DispatchChange(_dispatchStep);
-            synchPipeline.Pipeline = endPipeline;
-
-            return synchPipeline;
+            // return synchPipeline;
+            return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
         }
 
         protected virtual void OnPreprocessedPipelineConstructed(IEnumerable<TSynch> pipeline)
@@ -282,26 +249,29 @@ namespace Restore.Channel
 
         // Sticking with same pattern for what you can call events. Though some can be part of the pipeline
         // while others are simply events on the channel. Under water events are simply used where appropriate.
-        public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
+/*        public void AddSynchItemObserver<T>([NotNull] Action<TSynch> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
-            _synchItemListeners.Add(observer);
-        }
+            throw new NotImplementedException();
 
-        public void AddSynchActionObserver([NotNull] Action<ISynchronizationAction<TSynch>> observer)
+            // synchItemListeners.Add(observer);
+        }*/
+
+/*        public void AddSynchResultObserver([NotNull] Action<ISynchronizationAction<TSynch>> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
+            throw new NotImplementedException();
 
-            _resolutionStep.AddResultObserver(observer);
-        }
+            //_resolutionStep.AddResultObserver(observer);
+        }*/
 
-        public void AddSynchronizationStartedObserver([NotNull] Action<SynchronizationStarted> observer)
+        public void AddSynchronizationStartedObserver(Action<SynchronizationStarted> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             SynchronizationStart += observer;
         }
 
-        public void AddSynchronizationFinishedObserver([NotNull] Action<SynchronizationFinished> observer)
+        public void AddSynchronizationFinishedObserver(Action<SynchronizationFinished> observer)
         {
             if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
             SynchronizationFinished += observer;
@@ -344,7 +314,103 @@ namespace Restore.Channel
         }
     }
 
-    public class SynchPipeline : IEnumerable<SynchronizationResult>
+    public class ItemMatchPipelinePlumber<T1, T2, TId> : IPlumber<T1, T2, TId>
+        where TId : IEquatable<TId>
+    {
+        private readonly Func<IEnumerable<T1>, IEnumerable<T2>, IEnumerable<ItemMatch<T1, T2>>> _preprocessor;
+
+        [NotNull]
+        [ItemNotNull]
+        private readonly IList<Action<ItemMatch<T1, T2>>> _synchItemListeners = new List<Action<ItemMatch<T1, T2>>>();
+
+        [NotNull]
+        private readonly ChangeResolutionStep<ItemMatch<T1, T2>, ISynchSourcesConfig<T1, T2, TId>> _resolutionStep;
+
+        [NotNull]
+        private readonly ChangeDispatchingStep<ItemMatch<T1, T2>> _dispatchStep;
+
+        public ItemMatchPipelinePlumber(
+            ISynchSourcesConfig<T1, T2, TId> sourceConfig,
+            IList<ISynchronizationResolver<ItemMatch<T1, T2>>> synchronizationResolvers,
+            Func<IEnumerable<T1>, IEnumerable<T2>, IEnumerable<ItemMatch<T1, T2>>> preprocessor)
+        {
+            _preprocessor = preprocessor;
+            _resolutionStep = new ChangeResolutionStep<ItemMatch<T1, T2>, ISynchSourcesConfig<T1, T2, TId>>(synchronizationResolvers, sourceConfig);
+            _dispatchStep = new ChangeDispatchingStep<ItemMatch<T1, T2>>();
+        }
+
+        public IPreprocessorAppender Appender { get; set; }
+
+        public SynchPipeline CreatePipeline(IEnumerable<T1> source1, IEnumerable<T2> source2, ISynchSourcesConfig<T1, T2, TId> sourcesConfig)
+        {
+            IEnumerable<ItemMatch<T1, T2>> pipeline = CreateInlet(source1, source2, sourcesConfig);
+
+            if (Appender != null)
+            {
+                pipeline = Appender.Append(sourcesConfig, pipeline);
+            }
+
+            pipeline = _synchItemListeners.Aggregate(pipeline, (current, listener) => current.Select(item =>
+            {
+                listener(item);
+                return item;
+            }));
+
+            // This is an odd construct where the pipeline has to be constructed because it needs a counter in the do.
+            var synchPipeline = new SynchPipeline();
+            var endPipeline = pipeline
+                .Do(_ => synchPipeline.ItemsProcessed++)
+                .ResolveChange(_resolutionStep)
+                .Where(action => action.Applicant != null) // Filter out NullSynchActions, which don't have an applicant instance, why not put it in the step itself?
+                .DispatchChange(_dispatchStep);
+            synchPipeline.Pipeline = endPipeline;
+
+            return synchPipeline;
+        }
+
+        private IEnumerable<ItemMatch<T1, T2>> CreateInlet(IEnumerable<T1> source1, IEnumerable<T2> source2, ISynchSourcesConfig<T1, T2, TId> sourcesConfig)
+        {
+            IEnumerable<ItemMatch<T1, T2>> inlet;
+            try
+            {
+                inlet = _preprocessor(source1, source2);
+            }
+            catch (Exception ex)
+            {
+                throw new SynchronizationException($"Provided items preprocessor failed with message: \"{ex.Message}\"", ex);
+            }
+
+            return inlet;
+        }
+
+        public void AddSynchActionObserver([NotNull] Action<ISynchronizationAction<ItemMatch<T1, T2>>> observer)
+        {
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
+
+            _resolutionStep.AddOutputObserver(observer);
+        }
+
+        public void AddSynchResultObserver([NotNull] Action<SynchronizationResult> observer)
+        {
+            if (observer == null) { throw new ArgumentNullException(nameof(observer)); }
+
+            _dispatchStep.AddOutputObserver(observer);
+        }
+
+        public void AddSynchItemObserver(Action<ItemMatch<T1, T2>> action)
+        {
+            _synchItemListeners.Add(action);
+        }
+    }
+
+    public interface ISynchPipeline : IEnumerable<SynchronizationResult>
+    {
+        int ItemsProcessed { get; set; }
+
+        int ItemsSynchronized { get; set; }
+    }
+
+    public class SynchPipeline : ISynchPipeline
     {
         private int _itemsSynchronized;
         public int ItemsProcessed { get; set; }
@@ -369,12 +435,6 @@ namespace Restore.Channel
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        public void Reset()
-        {
-            ItemsProcessed = 0;
-            ItemsSynchronized = 0;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Restore.ChangeResolution;
+using Restore.Channel;
 
 namespace Restore
 {
@@ -29,5 +30,15 @@ namespace Restore
         /// So this together with the SynchronizationResolvers is config only required in the Resolution step.
         /// </remarks>
         [NotNull] IEnumerable<ISynchronizationResolver<TSynch>> SynchronizationResolvers { get; }
+    }
+
+    public class PipelineConfigurator
+    {
+        public void Configure<T1, T2, TId, TSynch>(IPlumber<T1, T2, TId> bla)
+            where TId : IEquatable<TId>
+        {
+            // Set the preprocessor?
+            // Set the rules?
+        }
     }
 }
