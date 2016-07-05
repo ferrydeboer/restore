@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Restore.Matching;
 
 namespace Restore.Tests.Matching
@@ -8,21 +7,21 @@ namespace Restore.Tests.Matching
     public class SingleItemCompletionMatcherTest
     {
         private TestConfiguration _channelConfiguration;
-        private SingleItemCompletionMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> _matcherUnderTest;
-        private Type _completionSourceType;
+        private SingleItemCompletionMatcher<LocalTestResource, RemoteTestResource, int> _matcherUnderTest;
+        private TargetType _completionSourceType;
 
         [SetUp]
         public void SetUpTest()
         {
             _channelConfiguration = new TestConfiguration();
-            _completionSourceType = typeof(LocalTestResource);
+            _completionSourceType = TargetType.T1;
             ConstructTestSubject();
         }
 
         private void ConstructTestSubject()
         {
             _matcherUnderTest = new SingleItemCompletionMatcher
-                <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+                <LocalTestResource, RemoteTestResource, int>(
                 _channelConfiguration,
                 _completionSourceType);
         }
@@ -46,7 +45,7 @@ namespace Restore.Tests.Matching
         [Test]
         public void ShouldTryMatchFromGivenSourceType2()
         {
-            _completionSourceType = typeof(RemoteTestResource);
+            _completionSourceType = TargetType.T2;
             ConstructTestSubject();
             var remoteTestResource = new RemoteTestResource(1, "test");
             _channelConfiguration.Type2EndpointConfiguration.Endpoint.Create(remoteTestResource);
@@ -73,7 +72,7 @@ namespace Restore.Tests.Matching
         [Test]
         public void ShouldReturnSourceWhenReallyNoOppositeT2()
         {
-            _completionSourceType = typeof(RemoteTestResource);
+            _completionSourceType = TargetType.T2;
             ConstructTestSubject();
             var testMatch = new ItemMatch<LocalTestResource, RemoteTestResource>(
                 new LocalTestResource(1),

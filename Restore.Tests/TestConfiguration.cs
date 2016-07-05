@@ -27,7 +27,6 @@ namespace Restore.Tests
 
         public IEndpointConfiguration<RemoteTestResource, int> Type2EndpointConfiguration { get; }
 
-
         public Func<IEnumerable<LocalTestResource>, IEnumerable<RemoteTestResource>, IEnumerable<ItemMatch<LocalTestResource, RemoteTestResource>>> ItemsPreprocessor
         { get; set; }
 

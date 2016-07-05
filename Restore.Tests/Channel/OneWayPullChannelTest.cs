@@ -39,7 +39,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldCallSideEffectListenerOnMatchedData()
         {
             var matched = false;
-            ChannelUnderTest.AddSynchItemObserver<ItemMatch<LocalTestResource, RemoteTestResource>>(match =>
+            (ChannelUnderTest.Plumber as ItemMatchPipelinePlumber<LocalTestResource, RemoteTestResource ,int>).AddSynchItemObserver(match =>
             {
                 matched = true;
             });
@@ -53,7 +53,7 @@ namespace Restore.Tests.Channel
         public async Task ShouldWrapItemExceptionIntoSynchronizationException()
         {
             var expectedException = new Exception("An observer has broken the item");
-            ChannelUnderTest.AddSynchActionObserver(action =>
+            (ChannelUnderTest.Plumber as ItemMatchPipelinePlumber<LocalTestResource, RemoteTestResource, int>).AddSynchActionObserver(action =>
             {
                 throw expectedException;
             });
@@ -134,8 +134,10 @@ namespace Restore.Tests.Channel
         {
             // Should I throw an exception if one of the data providers returns null? I simply can not proceed.
             // Silently simply stepping out of the execution is not really informative.
-            ChannelUnderTest = new OneWayPullChannel<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
+            ChannelUnderTest = new OneWayPullChannel
+                <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 ChannelConfig,
+                Plumber,
                 () => Task.FromResult(LocalEndpoint.ReadAll().AsEnumerable()),
                 () => Task.FromResult((IEnumerable<RemoteTestResource>)null));
 
@@ -151,6 +153,7 @@ namespace Restore.Tests.Channel
             ChannelUnderTest = new OneWayPullChannel
                 <LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
                 ChannelConfig,
+                Plumber,
                 () => Task.FromResult((IEnumerable<LocalTestResource>)null),
                 () => Task.FromResult((IEnumerable<RemoteTestResource>)null));
 

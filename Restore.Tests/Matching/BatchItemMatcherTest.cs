@@ -30,9 +30,9 @@ namespace Restore.Tests.Matching
                 .Select(
                     i =>
                         new ItemMatch<LocalTestResource, RemoteTestResource>(
-                            new LocalTestResource(i, i*10),
+                            new LocalTestResource(i, i * 10),
                             new RemoteTestResource(i, $"test {i}")))
-                .BatchMatchMissing(_channelConfig, typeof(LocalTestResource));
+                .BatchCompleteItems(_channelConfig, TargetType.T1);
 
             Assert.AreEqual(3, output.Count());
         }
@@ -62,7 +62,7 @@ namespace Restore.Tests.Matching
                         }
                     }
                 })
-                .BatchMatchMissing(_channelConfig, typeof(LocalTestResource));
+                .BatchCompleteItems(_channelConfig, TargetType.T1);
 
             var itemMatches = matches as IList<ItemMatch<LocalTestResource, RemoteTestResource>> ?? matches.ToList();
             Assert.AreEqual(count, itemMatches.Count);
@@ -95,7 +95,7 @@ namespace Restore.Tests.Matching
                         }
                     }
                 })
-                .BatchMatchMissing(_channelConfig, typeof(RemoteTestResource));
+                .BatchCompleteItems(_channelConfig, TargetType.T2);
 
             var itemMatches = matches as IList<ItemMatch<LocalTestResource, RemoteTestResource>> ?? matches.ToList();
             Assert.AreEqual(count, itemMatches.Count);
@@ -120,7 +120,7 @@ namespace Restore.Tests.Matching
 
             var localTestResource = new LocalTestResource(1, 10);
             _channelConfig.Type1EndpointConfiguration.Endpoint.Create(localTestResource);
-            var resultMatches = matches.BatchMatchMissing(_channelConfig, typeof(LocalTestResource)).ToList();
+            var resultMatches = matches.BatchCompleteItems(_channelConfig, TargetType.T1).ToList();
 
             Assert.AreEqual(2, resultMatches.Count);
             Assert.AreEqual(completeMatch, resultMatches[0]);

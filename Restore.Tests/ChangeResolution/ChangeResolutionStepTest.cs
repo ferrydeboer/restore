@@ -12,7 +12,7 @@ namespace Restore.Tests.ChangeResolution
         private SynchronizationResolver<LocalTestResource, string> _testSynchronizationResolver;
         private bool _shouldResolve;
         private bool _isResolved;
-        private ChangeResolutionStep<LocalTestResource, string> _resolutionStepUnderTest;
+        private ChangeResolutionStepOld<LocalTestResource, string> _resolutionStepUnderTest;
 
         [SetUp]
         public void SetUpTest()
@@ -32,7 +32,7 @@ namespace Restore.Tests.ChangeResolution
                 _testSynchronizationResolver
             };
 
-            _resolutionStepUnderTest = new ChangeResolutionStep<LocalTestResource, string>(
+            _resolutionStepUnderTest = new ChangeResolutionStepOld<LocalTestResource, string>(
                 changeResolvers, "bogus config");
         }
 
@@ -40,7 +40,7 @@ namespace Restore.Tests.ChangeResolution
         [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowChangeResolutionExceptionIfConfiguredWithoutResolvers()
         {
-            new ChangeResolutionStep<LocalTestResource, string>(null, "bogus config");
+            new ChangeResolutionStepOld<LocalTestResource, string>(null, "bogus config");
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace Restore.Tests.ChangeResolution
                 _testSynchronizationResolver
             };
 
-            _resolutionStepUnderTest = new ChangeResolutionStep<LocalTestResource, string>(
+            _resolutionStepUnderTest = new ChangeResolutionStepOld<LocalTestResource, string>(
                 changeResolvers, "bogus config");
 
             var localTestResource = new LocalTestResource(1);

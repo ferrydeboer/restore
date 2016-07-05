@@ -64,7 +64,6 @@
     <Compile Include="Channel\OneWayPullChannelTestBase.cs" />
     <Compile Include="LocalTestResource.cs" />
     <Compile Include="LocalTestResourceIdComparer.cs" />
-    <Compile Include="Matching\BatchItemMatcherExtension.cs" />
     <Compile Include="Matching\BatchItemMatcherTest.cs" />
     <Compile Include="Matching\IndividualItemMatcherTest.cs" />
     <Compile Include="Matching\ItemMatcherTest.cs" />
