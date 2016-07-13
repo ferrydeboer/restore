@@ -17,6 +17,6 @@
             return result.Success;
         }
 
-        public virtual bool Success { get; private set; }
+        public virtual bool Success { get; }
     }
 }

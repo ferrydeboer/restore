@@ -32,6 +32,10 @@ namespace Restore
         {
             OnItemCreate(new ItemCreateEventArgs<T>(item));
             var result = DoCreate(item);
+
+            // What if the item hasn't actually been created?
+            // Just returning values isn't sufficient.
+            // The abstraction will quickly leak.
             OnItemCreated(new ItemCreateEventArgs<T>(item));
 
             return result;
@@ -45,6 +49,10 @@ namespace Restore
         {
             OnItemUpdate(new ItemUpdateEventArgs<T>(item));
             var result = DoUpdate(item);
+
+            // What if the item didn't actually update?
+            // Just returning values isn't sufficient.
+            // The abstraction will quickly leak.
             OnItemUpdated(new ItemUpdateEventArgs<T>(item));
 
             return result;
@@ -54,6 +62,10 @@ namespace Restore
         {
             OnItemDelete(new ItemDeleteEventArgs<T>(item));
             var result = DoDelete(item);
+
+            // What if the item didn't actually delete?
+            // Just returning values isn't sufficient.
+            // The abstraction will quickly leak.
             OnItemDeleted(new ItemDeleteEventArgs<T>(item));
 
             return result;

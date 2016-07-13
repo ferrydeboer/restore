@@ -13,7 +13,8 @@ namespace Restore.Matching
             where TId : IEquatable<TId>
         {
             var singleItemMatcher = new SingleItemCompletionMatcher<T1, T2, TId>(channelConfig, appendType);
-            return original.Select(match => singleItemMatcher.Complete(match));
+            var completeSingleItems = original.Select(match => singleItemMatcher.Complete(match)).ToList();
+            return completeSingleItems;
         }
     }
 }

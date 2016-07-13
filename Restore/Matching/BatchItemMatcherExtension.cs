@@ -15,14 +15,28 @@ namespace Restore.Matching
             {
                 if (itemMatch.IsComplete) { yield return itemMatch; }
 
-                if (appendType == TargetType.T1 && !itemMatch.HasT1())
+                if (appendType == TargetType.T1)
                 {
-                    appendableMatches.Add(itemMatch);
+                    if (!itemMatch.HasT1())
+                    {
+                        appendableMatches.Add(itemMatch);
+                    }
+                    else
+                    {
+                        yield return itemMatch;
+                    }
                 }
 
-                if (appendType == TargetType.T2 && !itemMatch.HasT2())
+                if (appendType == TargetType.T2)
                 {
-                    appendableMatches.Add(itemMatch);
+                    if (!itemMatch.HasT2())
+                    {
+                        appendableMatches.Add(itemMatch);
+                    }
+                    else
+                    {
+                        yield return itemMatch;
+                    }
                 }
             }
 
@@ -61,6 +75,7 @@ namespace Restore.Matching
                     yield return newMatch;
                 }
             }
+
         }
     }
 }

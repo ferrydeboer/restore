@@ -152,8 +152,9 @@ namespace Restore.Configuration
         public IEnumerable<ItemMatch<T1, T2>> Append<T1, T2, TId>(ISynchSourcesConfig<T1, T2, TId> sourceConfig, IEnumerable<ItemMatch<T1, T2>> inlet)
             where TId : IEquatable<TId>
         {
-            return inlet.CompleteSingleItems(sourceConfig, TargetType.T1)
-                .BatchCompleteItems(sourceConfig, TargetType.T2);
+            var batchCompleteItems = inlet.CompleteSingleItems(sourceConfig, TargetType.T1)
+                .BatchCompleteItems(sourceConfig, TargetType.T2).ToList();
+            return batchCompleteItems;
         }
     }
 }
