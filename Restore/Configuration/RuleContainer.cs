@@ -23,8 +23,13 @@ namespace Restore.Configuration
         {
             foreach (Type rule in _rules)
             {
-                var genericTypeDef = rule.GetGenericTypeDefinition();
-                var closedGenericTypeDef = genericTypeDef.MakeGenericType(typeof(T1), typeof(T2), typeof(TId));
+                var closedGenericTypeDef = rule;
+                if (rule.GenericTypeArguments.Length > 0)
+                {
+                    var genericTypeDef = rule.GetGenericTypeDefinition();
+                    closedGenericTypeDef = genericTypeDef.MakeGenericType(typeof(T1), typeof(T2), typeof(TId));
+                }
+
                 var ruleInstance = Activator.CreateInstance(closedGenericTypeDef) as SynchronizationRule<T1, T2, TId>;
                 if (ruleInstance != null)
                 {
