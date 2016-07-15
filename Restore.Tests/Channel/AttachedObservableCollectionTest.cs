@@ -17,7 +17,8 @@ namespace Restore.Tests.Channel
         {
             _dataSource = new InMemoryCrudDataEndpoint<LocalTestResource, int>(
                 new TypeConfiguration<LocalTestResource, int>(
-                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1));
+                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1,
+                    -1));
             ConstrucTestSubject();
             _hasDispatched = false;
         }
@@ -69,7 +70,7 @@ namespace Restore.Tests.Channel
         {
             _dataSource = new InMemoryCrudDataEndpoint<LocalTestResource, int>(
                 new TypeConfiguration<LocalTestResource, int>(
-                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1));
+                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1, -1));
             var addedItem = new LocalTestResource(1, 10) { Name = "TestResource" };
             _dataSource.Create(addedItem);
             ConstrucTestSubject();

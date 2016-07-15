@@ -17,7 +17,8 @@ namespace Restore.Tests.Channel
         {
             _dataSource = new InMemoryCrudDataEndpoint<LocalTestResource, int>(
                 new TypeConfiguration<LocalTestResource, int>(
-                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1));
+                    ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1,
+                    -1));
             _observableUnderTest = new AttachedObservableCollection<LocalTestResource>(
                 _dataSource
                 , new LocalTestResourceIdComparer());

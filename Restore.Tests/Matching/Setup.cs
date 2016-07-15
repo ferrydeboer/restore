@@ -13,17 +13,19 @@ namespace Restore.Tests.Matching
     {
         public static IChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>> TestChannelConfig()
         {
-            return CreateChannelConfiguration(ltr => ltr.CorrelationId ?? -1, rtr => rtr.Id, new TestResourceTranslator());
+            return CreateChannelConfiguration(ltr => ltr.CorrelationId ?? -1, -1, rtr => rtr.Id, 0, new TestResourceTranslator());
         }
 
         public static IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> CreateChannelConfiguration<T1, T2, TId>(
             Func<T1, TId> t1IdResolver,
+            TId t1DeafultResolverId,
             Func<T2, TId> t2IdResolver,
+            TId t2DeafultResolverId,
             ITranslator<T1, T2> translator)
             where TId : IEquatable<TId>
         {
-            var t1EndpointCfg = CreateTestEndpointConfig(t1IdResolver);
-            var t2EndpointCfg = CreateTestEndpointConfig(t2IdResolver);
+            var t1EndpointCfg = CreateTestEndpointConfig(t1IdResolver, t1DeafultResolverId);
+            var t2EndpointCfg = CreateTestEndpointConfig(t2IdResolver, t2DeafultResolverId);
 
             var channelConfig = new ChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>>(
                 t1EndpointCfg,
@@ -33,10 +35,15 @@ namespace Restore.Tests.Matching
             return channelConfig;
         }
 
-        public static IEndpointConfiguration<T, TId> CreateTestEndpointConfig<T, TId>(Func<T, TId> idResolver)
+        public static IEndpointConfiguration<T, TId> CreateTestEndpointConfig<T, TId>(Func<T, TId> idResolver, TId defaultIdValue)
             where TId : IEquatable<TId>
         {
-            var configuration = new TypeConfiguration<T, TId>(idResolver);
+            return CreateTestEndpointConfig(new TypeConfiguration<T, TId>(idResolver, defaultIdValue));
+        }
+
+        public static IEndpointConfiguration<T, TId> CreateTestEndpointConfig<T, TId>(TypeConfiguration<T, TId> configuration)
+            where TId : IEquatable<TId>
+        {
             var endpoint = new InMemoryCrudDataEndpoint<T, TId>(configuration);
             return new EndpointConfiguration<T, TId>(configuration, endpoint);
         }

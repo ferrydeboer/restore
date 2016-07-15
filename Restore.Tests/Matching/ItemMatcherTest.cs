@@ -18,8 +18,8 @@ namespace Restore.Tests.Matching
         public ItemMatcherTest()
         {
             _itemMatcherUnderTest = new ItemMatcher<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>(
-                new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId ?? -1)
-                , new TypeConfiguration<RemoteTestResource, int>(ltr => ltr.Id));
+                new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId ?? -1, -1)
+                , new TypeConfiguration<RemoteTestResource, int>(ltr => ltr.Id, 0));
         }
 
         [SetUp]

@@ -24,13 +24,15 @@ namespace Restore.Tests.Channel
         [SetUp]
         public void SetUpTest()
         {
-            var type1Config = new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1);
+            var type1Config = new TypeConfiguration<LocalTestResource, int>(
+                ltr => ltr.CorrelationId.HasValue ? ltr.CorrelationId.Value : -1,
+                -1);
             LocalEndpoint = new InMemoryCrudDataEndpoint<LocalTestResource, int>(type1Config, TestData.LocalResults);
             var endpoint1Config = new EndpointConfiguration<LocalTestResource, int>(
                 type1Config,
                 LocalEndpoint);
 
-            var type2Config = new TypeConfiguration<RemoteTestResource, int>(rtr => rtr.Id);
+            var type2Config = new TypeConfiguration<RemoteTestResource, int>(rtr => rtr.Id, 0);
             RemoteEndpoint = new InMemoryCrudDataEndpoint<RemoteTestResource, int>(type2Config, TestData.RemoteResults);
             var endpoint2Config = new EndpointConfiguration<RemoteTestResource, int>(
                 type2Config,

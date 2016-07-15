@@ -19,7 +19,8 @@ namespace Restore.Tests.Channel
         public void SetUpTest()
         {
             _dateSource = new InMemoryCrudDataEndpoint<LocalTestResource, int>(
-                new TypeConfiguration<LocalTestResource, int>(ltr => ltr.LocalId));
+                new TypeConfiguration<LocalTestResource, int>(ltr => ltr.LocalId,
+                0));
             _observableUnderTest = new AttachedObservableCollection<LocalTestResource>(
                 _dateSource
                 , new LocalTestResourceIdComparer());

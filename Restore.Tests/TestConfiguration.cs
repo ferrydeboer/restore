@@ -10,12 +10,12 @@ namespace Restore.Tests
     public class TestConfiguration : IChannelConfiguration<LocalTestResource, RemoteTestResource, int, ItemMatch<LocalTestResource, RemoteTestResource>>
     {
         private readonly InMemoryCrudDataEndpoint<LocalTestResource, int> _t1Endpoint =
-            new InMemoryCrudDataEndpoint<LocalTestResource, int>(new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId ?? -1));
+            new InMemoryCrudDataEndpoint<LocalTestResource, int>(new TypeConfiguration<LocalTestResource, int>(ltr => ltr.CorrelationId ?? -1, -1));
 
         public IEndpointConfiguration<LocalTestResource, int> Type1EndpointConfiguration { get; }
 
         private readonly InMemoryCrudDataEndpoint<RemoteTestResource, int> _t2Endpoint =
-            new InMemoryCrudDataEndpoint<RemoteTestResource, int>(new TypeConfiguration<RemoteTestResource, int>(rtr => rtr.Id));
+            new InMemoryCrudDataEndpoint<RemoteTestResource, int>(new TypeConfiguration<RemoteTestResource, int>(rtr => rtr.Id, 0));
 
         public TestConfiguration()
         {
