@@ -75,7 +75,7 @@ namespace Restore.Configuration
 
     internal interface IChannelFactory
     {
-        ISynchChannel<T1, T2, TId> Create<T1, T2, TId>(ISynchSourcesConfig<T1, T2, TId> sourceCfg, IPlumber<T1, T2, TId> plumber)
+        ISynchChannel<T1, T2/*, TId*/> Create<T1, T2, TId>(ISynchSourcesConfig<T1, T2, TId> sourceCfg, IPlumber<T1, T2, TId> plumber)
             where TId : IEquatable<TId>;
     }
 

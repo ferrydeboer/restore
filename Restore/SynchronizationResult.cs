@@ -2,8 +2,11 @@
 {
     public class SynchronizationResult
     {
-        public SynchronizationResult(bool success)
+        private readonly string _message;
+
+        public SynchronizationResult(bool success, string message = "")
         {
+            _message = message;
             Success = success;
         }
 

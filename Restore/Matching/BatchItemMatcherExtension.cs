@@ -13,29 +13,23 @@ namespace Restore.Matching
 
             foreach (var itemMatch in original)
             {
-                if (itemMatch.IsComplete) { yield return itemMatch; }
-
-                if (appendType == TargetType.T1)
+                if (itemMatch.IsComplete)
                 {
-                    if (!itemMatch.HasT1())
-                    {
-                        appendableMatches.Add(itemMatch);
-                    }
-                    else
-                    {
-                        yield return itemMatch;
-                    }
+                    yield return itemMatch;
                 }
-
-                if (appendType == TargetType.T2)
+                else
                 {
-                    if (!itemMatch.HasT2())
+                    if (appendType == TargetType.T1 && itemMatch.HasT1())
                     {
-                        appendableMatches.Add(itemMatch);
+                        yield return itemMatch;
+                    }
+                    else if (appendType == TargetType.T2 && itemMatch.HasT2())
+                    {
+                        yield return itemMatch;
                     }
                     else
                     {
-                        yield return itemMatch;
+                        appendableMatches.Add(itemMatch);
                     }
                 }
             }

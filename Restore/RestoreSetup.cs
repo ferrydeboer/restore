@@ -19,7 +19,8 @@ namespace Restore
             }
         }
 
-        public IEnumerable<T> GetChannels<T>() where T : ISynchChannel
+        public IEnumerable<T> GetChannels<T>()
+            where T : ISynchChannel
         {
             var x = _configurations.Select(cfg => cfg.GetChannels<T>()).SelectMany(c => c);
             return x;
@@ -62,7 +63,7 @@ namespace Restore
                 throw new ArgumentException($"There are multiple channels for type {type.Name}");
             }
 
-            return channels.First();
+            return channels.FirstOrDefault();
         }
     }
 }

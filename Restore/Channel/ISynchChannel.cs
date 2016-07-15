@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace Restore.Channel
 {
-    public interface ISynchChannel<T1, T2, TSynch> : ISynchChannel
+    public interface ISynchChannel<T1, T2> : ISynchChannel
     {
-        // void AddSynchItemObserver<T>(Action<TSynch> observer);
+        void Push(IEnumerable<T2> items);
+        void Push(IEnumerable<T1> items);
     }
 
     public interface ISynchChannel

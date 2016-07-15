@@ -14,7 +14,6 @@ namespace Restore.Matching
     public class IndividualItemMatcher<T1, T2, TId, TSynch>
         where TId : IEquatable<TId>
     {
-        // Yeah, if we're synching the same types this obviously doesn't work!
         private readonly TargetType _appendType;
         public ISynchSourcesConfig<T1, T2, TId> ChannelConfig { get; }
 

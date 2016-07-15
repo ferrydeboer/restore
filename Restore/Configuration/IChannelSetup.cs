@@ -20,7 +20,7 @@ namespace Restore.Configuration
         /// <typeparam name="TId">The Id type of the channel to create.</typeparam>
         /// <param name="config">The configuration that the channel will work on.</param>
         /// <returns>an Plumber instance for the given types.</returns>
-        ISynchChannel<T1, T2, ItemMatch<T1, T2>> Create<TId>(
+        ISynchChannel<T1, T2/*, ItemMatch<T1, T2>*/> Create<TId>(
             IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> config,
             IPlumber<T1, T2, TId> plumber)
             where TId : IEquatable<TId>;

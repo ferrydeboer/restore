@@ -31,7 +31,7 @@ namespace Restore.Configuration
             _creationObservers.Add(observer);
         }
 
-        public ISynchChannel<T1, T2, ItemMatch<T1, T2>> Create<TId>(
+        public ISynchChannel<T1, T2/*, ItemMatch<T1, T2>*/> Create<TId>(
             IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> config,
             IPlumber<T1, T2, TId> plumber)
             where TId : IEquatable<TId>
@@ -45,7 +45,7 @@ namespace Restore.Configuration
             return channel;
         }
 
-        protected virtual ISynchChannel<T1, T2, ItemMatch<T1, T2>> DoCreate<TId>(
+        protected virtual ISynchChannel<T1, T2/*, ItemMatch<T1, T2>*/> DoCreate<TId>(
             IChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>> config,
             IPlumber<T1, T2, TId> plumber)
             where TId : IEquatable<TId>

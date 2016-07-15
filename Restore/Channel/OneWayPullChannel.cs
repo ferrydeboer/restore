@@ -14,7 +14,7 @@ using Restore.Matching;
 namespace Restore.Channel
 {
     public class OneWayPullChannel<T1, T2, TId, TSynch>
-        : ISynchChannel<T1, T2, TSynch>, IOneWayPullChannel<T1>, IDisposable
+        : ISynchChannel<T1, T2>, IOneWayPullChannel<T1>, IDisposable
         where TId : IEquatable<TId>
     {
         public Type Type1 { get; } = typeof(T1);
@@ -149,7 +149,8 @@ namespace Restore.Channel
 
         protected async Task Synchronize(IEnumerable<T1> input)
         {
-            OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
+            await Synchronize(BuildSynchPipeline(input));
+/*            OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
 
             // The problem with this type of error handling is that is does not allow us ignore errors and continue enumeration.
             // However, it should be up to the implementor to distinguish expected failures like validation from actual exceptions
@@ -158,6 +159,56 @@ namespace Restore.Channel
             {
                 var pipeline = await BuildSynchPipeline(input);
 
+                // Pump items out at the end of the sequence. In the end is probably responsibility of separate
+                // class.
+                foreach (SynchronizationResult result in pipeline)
+                {
+                    // Only once synchroniazation is completely done we can actually 100 % sure
+                    // evaluate succes on the SynchronizationResults. For instance, deleting expenses is supported as a batch/bulk operation.
+                    // This is endpoint specific. This results can essentially be inconclusive.
+                    if (!result)
+                    {
+                        Debug.WriteLine("Failed executing an item.");
+                    }
+                    else
+                    {
+                        pipeline.ItemsSynchronized++;
+                    }
+                }
+
+                // This can fail because it for instance runs a transaction. Then what?
+                // Should we instead always raise a synchronization finished regardless of the outcome?
+                // Only when this is really relevant we can further decide on this.
+                OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
+            }
+            catch (SynchronizationException ex)
+            {
+                if (!OnError(ex))
+                {
+                    // Let already wrapped exception through!
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!OnError(ex))
+                {
+                    // This simply end up in a void of another thread. Besides, It can wrap an already existing SynchronizationException
+                    throw new ItemSynchronizationException("Synchronization of an item failed for an unknown reason.", ex, null);
+                }
+            }*/
+        }
+
+        protected async Task Synchronize(Task<SynchPipeline> pipelineTask)
+        {
+            OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
+
+            // The problem with this type of error handling is that is does not allow us ignore errors and continue enumeration.
+            // However, it should be up to the implementor to distinguish expected failures like validation from actual exceptions
+            // that imply there is something really wrong.
+            try
+            {
+                var pipeline = await pipelineTask;
                 // Pump items out at the end of the sequence. In the end is probably responsibility of separate
                 // class.
                 foreach (SynchronizationResult result in pipeline)
@@ -225,8 +276,17 @@ namespace Restore.Channel
             return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
         }
 
-        protected virtual void OnPreprocessedPipelineConstructed(IEnumerable<TSynch> pipeline)
+        private SynchPipeline BuildPushPipeline(IEnumerable<T2> t2Data)
         {
+            if (t2Data == null)
+            {
+                throw new SynchronizationException("Data source 2 delivered a null result!");
+            }
+
+            IEnumerable<T1> t1Data = new List<T1>();
+
+            // return synchPipeline;
+            return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
         }
 
         private async Task LockSync(Func<Task> mechanism)
@@ -293,6 +353,17 @@ namespace Restore.Channel
                 _lockSemaphore.Dispose();
                 _lockSemaphore = null;
             }
+        }
+
+        public void Push(IEnumerable<T2> items)
+        {
+            // Assume pipeline knows how to complete!
+            Synchronize(Task.FromResult(BuildPushPipeline(items))).Wait();
+        }
+
+        public void Push(IEnumerable<T1> items)
+        {
+            throw new NotImplementedException();
         }
     }
 
