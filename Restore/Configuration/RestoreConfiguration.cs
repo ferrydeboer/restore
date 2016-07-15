@@ -157,4 +157,14 @@ namespace Restore.Configuration
             return batchCompleteItems;
         }
     }
+
+    public class LocalMatchAppender : IPreprocessorAppender
+    {
+        public IEnumerable<ItemMatch<T1, T2>> Append<T1, T2, TId>(ISynchSourcesConfig<T1, T2, TId> sourceConfig, IEnumerable<ItemMatch<T1, T2>> inlet)
+            where TId : IEquatable<TId>
+        {
+            var batchCompleteItems = inlet.CompleteSingleItems(sourceConfig, TargetType.T1);
+            return batchCompleteItems;
+        }
+    }
 }

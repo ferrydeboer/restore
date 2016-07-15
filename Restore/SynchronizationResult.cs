@@ -2,11 +2,9 @@
 {
     public class SynchronizationResult
     {
-        private readonly string _message;
-
         public SynchronizationResult(bool success, string message = "")
         {
-            _message = message;
+            Message = message;
             Success = success;
         }
 
@@ -21,5 +19,6 @@
         }
 
         public virtual bool Success { get; }
+        public string Message { get; }
     }
 }

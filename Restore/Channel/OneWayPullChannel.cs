@@ -209,6 +209,7 @@ namespace Restore.Channel
             try
             {
                 var pipeline = await pipelineTask;
+                IList<string> resultMessages = new List<string>();
                 // Pump items out at the end of the sequence. In the end is probably responsibility of separate
                 // class.
                 foreach (SynchronizationResult result in pipeline)
@@ -218,12 +219,21 @@ namespace Restore.Channel
                     // This is endpoint specific. This results can essentially be inconclusive.
                     if (!result)
                     {
-                        Debug.WriteLine("Failed executing an item.");
+                        pipeline.ItemsFailed++;
                     }
                     else
                     {
                         pipeline.ItemsSynchronized++;
                     }
+
+                    resultMessages.Add(result.Message);
+
+                    // TODO, create traces.
+                }
+
+                foreach (var resultMessage in resultMessages)
+                {
+                    Debug.WriteLine(resultMessage);
                 }
 
                 // This can fail because it for instance runs a transaction. Then what?
@@ -465,18 +475,11 @@ namespace Restore.Channel
 
     public class SynchPipeline : ISynchPipeline
     {
-        private int _itemsSynchronized;
         public int ItemsProcessed { get; set; }
 
-        public int ItemsSynchronized
-        {
-            get { return _itemsSynchronized; }
-            set
-            {
-                Debug.WriteLine($"{GetHashCode()} - Raising ItemsSycnhronized from {_itemsSynchronized} to {value}");
-                _itemsSynchronized = value;
-            }
-        }
+        public int ItemsFailed { get; set; }
+
+        public int ItemsSynchronized { get; set; }
 
         public IEnumerable<SynchronizationResult> Pipeline { private get; set; }
 
