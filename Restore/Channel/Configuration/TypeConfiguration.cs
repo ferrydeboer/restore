@@ -11,7 +11,7 @@ namespace Restore.Channel.Configuration
 
         public TId DefaultExtractorValue { get; set; }
 
-        public TypeConfiguration([NotNull] Func<T, TId> idExtractor, TId defaultExtractorValue)
+        public TypeConfiguration([NotNull] Func<T, TId> idExtractor, TId defaultExtractorValue = default(TId))
         {
             if (idExtractor == null) { throw new ArgumentNullException(nameof(idExtractor)); }
 
