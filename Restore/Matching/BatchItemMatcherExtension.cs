@@ -6,7 +6,10 @@ namespace Restore.Matching
 {
     public static class BatchItemMatcherExtension
     {
-        public static IEnumerable<ItemMatch<T1, T2>> BatchCompleteItems<T1, T2, TId>(this IEnumerable<ItemMatch<T1, T2>> original, ISynchSourcesConfig<T1, T2, TId> channelConfig, TargetType appendType)
+        public static IEnumerable<ItemMatch<T1, T2>> BatchCompleteItems<T1, T2, TId>(
+            this IEnumerable<ItemMatch<T1, T2>> original,
+            ISynchSourcesConfig<T1, T2, TId> channelConfig,
+            TargetType appendType)
             where TId : IEquatable<TId>
         {
             List<ItemMatch<T1,T2>> appendableMatches = new List<ItemMatch<T1, T2>>();
@@ -19,11 +22,11 @@ namespace Restore.Matching
                 }
                 else
                 {
-                    if (appendType == TargetType.T1 && itemMatch.HasT1())
+                    if (appendType == TargetType.T1 && (itemMatch.HasT1() || channelConfig.Type2EndpointConfiguration.IsNew(itemMatch.Result2)))
                     {
                         yield return itemMatch;
                     }
-                    else if (appendType == TargetType.T2 && itemMatch.HasT2())
+                    else if (appendType == TargetType.T2 && (itemMatch.HasT2() || channelConfig.Type1EndpointConfiguration.IsNew(itemMatch.Result1)))
                     {
                         yield return itemMatch;
                     }

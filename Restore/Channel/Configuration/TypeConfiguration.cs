@@ -9,15 +9,19 @@ namespace Restore.Channel.Configuration
         [NotNull]
         public Func<T, TId> IdExtractor { get; }
 
-        public TypeConfiguration([NotNull] Func<T, TId> idExtractor)
+        public TId DefaultExtractorValue { get; set; }
+
+        public TypeConfiguration([NotNull] Func<T, TId> idExtractor, TId defaultExtractorValue)
         {
             if (idExtractor == null) { throw new ArgumentNullException(nameof(idExtractor)); }
 
             IdExtractor = idExtractor;
+            DefaultExtractorValue = defaultExtractorValue;
         }
 
-        public TypeConfiguration(IIdResolver<T, TId> resolver)
+        public TypeConfiguration(IIdResolver<T, TId> resolver, TId defaultExtractorValue)
         {
+            DefaultExtractorValue = defaultExtractorValue;
             IdExtractor = resolver.Resolve;
         }
     }

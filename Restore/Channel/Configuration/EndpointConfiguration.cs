@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace Restore.Channel.Configuration
@@ -29,5 +31,10 @@ namespace Restore.Channel.Configuration
         public TypeConfiguration<T, TId> TypeConfig { get; }
 
         public ICrudEndpoint<T, TId> Endpoint { get; }
+        public bool IsNew(T item)
+        {
+            // If the default is null this doesn't work! However, I don't think that supports IEquatable!?
+            return TypeConfig.IdExtractor(item).Equals(TypeConfig.DefaultExtractorValue);
+        }
     }
 }

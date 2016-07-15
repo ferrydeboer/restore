@@ -12,5 +12,7 @@ namespace Restore
         [NotNull] TypeConfiguration<T, TId> TypeConfig { get; }
 
         [NotNull] ICrudEndpoint<T, TId> Endpoint { get; }
+
+        bool IsNew(T item);
     }
 }

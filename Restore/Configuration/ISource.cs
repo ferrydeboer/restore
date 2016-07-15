@@ -11,6 +11,12 @@ namespace Restore.Configuration
         Func<T, TId> IdExtractor { get; }
 
         /// <summary>
+        /// Gets the default value the extractor return.
+        /// Used to determine if <typeparam name="T"></typeparam> is an already existing instance.
+        /// </summary>
+        TId DefaultExtractorValue { get; }
+
+        /// <summary>
         /// Sets the Id resolver for this source. Instances with a derived type of <typeparam name="T"></typeparam>T
         /// will be instantiated on channel creation.
         /// </summary>

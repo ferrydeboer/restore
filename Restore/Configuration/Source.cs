@@ -14,6 +14,12 @@ namespace Restore.Configuration
         public string Name { get; }
         public Func<T, TId> IdExtractor { get; set; }
 
+        /// <summary>
+        /// Gets the default value the extractor return.
+        /// Used to determine if <typeparam name="T"></typeparam> is an already existing instance.
+        /// </summary>
+        public TId DefaultExtractorValue { get; }
+
         public IIdResolver<T, TId> IdResolver { get; set; }
 
         protected void SetResolver(Type idResolverType)
@@ -89,8 +95,9 @@ namespace Restore.Configuration
             return null;
         }
 
-        public Source(string name, Func<T, TId> idExtractor)
+        public Source(string name, Func<T, TId> idExtractor, TId defaultExtractorValue)
         {
+            DefaultExtractorValue = defaultExtractorValue;
             Name = name;
             IdExtractor = idExtractor;
         }

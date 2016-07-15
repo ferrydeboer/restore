@@ -19,7 +19,7 @@ namespace Restore.Matching
             // TODO: What to do if there is no default Equality comparer?
             if (!HasT1() && !HasT2())
             {
-                throw new ArgumentException("A match can never contain two items that contain no value!");
+                throw new ArgumentException("A match can never contain two items default item values!");
             }
         }
 
@@ -32,11 +32,5 @@ namespace Restore.Matching
         {
             return !EqualityComparer<T2>.Default.Equals(Result2, default(T2));
         }
-    }
-
-    public interface IItemMatch<out T1, out T2>
-    {
-        T1 Result1 { get; }
-        T2 Result2 { get; }
     }
 }

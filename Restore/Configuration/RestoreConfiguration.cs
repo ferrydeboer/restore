@@ -46,13 +46,13 @@ namespace Restore.Configuration
             // is a better strategy. Doing it afterwards requires a lot more effort using reflection.
             // - Find endpoints and build configuration using them.
             var t1Endpoint = Source1.GetEndpoint<T1>();
-            var t1Extractor = Source1.CreateResolver<T1>();
-            var t1TypeConfig = new TypeConfiguration<T1, TId>(t1Extractor);
+            var t1Extractor = Source1.CreateResolver<T1>(); // Because constraint on this, as a whole this can't be moved into Source itself.
+            var t1TypeConfig = new TypeConfiguration<T1, TId>(t1Extractor, Source2.DefaultExtractorValue);
             var t1EndpointConfig = new EndpointConfiguration<T1, TId>(t1TypeConfig, t1Endpoint);
 
             var t2Endpoint = Source2.GetEndpoint<T2>();
             var t2Extractor = Source2.CreateResolver<T2>();
-            var t2TypeConfig = new TypeConfiguration<T2, TId>(t2Extractor);
+            var t2TypeConfig = new TypeConfiguration<T2, TId>(t2Extractor, Source2.DefaultExtractorValue);
             var t2EndpointConfig = new EndpointConfiguration<T2, TId>(t2TypeConfig, t2Endpoint);
 
             var channelConfig = new ChannelConfiguration<T1, T2, TId, ItemMatch<T1, T2>>(t1EndpointConfig, t2EndpointConfig, setup.TypeTranslator);
@@ -147,6 +147,7 @@ namespace Restore.Configuration
         }
     }
 
+    // Doesn't really belong here, since it's actually hardcoding the direction of the appenders.
     public class FullMatchAppender : IPreprocessorAppender
     {
         public IEnumerable<ItemMatch<T1, T2>> Append<T1, T2, TId>(ISynchSourcesConfig<T1, T2, TId> sourceConfig, IEnumerable<ItemMatch<T1, T2>> inlet)
