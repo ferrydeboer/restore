@@ -2,8 +2,9 @@
 {
     public class SynchronizationResult
     {
-        public SynchronizationResult(bool success, string message = "")
+        public SynchronizationResult(bool success, string message = "", string messageKey = "")
         {
+            MessageKey = messageKey;
             Message = message;
             Success = success;
         }
@@ -19,6 +20,9 @@
         }
 
         public virtual bool Success { get; }
+
         public string Message { get; }
+
+        public string MessageKey { get; }
     }
 }

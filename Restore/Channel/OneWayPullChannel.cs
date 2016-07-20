@@ -199,7 +199,7 @@ namespace Restore.Channel
             }*/
         }
 
-        protected async Task Synchronize(Task<SynchPipeline> pipelineTask)
+        protected async Task Synchronize(Task<ISynchPipeline> pipelineTask)
         {
             OnSynchronizationStart(new SynchronizationStarted(typeof(T1), typeof(T2)));
 
@@ -209,7 +209,7 @@ namespace Restore.Channel
             try
             {
                 var pipeline = await pipelineTask;
-                IList<string> resultMessages = new List<string>();
+                IList<SynchronizationResult> results = new List<SynchronizationResult>();
                 // Pump items out at the end of the sequence. In the end is probably responsibility of separate
                 // class.
                 foreach (SynchronizationResult result in pipeline)
@@ -226,20 +226,13 @@ namespace Restore.Channel
                         pipeline.ItemsSynchronized++;
                     }
 
-                    resultMessages.Add(result.Message);
-
-                    // TODO, create traces.
-                }
-
-                foreach (var resultMessage in resultMessages)
-                {
-                    Debug.WriteLine(resultMessage);
+                    results.Add(result);
                 }
 
                 // This can fail because it for instance runs a transaction. Then what?
                 // Should we instead always raise a synchronization finished regardless of the outcome?
                 // Only when this is really relevant we can further decide on this.
-                OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline.ItemsProcessed, pipeline.ItemsSynchronized));
+                OnSynchronizationFinished(new SynchronizationFinished(typeof(T1), typeof(T2), pipeline, results));
             }
             catch (SynchronizationException ex)
             {
@@ -259,7 +252,7 @@ namespace Restore.Channel
             }
         }
 
-        private async Task<SynchPipeline> BuildSynchPipeline(IEnumerable<T1> t1Data)
+        private async Task<ISynchPipeline> BuildSynchPipeline(IEnumerable<T1> t1Data)
         {
             if (t1Data == null)
             {
@@ -286,7 +279,7 @@ namespace Restore.Channel
             return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
         }
 
-        private SynchPipeline BuildPushPipeline(IEnumerable<T2> t2Data)
+        private ISynchPipeline BuildPushPipeline(IEnumerable<T2> t2Data)
         {
             if (t2Data == null)
             {
@@ -471,6 +464,8 @@ namespace Restore.Channel
         int ItemsProcessed { get; set; }
 
         int ItemsSynchronized { get; set; }
+
+        int ItemsFailed { get; set; }
     }
 
     public class SynchPipeline : ISynchPipeline

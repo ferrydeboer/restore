@@ -32,5 +32,10 @@ namespace Restore.Configuration
         public abstract bool When(ItemMatch<TBase1, TBase2> item, ISynchSourcesConfig<TBase1, TBase2, TId> cfg);
 
         public abstract SynchronizationResult Then(ItemMatch<TBase1, TBase2> item, ISynchSourcesConfig<TBase1, TBase2, TId> cfg);
+
+        protected SynchronizationResult CreateResult(bool succes, string message)
+        {
+            return new SynchronizationResult(succes, message, Name);
+        }
     }
 }
