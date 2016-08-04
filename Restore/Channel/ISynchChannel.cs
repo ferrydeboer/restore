@@ -7,8 +7,8 @@ namespace Restore.Channel
 {
     public interface ISynchChannel<T1, T2> : ISynchChannel
     {
-        void Push(IEnumerable<T2> items);
-        void Push(IEnumerable<T1> items);
+        void PushT2(IEnumerable<T2> items);
+        void PushT1(IEnumerable<T1> items);
     }
 
     public interface ISynchChannel

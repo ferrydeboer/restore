@@ -278,7 +278,7 @@ namespace Restore.Channel
             return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
         }
 
-        private ISynchPipeline BuildPushPipeline(IEnumerable<T2> t2Data)
+        private ISynchPipeline BuildPushT2Pipeline(IEnumerable<T2> t2Data)
         {
             if (t2Data == null)
             {
@@ -286,6 +286,19 @@ namespace Restore.Channel
             }
 
             IEnumerable<T1> t1Data = new List<T1>();
+
+            // return synchPipeline;
+            return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
+        }
+
+        private ISynchPipeline BuildPushT1Pipeline(IEnumerable<T1> t1Data)
+        {
+            if (t1Data == null)
+            {
+                throw new SynchronizationException("Data source 2 delivered a null result!");
+            }
+
+            IEnumerable<T2> t2Data = new List<T2>();
 
             // return synchPipeline;
             return Plumber.CreatePipeline(t1Data, t2Data, ChannelConfig);
@@ -357,15 +370,15 @@ namespace Restore.Channel
             }
         }
 
-        public void Push(IEnumerable<T2> items)
+        public void PushT2(IEnumerable<T2> items)
         {
             // Assume pipeline knows how to complete!
-            Synchronize(Task.FromResult(BuildPushPipeline(items))).Wait();
+            Synchronize(Task.FromResult(BuildPushT2Pipeline(items))).Wait();
         }
 
-        public void Push(IEnumerable<T1> items)
+        public void PushT1(IEnumerable<T1> items)
         {
-            throw new NotImplementedException();
+            Synchronize(Task.FromResult(BuildPushT1Pipeline(items))).Wait();
         }
     }
 
