@@ -1,5 +1,3 @@
-using Restore.Matching;
-
 namespace Restore.Channel
 {
     /// <summary>
