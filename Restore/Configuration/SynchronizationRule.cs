@@ -17,9 +17,7 @@ namespace Restore.Configuration
 
         public string Name { get; }
 
-        // Experiment to make type specific rule out of generic rule.
         public SynchronizationResolver<ItemMatch<TBase1, TBase2>, ISynchSourcesConfig<TBase1, TBase2, TId>> ResolverInstance(ISynchSourcesConfig<TBase1, TBase2, TId> cfg)
-            // where TCfg : ISynchSourcesConfig<TBase1, TBase2, TId>
         {
             // Create instance of self with derived types.
             // Then again, passing the methods as a resolver will still result in calls on the same instance, which we might not want in the future.

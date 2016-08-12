@@ -48,8 +48,8 @@ namespace Restore.Configuration
 
     public class SourceSetup<T, TId>
     {
-        IRuleSetup<T1, T2, TId> And<T1, T2, TId>(Action<ISource<T2, TId>> source2Configurator)
-            where TId : IEquatable<TId>
+        private IRuleSetup<T1, T2, TId> And<T1, T2, TIdx>(Action<ISource<T2, TIdx>> source2Configurator)
+            where TIdx : IEquatable<TIdx>
         {
             return null;
         }
